@@ -8,6 +8,7 @@ namespace JustPlanes.Network.Client
         private static TcpClient clientSocket;
         private static NetworkStream myStream;
         private static byte[] recvBuffer;
+        public static string ServerAddress = "127.0.0.1";
 
         public static void InitializingNetworking()
         {
@@ -15,7 +16,7 @@ namespace JustPlanes.Network.Client
             clientSocket.ReceiveBufferSize = 4096;
             clientSocket.SendBufferSize = 4096;
             recvBuffer = new byte[4096 * 2];
-            clientSocket.BeginConnect("127.0.0.1", 5569, new AsyncCallback(ClientConnectCallback), clientSocket);
+            clientSocket.BeginConnect(ServerAddress, 5569, new AsyncCallback(ClientConnectCallback), clientSocket);
         }
 
         private static void ClientConnectCallback(IAsyncResult result)

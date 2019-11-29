@@ -16,8 +16,8 @@ namespace JustPlanes.Network.Server
             socket.SendBufferSize = 4096;
             socket.ReceiveBufferSize = 4096;
             stream = socket.GetStream();
-            recvBuffer = new byte[4096];
-            stream.BeginRead(recvBuffer, 0, socket.ReceiveBufferSize, OnRecvData, null);
+            recvBuffer = new byte[4096 * 2];
+            stream.BeginRead(recvBuffer, 0, recvBuffer.Length, OnRecvData, null);
             Console.WriteLine("Incoming connection from '{0}", socket.Client.RemoteEndPoint.ToString());
         }
 

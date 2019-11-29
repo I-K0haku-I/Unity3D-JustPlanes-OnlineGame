@@ -10,6 +10,8 @@ namespace JustPlanes.Network
 
         [SerializeField]
         private bool isOnline = false;
+        [SerializeField]
+        private string serverAddress = "localhost";
 
         private void Awake()
         {
@@ -25,6 +27,7 @@ namespace JustPlanes.Network
             UnityThread.initUnityThread();
 
             ClientHandleData.InitializePackets();
+            ClientTCP.ServerAddress = serverAddress;
             ClientTCP.InitializingNetworking();
         }
 
