@@ -1,9 +1,17 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using JustPlanes.Network.Client;
+using UnityEngine.Events;
 
 namespace JustPlanes.Network
 {
+    [System.Serializable]
+    public class PlayerEvent : UnityEvent<Player>
+    {
+
+    }
+
     public class NetworkManager : MonoBehaviour
     {
         public static NetworkManager instance;
@@ -12,6 +20,11 @@ namespace JustPlanes.Network
         private bool isOnline = false;
         [SerializeField]
         private string serverAddress = "localhost";
+        
+        private List<Player> players = new List<Player>();
+        public Player[] playerDisplayed = new Player[100];
+        private PlayerEvent OnPlayerAdd = new PlayerEvent();
+        private int playerCount = 0;
 
         private void Awake()
         {
@@ -26,7 +39,7 @@ namespace JustPlanes.Network
             DontDestroyOnLoad(this);
             UnityThread.initUnityThread();
 
-            ClientHandleData.InitializePackets();
+            ClientHandleData.InitializePackets(this);
             ClientTCP.ServerAddress = serverAddress;
             ClientTCP.InitializingNetworking();
         }
@@ -37,6 +50,14 @@ namespace JustPlanes.Network
                 return;
 
             ClientTCP.Disconnect();
+        }
+
+        public void AddPlayer(Player player)
+        {
+            players.Add(player);
+            playerDisplayed[playerCount] = player;
+            playerCount++;
+            OnPlayerAdd.Invoke(player);
         }
     }
 }

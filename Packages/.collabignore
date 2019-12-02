@@ -25,9 +25,13 @@ ehthumbs.db
 *.unityproj
 *.booproj
 
+
 # Unity generated
 # ===============
 [Oo]bj/
 [Bb]uild
 sysinfo.txt
 *.stackdump
+
+**/bin
+**/obj

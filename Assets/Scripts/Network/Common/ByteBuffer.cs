@@ -169,7 +169,7 @@ namespace JustPlanes.Network
 
         public int ReadInteger(bool Peek = true)
         {
-            if (Buff.Count > readPos + 4)
+            if (Buff.Count >= readPos + 4)  // TODO: adjust other types to bigger than too
             {
                 if (buffUpdated)
                 {

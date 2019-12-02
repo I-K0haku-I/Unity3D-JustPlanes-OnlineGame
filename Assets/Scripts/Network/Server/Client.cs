@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 
 namespace JustPlanes.Network.Server
@@ -10,6 +12,7 @@ namespace JustPlanes.Network.Server
         public NetworkStream stream;
         private byte[] recvBuffer;
         public ByteBuffer buffer;
+        public Player player;
 
         public void Start()
         {
@@ -39,8 +42,10 @@ namespace JustPlanes.Network.Server
 
                 stream.BeginRead(recvBuffer, 0, socket.ReceiveBufferSize, OnRecvData, null);
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
+                Console.WriteLine("OnRecvData something went extremely wrong!");
+                Console.WriteLine(e);
                 CloseConnection();
                 return;
             }
@@ -49,6 +54,8 @@ namespace JustPlanes.Network.Server
         private void CloseConnection()
         {
             Console.WriteLine("Connection from '{0}' has been terminated.", socket.Client.RemoteEndPoint.ToString());
+            Console.WriteLine(string.Join(", ", ClientManager.clients.Values.ToList().Select(c => c.connectionID.ToString())));
+            ClientManager.clients.Remove(connectionID);
             socket.Close();
         }
     }

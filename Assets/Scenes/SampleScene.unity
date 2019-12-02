@@ -506,6 +506,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isOnline: 1
+  serverAddress: 127.0.0.1
 --- !u!4 &1559510656
 Transform:
   m_ObjectHideFlags: 0

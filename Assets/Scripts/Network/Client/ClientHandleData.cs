@@ -6,12 +6,16 @@ namespace JustPlanes.Network.Client
     static class ClientHandleData
     {
         private static ByteBuffer playerBuffer;
-        public delegate void Packet(byte[] data);
+        public delegate void Packet(ByteBuffer buffer);
         public static Dictionary<int, Packet> packets = new Dictionary<int, Packet>();
+        public static NetworkManager Manager;
 
-        public static void InitializePackets()
+        public static void InitializePackets(NetworkManager manager)
         {
+            Manager = manager;
             packets.Add((int)ServerPackets.SWelcomeMsg, DataReceiver.HandleWelcomeMsg);
+            packets.Add((int)ServerPackets.SGivePlayers, DataReceiver.HandleGivePlayers);
+            packets.Add((int)ServerPackets.SPlayerJoined, DataReceiver.HandlePlayerJoined);
         }
 
         public static void HandleData(byte[] data)
@@ -77,11 +81,11 @@ namespace JustPlanes.Network.Client
 
             buffer.WriteBytes(data);
             int packetID = buffer.ReadInteger();
-            buffer.Dispose();
             if (packets.TryGetValue(packetID, out Packet packet))
             {
-                packet.Invoke(data);
+                packet.Invoke(buffer);
             }
+            buffer.Dispose();
         }
     }
 }

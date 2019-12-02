@@ -1,16 +1,18 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace JustPlanes.Network.Server
 {
     static class ServerHandleData
     {
-        public delegate void Packet(int connectionID, byte[] data);
+        public delegate void Packet(int connectionID, ByteBuffer data);
         public static Dictionary<int, Packet> packets = new Dictionary<int, Packet>();
 
         public static void InitializePackets()
         {
             packets.Add((int)ClientPackets.CHelloServer, DataReceiver.HandleHelloServer);
+            packets.Add((int)ClientPackets.CGiveMePlayers, DataReceiver.HandleGiveMePlayers);
         }
 
         public static void HandleData(int connectionID, byte[] data)
@@ -18,7 +20,7 @@ namespace JustPlanes.Network.Server
             byte[] incomingBuffer = (byte[])data.Clone();
             int packetLength = 0;
 
-            Client client = ClientManager.client[connectionID];
+            Client client = ClientManager.clients[connectionID];
             if (client.buffer == null)
                 client.buffer = new ByteBuffer();
 
@@ -73,12 +75,13 @@ namespace JustPlanes.Network.Server
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteBytes(data);
+            Console.WriteLine(string.Join(",", data.ToList().Select(b => b.ToString())));
             int packetID = buffer.ReadInteger();
-            buffer.Dispose();
             if (packets.TryGetValue(packetID, out Packet packet))
             {
-                packet.Invoke(connectionID, data);
+                packet.Invoke(connectionID, buffer);
             }
+            buffer.Dispose();
         }
     }
 }
