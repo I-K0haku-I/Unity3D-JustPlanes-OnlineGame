@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace JustPlanesGame
+namespace JustPlanes
 {
     public class JustPlanesGame : MonoBehaviour
     {

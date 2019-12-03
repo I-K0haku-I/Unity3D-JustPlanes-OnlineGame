@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace JustPlanesGame
+namespace JustPlanes
 {
 
     public sealed class FloatEvent : UnityEvent<float> { }

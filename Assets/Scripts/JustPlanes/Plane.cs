@@ -1,36 +1,39 @@
 ﻿using UnityEngine;
 
-namespace JustPlanesGame
+namespace JustPlanes
 {
 
     public class Plane : MonoBehaviour
     {
 
-        public float maxThrottle = 100.0F;
-        public float minThrottle = 0.5F;
-        public float throttleSpeedMultiplier = 1.5F;
-        public float turnSpeedMultiplier = 30.0F;
+        public float maxThrottle = 20.0F;
+        public float minThrottle = 10.0F;
+        public float throttleMultiplier = 10.0F;
+        public float speedMultiplier = 1.5F;
+        public float turnSpeedMultiplier = 150.0F;
         public float bulletCoolDownTime = 0.2f;
         public KeyCode scoreboardKey = KeyCode.Tab;
 
-        protected float currentThrottle;
-        protected float currentBulletCoolDown;
+        protected float _currentThrottle;
+        protected float _currentBulletCoolDown;
 
         public GameObject bullet;
         public Rigidbody rb;
         public HealthBody hp;
 
-        private void Start()
+        private void Awake()
         {
             bullet = Resources.Load("Bullet") as GameObject;
-            // Set owner to prevent damaging self
-            bullet.GetComponent<Bullet>().owner = gameObject;
-
             rb = GetComponent<Rigidbody>();
             hp = GetComponent<HealthBody>();
+        }
 
+        private void Start()
+        {
+            // Set owner to prevent damaging self
+            bullet.GetComponent<Bullet>().owner = gameObject;
             // Listen to event that triggers on death
-            hp.OnDeathEvent.AddListener((o) => OnDeath(o));
+            hp.OnDeathEvent.AddListener((o) => Death(o));
         }
 
         private void Update()
@@ -39,65 +42,48 @@ namespace JustPlanesGame
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
 
-            SetThrottle(currentThrottle + (vertical * Time.deltaTime));
-
+            SetThrottle(_currentThrottle + (vertical * throttleMultiplier * Time.deltaTime));
             transform.Rotate(Vector3.back, horizontal * Time.deltaTime * turnSpeedMultiplier);
+
             rb.velocity = GetSpeed();
 
-            if (Input.GetButtonDown("Fire1"))
+            if (Input.GetButton("Fire1"))
             {
-                OnShoot();
-            }
-
-            // TODO: make scoreboard
-            // Scoreboard
-            if (Input.GetKeyDown(scoreboardKey))
-            {
-                // Show/Update scoreboard here
-            }
-
-            if (Input.GetKeyUp(scoreboardKey))
-            {
-                // Remove scoreboard here
+                Shoot();
             }
         }
 
         public void SetThrottle(float throttle)
         {
-            currentThrottle = throttle;
+            _currentThrottle = throttle;
 
-            if (currentThrottle > maxThrottle)
-            {
-                currentThrottle = maxThrottle;
-            }
-            else if (currentThrottle < minThrottle)
-            {
-                currentThrottle = minThrottle;
-            }
+            // apprently System.Math.Clamp doesn't exist? :thinking:
+            _currentThrottle = Mathf.Clamp(throttle, minThrottle, maxThrottle);
         }
 
         public Vector3 GetSpeed()
         {
-            return transform.up * currentThrottle * throttleSpeedMultiplier;
+            return transform.up * _currentThrottle * speedMultiplier;
         }
 
         // TODO: Explooosion! (animated sprite? particles?)
-        private void OnDeath(GameObject obj)
+        private void Death(GameObject obj)
         {
 
         }
 
-        private void OnShoot()
+        private void Shoot()
         {
-            if (0 <= currentBulletCoolDown)
+            if (0 <= _currentBulletCoolDown)
             {
-                currentBulletCoolDown -= Time.deltaTime;
+                _currentBulletCoolDown -= Time.deltaTime;
                 return;
             }
             else
             {
                 GameObject obj = Instantiate(bullet, transform.position, transform.rotation);
                 obj.name = "Bullet<" + gameObject.name + ">";
+                _currentBulletCoolDown = bulletCoolDownTime;
             }
         }
     }

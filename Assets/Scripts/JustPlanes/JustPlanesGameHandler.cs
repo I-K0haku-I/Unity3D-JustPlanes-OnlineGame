@@ -1,5 +1,5 @@
 ﻿
-namespace JustPlanesGame
+namespace JustPlanes
 {
 
     public abstract class JustPlanesGameHandler

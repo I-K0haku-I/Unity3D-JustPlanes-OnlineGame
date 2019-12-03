@@ -197,6 +197,7 @@ GameObject:
   - component: {fileID: 519420032}
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
+  - component: {fileID: 519420030}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -212,6 +213,22 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_Enabled: 1
+--- !u!114 &519420030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 921909f14b445434790f9a9e8ff21fdd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 519420031}
+  target: {fileID: 1327614139}
+  offset: {x: 0, y: 0, z: -50}
+  smoothTime: 0.3
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -317,10 +334,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7837ee99c9e821347862339d8f0c1134, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxThrottle: 10
-  minThrottle: 5
-  throttleSpeedMultiplier: 1.5
-  turnSpeedMultiplier: 60
+  maxThrottle: 20
+  minThrottle: 10
+  throttleMultiplier: 10
+  speedMultiplier: 1.5
+  turnSpeedMultiplier: 150
   bulletCoolDownTime: 0.2
   scoreboardKey: 9
   bullet: {fileID: 4498760227430251570, guid: dba3b374731b7a443b637cf42f1a158f, type: 3}

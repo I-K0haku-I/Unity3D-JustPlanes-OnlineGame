@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   aliveTime: 30
-  speed: 30
+  speed: 60
   damage: 5
   owner: {fileID: 0}
   rb: {fileID: 0}

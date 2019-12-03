@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace JustPlanesGame
+namespace JustPlanes
 {
     public class Bullet : MonoBehaviour
     {
