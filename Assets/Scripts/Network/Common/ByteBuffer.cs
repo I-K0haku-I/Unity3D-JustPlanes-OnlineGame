@@ -57,6 +57,14 @@ namespace JustPlanes.Network
             buffUpdated = true;
         }
 
+        public Player ReadPlayer()
+        {
+            string name = ReadString();
+            int x = ReadInteger();
+            int y = ReadInteger();
+            return new Player(name, x, y);
+        }
+
         public void WriteShort(short input)
         {
             WriteBytes(BitConverter.GetBytes(input));
@@ -70,6 +78,13 @@ namespace JustPlanes.Network
         public void WriteLong(long input)
         {
             WriteBytes(BitConverter.GetBytes(input));
+        }
+
+        public void WritePlayer(Player player)
+        {
+            WriteString(player.Name);
+            WriteInteger(player.X);
+            WriteInteger(player.Y);
         }
 
         public void WriteFloat(float input)

@@ -24,11 +24,7 @@ namespace JustPlanes.Network.Server
             buffer.WriteInteger(players.Count);
 
             foreach (var p in players)
-            {
-                buffer.WriteString(p.Name);
-                buffer.WriteInteger(p.X);
-                buffer.WriteInteger(p.Y);
-            }
+                buffer.WritePlayer(p);
 
             ClientManager.SendDataTo(connectionID, buffer.ToArray());
             buffer.Dispose();
@@ -38,9 +34,7 @@ namespace JustPlanes.Network.Server
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((int)ServerPackets.SPlayerJoined);
-            buffer.WriteString(player.Name);
-            buffer.WriteInteger(player.X);
-            buffer.WriteInteger(player.Y);
+            buffer.WritePlayer(player);
 
             ClientManager.SendDataToAll(buffer.ToArray());
             buffer.Dispose();

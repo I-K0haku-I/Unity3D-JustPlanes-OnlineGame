@@ -22,7 +22,7 @@ namespace JustPlanes
             // Define a target position above and behind the target transform
             Vector3 targetPosition = target.transform.TransformPoint(offset);
 
-            Debug.Log("Target: " + target.transform.forward + "Offset Pos: " + targetPosition + ", Offset: " + offset);
+            // Debug.Log("Target: " + target.transform.forward + "Offset Pos: " + targetPosition + ", Offset: " + offset);
 
             // Smoothly move the camera towards that target position
             cam.transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);

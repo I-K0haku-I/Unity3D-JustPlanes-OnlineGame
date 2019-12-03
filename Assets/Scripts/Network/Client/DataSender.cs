@@ -21,5 +21,15 @@ namespace JustPlanes.Network.Client
             ClientTCP.SendData(buffer.ToArray());
             buffer.Dispose();
         }
+
+        public static void SendHereIsMyPosition(int x, int y)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteInteger((int)ClientPackets.CHereIsMyPosition);
+            buffer.WriteInteger(x);
+            buffer.WriteInteger(y);
+            ClientTCP.SendData(buffer.ToArray());
+            buffer.Dispose();
+        }
     }
 }

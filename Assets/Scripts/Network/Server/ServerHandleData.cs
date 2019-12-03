@@ -75,7 +75,7 @@ namespace JustPlanes.Network.Server
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteBytes(data);
-            Console.WriteLine(string.Join(",", data.ToList().Select(b => b.ToString())));
+            // Console.WriteLine(string.Join(",", data.ToList().Select(b => b.ToString())));
             int packetID = buffer.ReadInteger();
             if (packets.TryGetValue(packetID, out Packet packet))
             {

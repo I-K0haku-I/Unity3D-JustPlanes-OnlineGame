@@ -13,5 +13,6 @@ namespace JustPlanes.Network
     {
         CHelloServer = 1,
         CGiveMePlayers = 2,
+        CHereIsMyPosition = 3,
     }
 }

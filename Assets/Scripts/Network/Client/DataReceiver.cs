@@ -23,26 +23,20 @@ namespace JustPlanes.Network.Client
             // buffer.WriteBytes(data);
             // int packetID = buffer.ReadInteger();
 
-            string name;
-            int x; int y;
-
             int playerAmount = buffer.ReadInteger();
             for (int i = 0; i < playerAmount; i++)
-            {
-                name = buffer.ReadString();
-                x = buffer.ReadInteger();
-                y = buffer.ReadInteger();
-                ClientHandleData.Manager.AddPlayer(new Player(name, x, y));
-            }
+                ClientHandleData.Manager.AddPlayer(buffer.ReadPlayer());
 
         }
 
-        internal static void HandlePlayerJoined(ByteBuffer buffer)
+        public static void HandlePlayerJoined(ByteBuffer buffer)
         {
-            string name = buffer.ReadString();
-            int x = buffer.ReadInteger();
-            int y = buffer.ReadInteger();
-            ClientHandleData.Manager.AddPlayer(new Player(name, x, y));
+            // string name = buffer.ReadString();
+            // int x = buffer.ReadInteger();
+            // int y = buffer.ReadInteger();
+            Player player = buffer.ReadPlayer();
+            Debug.Log($"JOINED: {player.Name}");
+            ClientHandleData.Manager.AddPlayer(player);
         }
     }
 }
