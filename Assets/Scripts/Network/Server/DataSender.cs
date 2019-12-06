@@ -39,5 +39,15 @@ namespace JustPlanes.Network.Server
             ClientManager.SendDataToAll(buffer.ToArray());
             buffer.Dispose();
         }
+
+        internal static void SendUnitSpawned(Unit unit)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteInteger((int)ServerPackets.SUnitSpawned);
+            buffer.WriteUnit(unit);
+
+            ClientManager.SendDataToAll(buffer.ToArray());
+            buffer.Dispose();
+        }
     }
 }

@@ -57,14 +57,6 @@ namespace JustPlanes.Network
             buffUpdated = true;
         }
 
-        public Player ReadPlayer()
-        {
-            string name = ReadString();
-            int x = ReadInteger();
-            int y = ReadInteger();
-            return new Player(name, x, y);
-        }
-
         public void WriteShort(short input)
         {
             WriteBytes(BitConverter.GetBytes(input));
@@ -78,6 +70,13 @@ namespace JustPlanes.Network
         public void WriteLong(long input)
         {
             WriteBytes(BitConverter.GetBytes(input));
+        }
+
+        public void WriteUnit(Unit unit)
+        {
+            WriteString(unit.ID);
+            WriteInteger(unit.X);
+            WriteInteger(unit.Y);
         }
 
         public void WritePlayer(Player player)
@@ -303,6 +302,23 @@ namespace JustPlanes.Network
             {
                 throw new Exception("You are not trying  to read out a 'STRING'");
             }
+        }
+        
+
+        public Player ReadPlayer()
+        {
+            string name = ReadString();
+            int x = ReadInteger();
+            int y = ReadInteger();
+            return new Player(name, x, y);
+        }
+
+        public Unit ReadUnit()
+        {
+            string id = ReadString();
+            int x = ReadInteger();
+            int y = ReadInteger();
+            return new Unit(id, x, y);
         }
 
         #endregion

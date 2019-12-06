@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace JustPlanes.Network.Client
 {
@@ -12,7 +11,7 @@ namespace JustPlanes.Network.Client
             // buffer.WriteBytes(data);
             string msg = buffer.ReadString();
 
-            Debug.Log(msg);
+            ClientHandleData.Manager.ReceivedMsg(msg);
             DataSender.SendHelloServer();
             DataSender.SendGiveMePlayers();
         }
@@ -35,8 +34,13 @@ namespace JustPlanes.Network.Client
             // int x = buffer.ReadInteger();
             // int y = buffer.ReadInteger();
             Player player = buffer.ReadPlayer();
-            Debug.Log($"JOINED: {player.Name}");
             ClientHandleData.Manager.AddPlayer(player);
+        }
+
+        public static void HandleUnitSpawned(ByteBuffer buffer)
+        {
+            Unit unit = buffer.ReadUnit();
+            ClientHandleData.Manager.AddUnit(unit);
         }
     }
 }

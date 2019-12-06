@@ -12,14 +12,16 @@ namespace JustPlanes.Network.Server
             // int packetID = buffer.ReadInteger();
             string msg = buffer.ReadString();
             // buffer.Dispose();
-            Console.WriteLine(msg);
+            // Console.WriteLine(msg);
+            Game.msgQueue.Enqueue(msg);
         }
 
         public static void HandleGiveMePlayers(int connectionID, ByteBuffer buffer)
         {
             // ByteBuffer buffer = new ByteBuffer();
             // buffer.WriteBytes(data);
-            Console.WriteLine($"{connectionID} wants to know all the players.");
+            string msg = $"{connectionID} wants to know all the players.";
+            Game.msgQueue.Enqueue(msg);
             DataSender.SendGivePlayers(connectionID);
         }
     }
