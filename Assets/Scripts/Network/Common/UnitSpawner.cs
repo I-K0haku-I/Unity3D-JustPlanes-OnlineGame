@@ -23,7 +23,7 @@ namespace JustPlanes.Network
         public Point GetRandomPoint()
         {
             var rand = new Random();
-            return new Point(rand.Next(X, X + Width), rand.Next(Y, Y - Height));
+            return new Point(rand.Next(X, X + Width), rand.Next(Y - Height, Y));
         }
     }
 
@@ -33,7 +33,7 @@ namespace JustPlanes.Network
         private long timer;
         private long spawnInterval = 5000;
 
-        private Dictionary<string, Unit> units = new Dictionary<string, Unit>();
+        public Dictionary<string, Unit> units = new Dictionary<string, Unit>();
         public Queue<Unit> unitsToSend = new Queue<Unit>();
         private int maxUnitAmount = 10;
         private Rectangle spawnRect = new Rectangle(-150, 150, 300, 300);

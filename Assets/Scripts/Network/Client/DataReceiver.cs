@@ -14,6 +14,7 @@ namespace JustPlanes.Network.Client
             ClientHandleData.Manager.ReceivedMsg(msg);
             DataSender.SendHelloServer();
             DataSender.SendGiveMePlayers();
+            DataSender.SendGiveMeUnits();
         }
 
         public static void HandleGivePlayers(ByteBuffer buffer)
@@ -26,6 +27,13 @@ namespace JustPlanes.Network.Client
             for (int i = 0; i < playerAmount; i++)
                 ClientHandleData.Manager.AddPlayer(buffer.ReadPlayer());
 
+        }
+
+        public static void HandleGiveUnits(ByteBuffer buffer)
+        {
+            int playerAmount = buffer.ReadInteger();
+            for (int i = 0; i < playerAmount; i++)
+                ClientHandleData.Manager.AddUnit(buffer.ReadUnit());
         }
 
         public static void HandlePlayerJoined(ByteBuffer buffer)

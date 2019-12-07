@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace JustPlanes.Network.Server
 {
@@ -42,6 +44,11 @@ namespace JustPlanes.Network.Server
             unitSpawner.unitsToSend.Clear();
             // if (unitSpawner.unitsToSend.TryDequeue(out Unit unit))
             //     DataSender.SendUnitSpawned(unit);
+        }
+
+        internal static List<Unit> GetUnits()
+        {
+            return unitSpawner.units.Values.ToList();
         }
 
         public static void Stop()

@@ -24,5 +24,12 @@ namespace JustPlanes.Network.Server
             Game.msgQueue.Enqueue(msg);
             DataSender.SendGivePlayers(connectionID);
         }
+
+        public static void HandleGiveMeUnits(int connectionID, ByteBuffer buffer)
+        {
+            string msg = $"{connectionID} wants to know all the units.";
+            Game.msgQueue.Enqueue(msg);
+            DataSender.SendGiveUnits(connectionID);
+        }
     }
 }

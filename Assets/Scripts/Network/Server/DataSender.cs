@@ -30,6 +30,21 @@ namespace JustPlanes.Network.Server
             buffer.Dispose();
         }
 
+        public static void SendGiveUnits(int connectionID)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteInteger((int)ServerPackets.SGiveUnits);
+
+            List<Unit> units = Game.GetUnits();
+            buffer.WriteInteger(units.Count);
+
+            foreach (var u in units)
+                buffer.WriteUnit(u);
+            
+            ClientManager.SendDataTo(connectionID, buffer.ToArray());
+            buffer.Dispose();
+        }
+
         public static void SendPlayerJoined(Player player)
         {
             ByteBuffer buffer = new ByteBuffer();

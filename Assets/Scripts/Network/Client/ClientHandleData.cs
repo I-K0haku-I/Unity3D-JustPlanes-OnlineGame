@@ -15,6 +15,7 @@ namespace JustPlanes.Network.Client
             Manager = manager;
             packets.Add((int)ServerPackets.SWelcomeMsg, DataReceiver.HandleWelcomeMsg);
             packets.Add((int)ServerPackets.SGivePlayers, DataReceiver.HandleGivePlayers);
+            packets.Add((int)ServerPackets.SGiveUnits, DataReceiver.HandleGiveUnits);
             packets.Add((int)ServerPackets.SPlayerJoined, DataReceiver.HandlePlayerJoined);
             packets.Add((int)ServerPackets.SUnitSpawned, DataReceiver.HandleUnitSpawned);
         }

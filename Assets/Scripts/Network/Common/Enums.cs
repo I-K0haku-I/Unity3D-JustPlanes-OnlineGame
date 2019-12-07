@@ -6,14 +6,15 @@ namespace JustPlanes.Network
     {
         SWelcomeMsg = 1,
         SGivePlayers = 2,
-        SPlayerJoined = 3,
-        SUnitSpawned = 4,
+        SGiveUnits = 3,
+        SPlayerJoined = 4,
+        SUnitSpawned = 5,
     }
     
     public enum ClientPackets
     {
         CHelloServer = 1,
         CGiveMePlayers = 2,
-        CHereIsMyPosition = 3,
+        CGiveMeUnits = 3,
     }
 }
