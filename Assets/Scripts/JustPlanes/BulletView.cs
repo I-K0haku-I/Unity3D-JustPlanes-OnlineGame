@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace JustPlanes
 {
-    public class Bullet : MonoBehaviour
+    public class BulletView : MonoBehaviour
     {
 
         public float aliveTime = 30.0F;

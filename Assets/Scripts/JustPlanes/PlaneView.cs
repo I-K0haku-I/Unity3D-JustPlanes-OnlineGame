@@ -3,7 +3,7 @@
 namespace JustPlanes
 {
 
-    public class Plane : MonoBehaviour
+    public class PlaneView : MonoBehaviour
     {
 
         public float maxThrottle = 20.0F;
@@ -18,6 +18,7 @@ namespace JustPlanes
         protected float _currentBulletCoolDown;
 
         public GameObject bullet;
+        public Transform bulletParent;
         public Rigidbody rb;
         public HealthBody hp;
 
@@ -31,7 +32,7 @@ namespace JustPlanes
         private void Start()
         {
             // Set owner to prevent damaging self
-            bullet.GetComponent<Bullet>().owner = gameObject;
+            bullet.GetComponent<BulletView>().owner = gameObject;
             // Listen to event that triggers on death
             hp.OnDeathEvent.AddListener((o) => Death(o));
         }
@@ -81,7 +82,7 @@ namespace JustPlanes
             }
             else
             {
-                GameObject obj = Instantiate(bullet, transform.position, transform.rotation);
+                GameObject obj = Instantiate(bullet, transform.position, transform.rotation, bulletParent);
                 obj.name = "Bullet<" + gameObject.name + ">";
                 _currentBulletCoolDown = bulletCoolDownTime;
             }

@@ -1,9 +1,32 @@
 using System;
+using System.Drawing;
 using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace JustPlanes.Network
 {
+    public class Rectangle
+    {
+        private int X;
+        private int Y;
+        private int Width;
+        private int Height;
+
+        public Rectangle(int x, int y, int width, int height)
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+        }
+
+        public Point GetRandomPoint()
+        {
+            var rand = new Random();
+            return new Point(rand.Next(X, X + Width), rand.Next(Y, Y - Height));
+        }
+    }
+
     public class UnitSpawner
     {
 
@@ -13,10 +36,10 @@ namespace JustPlanes.Network
         private Dictionary<string, Unit> units = new Dictionary<string, Unit>();
         public Queue<Unit> unitsToSend = new Queue<Unit>();
         private int maxUnitAmount = 10;
+        private Rectangle spawnRect = new Rectangle(-150, 150, 300, 300);
 
         public UnitSpawner()
         {
-
         }
 
         internal void Tick(long elapsedMilliseconds)
@@ -29,9 +52,8 @@ namespace JustPlanes.Network
                 if (units.Count < maxUnitAmount)
                 {
                     string id = Guid.NewGuid().ToString();
-                    int x = 0;
-                    int y = 0;
-                    Unit unit = new Unit(id, x, y);
+                    Point point = spawnRect.GetRandomPoint();
+                    Unit unit = new Unit(id, point);
                     units.Add(unit.ID, unit);
                     unitsToSend.Enqueue(unit);
                     Console.WriteLine($"[GAME] Spawning unit: {unit.ID}");
