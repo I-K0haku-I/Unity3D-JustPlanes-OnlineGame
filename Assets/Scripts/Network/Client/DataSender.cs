@@ -30,6 +30,16 @@ namespace JustPlanes.Network.Client
             buffer.Dispose();
         }
 
+        public static void SendUnitDamaged(Unit unit, int damage)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteInteger((int)ClientPackets.CUnitDamaged);
+            buffer.WriteString(unit.ID);
+            buffer.WriteInteger(damage);
+            ClientTCP.SendData(buffer.ToArray());
+            buffer.Dispose();
+        }
+
         // public static void SendHereIsMyPosition(int x, int y)
         // {
         //     ByteBuffer buffer = new ByteBuffer();

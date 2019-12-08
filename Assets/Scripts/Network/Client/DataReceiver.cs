@@ -36,6 +36,12 @@ namespace JustPlanes.Network.Client
                 ClientHandleData.Manager.AddUnit(buffer.ReadUnit());
         }
 
+        internal static void HandleUnitDied(ByteBuffer buffer)
+        {
+            string id = buffer.ReadString();
+            ClientHandleData.Manager.AcknowledgeUnitDied(id);
+        }
+
         public static void HandlePlayerJoined(ByteBuffer buffer)
         {
             // string name = buffer.ReadString();

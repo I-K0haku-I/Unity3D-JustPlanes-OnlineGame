@@ -9,6 +9,7 @@ namespace JustPlanes.Network
         SGiveUnits = 3,
         SPlayerJoined = 4,
         SUnitSpawned = 5,
+        SUnitDied = 6,
     }
     
     public enum ClientPackets
@@ -16,5 +17,6 @@ namespace JustPlanes.Network
         CHelloServer = 1,
         CGiveMePlayers = 2,
         CGiveMeUnits = 3,
+        CUnitDamaged = 4,
     }
 }

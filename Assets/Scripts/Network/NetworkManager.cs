@@ -41,6 +41,7 @@ namespace JustPlanes.Network
         private Dictionary<string, Unit> units = new Dictionary<string, Unit>();
         public UnitEvent OnUnitAdd = new UnitEvent();
         public StringEvent OnReceiveMsg = new StringEvent();
+        public UnitEvent OnUnitDies = new UnitEvent();
 
         private void Awake()
         {
@@ -58,6 +59,15 @@ namespace JustPlanes.Network
             ClientHandleData.InitializePackets(this);
             ClientTCP.ServerAddress = serverAddress;
             ClientTCP.InitializingNetworking();
+        }
+
+        internal void AcknowledgeUnitDied(string id)
+        {
+            units.TryGetValue(id, out Unit unit);
+            if (unit == null)
+                return;
+            OnUnitDies.Invoke(unit);
+            units.Remove(unit.ID);
         }
 
         private void OnApplicationQuit()
@@ -88,6 +98,11 @@ namespace JustPlanes.Network
         {
             Debug.Log(msg);
             OnReceiveMsg.Invoke(msg);
+        }
+
+        public void DamageUnit(Unit unit, int damage)
+        {
+            DataSender.SendUnitDamaged(unit, damage);
         }
     }
 }

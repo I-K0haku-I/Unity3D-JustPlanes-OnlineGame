@@ -16,6 +16,7 @@ namespace JustPlanes.Network.Server
         internal static ConcurrentDictionary<int, Player> players = new ConcurrentDictionary<int, Player>();
 
         private static UnitSpawner unitSpawner = new UnitSpawner();
+        internal static ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
 
         public static void StartLoop()
         {
@@ -35,13 +36,31 @@ namespace JustPlanes.Network.Server
         {
             if (msgQueue.TryDequeue(out string result))
                 Console.WriteLine(result);
-         
+
             unitSpawner.Tick(elapsedMilliseconds);
             foreach (var unit in unitSpawner.unitsToSend)
             {
                 DataSender.SendUnitSpawned(unit);
             }
             unitSpawner.unitsToSend.Clear();
+
+            while (damageQueue.TryDequeue(out var damageItem))
+            {
+                if (unitSpawner.units.ContainsKey(damageItem.Item1))
+                {
+                    Unit u = unitSpawner.units[damageItem.Item1];
+                    int damage = damageItem.Item2;
+                    u.hp -= damage;
+                    if (u.IsDead())
+                        DataSender.SendUnitDied(u);
+                }
+                else
+                {
+                    Console.WriteLine($"Tried to damage but id does not exist: {damageItem.Item1}");
+                }
+            }
+
+            // foreach ((var, var) id, damage in damageQueue.)
             // if (unitSpawner.unitsToSend.TryDequeue(out Unit unit))
             //     DataSender.SendUnitSpawned(unit);
         }
@@ -57,5 +76,5 @@ namespace JustPlanes.Network.Server
             IsRunning = false;
         }
     }
-    
+
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 
 namespace JustPlanes.Network
@@ -5,6 +6,8 @@ namespace JustPlanes.Network
     public class Unit
     {
         public string ID;
+
+        public int hp = 100;
 
         public int X
         {
@@ -31,6 +34,11 @@ namespace JustPlanes.Network
             ID = id;
             X = x;
             Y = y;
+        }
+
+        internal bool IsDead()
+        {
+            return hp <= 0;
         }
     }
 

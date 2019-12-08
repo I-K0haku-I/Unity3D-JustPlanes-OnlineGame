@@ -25,6 +25,13 @@ namespace JustPlanes.Network.Server
             DataSender.SendGivePlayers(connectionID);
         }
 
+        internal static void HandleUnitDamaged(int connectionID, ByteBuffer buffer)
+        {
+            string id = buffer.ReadString();
+            int damage = buffer.ReadInteger();
+            Game.damageQueue.Enqueue(Tuple.Create(id, damage));
+        }
+
         public static void HandleGiveMeUnits(int connectionID, ByteBuffer buffer)
         {
             string msg = $"{connectionID} wants to know all the units.";
