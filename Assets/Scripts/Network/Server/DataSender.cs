@@ -74,5 +74,34 @@ namespace JustPlanes.Network.Server
             ClientManager.SendDataToAll(buffer.ToArray());
             buffer.Dispose();
         }
+
+        internal static void SendUnitsDamage(List<Tuple<string, int>> damageToSend)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteInteger((int)ServerPackets.SUnitsDamaged);
+
+            buffer.WriteInteger(damageToSend.Count);
+            damageToSend.ForEach(damageItem => {
+                buffer.WriteString(damageItem.Item1);
+                buffer.WriteInteger(damageItem.Item2);
+            });
+
+            ClientManager.SendDataToAll(buffer.ToArray());
+            buffer.Dispose();
+        }
+
+        internal static void SendUnitsDied(List<Unit> unitDeathToSend)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteInteger((int)ServerPackets.SUnitsDied);
+
+            buffer.WriteInteger(unitDeathToSend.Count);
+            unitDeathToSend.ForEach(unit => {
+                buffer.WriteString(unit.ID);
+            });
+
+            ClientManager.SendDataToAll(buffer.ToArray());
+            buffer.Dispose();
+        }
     }
 }

@@ -24,6 +24,12 @@ namespace JustPlanes.Network
 
     }
 
+    [System.Serializable]
+    public class UnitDamageEvent : UnityEvent<Unit, int>
+    {
+
+    }
+
     public class NetworkManager : MonoBehaviour
     {
         public static NetworkManager instance;
@@ -42,6 +48,7 @@ namespace JustPlanes.Network
         public UnitEvent OnUnitAdd = new UnitEvent();
         public StringEvent OnReceiveMsg = new StringEvent();
         public UnitEvent OnUnitDies = new UnitEvent();
+        public UnitDamageEvent OnUnitGetsDamaged = new UnitDamageEvent();
 
         private void Awake()
         {
@@ -68,6 +75,15 @@ namespace JustPlanes.Network
                 return;
             OnUnitDies.Invoke(unit);
             units.Remove(unit.ID);
+        }
+
+        internal void AcknowledgeUnitDamaged(string id, int dmg)
+        {
+            units.TryGetValue(id, out Unit unit);
+            if (unit == null)
+                return;
+            Debug.Log($"{id} got hit for {dmg} DMG!");
+            OnUnitGetsDamaged.Invoke(unit, dmg);
         }
 
         private void OnApplicationQuit()

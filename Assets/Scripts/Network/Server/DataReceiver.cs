@@ -29,6 +29,7 @@ namespace JustPlanes.Network.Server
         {
             string id = buffer.ReadString();
             int damage = buffer.ReadInteger();
+            // Console.WriteLine($"{id} got damaged {damage.ToString()} from {connectionID}");
             Game.damageQueue.Enqueue(Tuple.Create(id, damage));
         }
 

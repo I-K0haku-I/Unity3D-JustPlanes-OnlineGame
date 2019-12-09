@@ -36,6 +36,13 @@ namespace JustPlanes.Network.Client
                 ClientHandleData.Manager.AddUnit(buffer.ReadUnit());
         }
 
+        internal static void HandleUnitsDamaged(ByteBuffer buffer)
+        {
+            int damageItemAmount = buffer.ReadInteger();
+            for (int i = 0; i < damageItemAmount; i++)
+                ClientHandleData.Manager.AcknowledgeUnitDamaged(buffer.ReadString(), buffer.ReadInteger());
+        }
+
         internal static void HandleUnitDied(ByteBuffer buffer)
         {
             string id = buffer.ReadString();
@@ -55,6 +62,13 @@ namespace JustPlanes.Network.Client
         {
             Unit unit = buffer.ReadUnit();
             ClientHandleData.Manager.AddUnit(unit);
+        }
+
+        public static void HandleUnitsDied(ByteBuffer buffer)
+        {
+            int unitAmount = buffer.ReadInteger();
+            for (int i = 0; i < unitAmount; i++)
+                ClientHandleData.Manager.AcknowledgeUnitDied(buffer.ReadString());
         }
     }
 }

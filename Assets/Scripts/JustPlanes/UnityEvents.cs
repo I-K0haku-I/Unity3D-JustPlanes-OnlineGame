@@ -8,5 +8,7 @@ namespace JustPlanes
 
     public sealed class GameObjectEvent : UnityEvent<GameObject> { }
 
+    public sealed class GameObjectIntEvent : UnityEvent<GameObject, int> { }
+
 }
 

@@ -7,7 +7,9 @@ namespace JustPlanes.Network
     {
         public string ID;
 
-        public int hp = 100;
+        public int maxHP = 100;
+
+        public int hp;
 
         public int X
         {
@@ -27,13 +29,29 @@ namespace JustPlanes.Network
         {
             ID = id;
             this.point = point;
+            hp = maxHP;
         }
-
+        public Unit(string id, int _hp, Point point)
+        {
+            ID = id;
+            this.point = point;
+            hp = _hp;
+        }
+        
         public Unit(string id, int x, int y)
         {
             ID = id;
             X = x;
             Y = y;
+            hp = maxHP;
+        }
+
+        public Unit(string id, int _hp, int x, int y)
+        {
+            ID = id;
+            X = x;
+            Y = y;
+            hp = _hp;
         }
 
         internal bool IsDead()

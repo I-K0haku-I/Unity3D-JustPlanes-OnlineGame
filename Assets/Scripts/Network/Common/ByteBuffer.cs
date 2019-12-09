@@ -75,6 +75,7 @@ namespace JustPlanes.Network
         public void WriteUnit(Unit unit)
         {
             WriteString(unit.ID);
+            WriteInteger(unit.hp);
             WriteInteger(unit.X);
             WriteInteger(unit.Y);
         }
@@ -316,9 +317,10 @@ namespace JustPlanes.Network
         public Unit ReadUnit()
         {
             string id = ReadString();
+            int hp = ReadInteger();
             int x = ReadInteger();
             int y = ReadInteger();
-            return new Unit(id, x, y);
+            return new Unit(id, hp, x, y);
         }
 
         #endregion

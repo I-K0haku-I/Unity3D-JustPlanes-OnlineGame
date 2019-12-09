@@ -3,6 +3,7 @@
 namespace JustPlanes
 {
 
+    [RequireComponent(typeof(Rigidbody)), RequireComponent(typeof(UnitView))]
     public class PlaneView : MonoBehaviour
     {
 
@@ -20,13 +21,14 @@ namespace JustPlanes
         public GameObject bullet;
         public Transform bulletParent;
         public Rigidbody rb;
-        public HealthBody hp;
+        // TODO: this is smells a bit, not sure why
+        public UnitView uv;
 
         private void Awake()
         {
             bullet = Resources.Load("Bullet") as GameObject;
             rb = GetComponent<Rigidbody>();
-            hp = GetComponent<HealthBody>();
+            uv = GetComponent<UnitView>();
         }
 
         private void Start()
@@ -34,7 +36,7 @@ namespace JustPlanes
             // Set owner to prevent damaging self
             bullet.GetComponent<BulletView>().owner = gameObject;
             // Listen to event that triggers on death
-            hp.OnDeathEvent.AddListener((o) => Death(o));
+            uv.OnUnitDeathEvent.AddListener((o) => Death(o));
         }
 
         private void Update()

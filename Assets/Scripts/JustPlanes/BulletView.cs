@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace JustPlanes
 {
+
+    [RequireComponent(typeof(Rigidbody))]
     public class BulletView : MonoBehaviour
     {
 
@@ -23,9 +25,22 @@ namespace JustPlanes
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.gameObject != owner && collision.gameObject.GetComponent<HealthBody>() != null)
+            GameObject obj = collision.gameObject;
+
+            if (obj != owner && obj.GetComponent<UnitView>() != null)
             {
-                collision.gameObject.GetComponent<HealthBody>().AddDamage(damage);
+                UnitView unitView = obj.GetComponent<UnitView>();
+                if (unitView.unit.ID.StartsWith("local:"))
+                {
+                    // TODO: don't leave random debugs like that
+                    // I don't even know why this is here, it's not self explanatory at all
+                    // also, why do we even care about local or not local units? we only display server units
+                    Debug.Log("Found local unit, ejecting!");
+                    return;
+                }
+                // instead of rounding, you should just cast to int
+                // or just change damage to ints, I don't see a reason to work with floats here
+                Network.NetworkManager.instance.DamageUnit(unitView.unit, Mathf.RoundToInt(damage));
                 Destroy(this.gameObject);
             }
         }

@@ -10,6 +10,8 @@ namespace JustPlanes.Network
         SPlayerJoined = 4,
         SUnitSpawned = 5,
         SUnitDied = 6,
+        SUnitsDied = 7,
+        SUnitsDamaged = 8,
     }
     
     public enum ClientPackets

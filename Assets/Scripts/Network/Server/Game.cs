@@ -17,6 +17,8 @@ namespace JustPlanes.Network.Server
 
         private static UnitSpawner unitSpawner = new UnitSpawner();
         internal static ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
+        internal static List<Unit> unitDeathToSend = new List<Unit>();
+        internal static List<Tuple<string, int>> damageToSend = new List<Tuple<string, int>>();
 
         public static void StartLoop()
         {
@@ -51,8 +53,10 @@ namespace JustPlanes.Network.Server
                     Unit u = unitSpawner.units[damageItem.Item1];
                     int damage = damageItem.Item2;
                     u.hp -= damage;
+                    damageToSend.Add(damageItem);
                     if (u.IsDead())
-                        DataSender.SendUnitDied(u);
+                        unitDeathToSend.Add(u);
+                    // DataSender.SendUnitDied(u);
                 }
                 else
                 {
@@ -60,9 +64,29 @@ namespace JustPlanes.Network.Server
                 }
             }
 
+            if (damageToSend.Count > 0)
+            {
+                DataSender.SendUnitsDamage(damageToSend);
+                damageToSend.Clear();
+            }
+
+            if (unitDeathToSend.Count > 0)
+            {
+                DataSender.SendUnitsDied(unitDeathToSend);
+                unitDeathToSend.ForEach(unit => {
+                    unitSpawner.units.Remove(unit.ID);
+                });
+                unitDeathToSend.Clear();
+            }
+
             // foreach ((var, var) id, damage in damageQueue.)
             // if (unitSpawner.unitsToSend.TryDequeue(out Unit unit))
             //     DataSender.SendUnitSpawned(unit);
+        }
+
+        internal static Unit GetUnit(string id)
+        {
+            return unitSpawner.units[id];
         }
 
         internal static List<Unit> GetUnits()

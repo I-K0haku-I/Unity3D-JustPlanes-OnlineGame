@@ -1,24 +1,26 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace JustPlanes
 {
     public class UnitView : MonoBehaviour
     {
 
-        public HealthBody hp;
+        public Network.Unit unit;
+        public GameObjectEvent OnUnitDeathEvent = new GameObjectEvent();
 
-        // Start is called before the first frame update
+        public Slider slider;
+
         private void Start()
         {
-            hp = GetComponent<HealthBody>();
-            hp.OnDeathEvent.AddListener((o) => Destroy(o));
+            if (slider == null)
+                slider = this.gameObject.GetComponentInChildren<Slider>();
+            slider.value = (float)unit.hp / unit.maxHP;
         }
 
-        // Update is called once per frame
         private void Update()
         {
-
+            slider.value = (float)unit.hp / unit.maxHP;
         }
     }
 }
