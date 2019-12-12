@@ -29,6 +29,7 @@ namespace JustPlanes
             bullet = Resources.Load("Bullet") as GameObject;
             rb = GetComponent<Rigidbody>();
             uv = GetComponent<UnitView>();
+            uv.unit = new Network.Unit("local:playerplane", 0, 0);
         }
 
         private void Start()
