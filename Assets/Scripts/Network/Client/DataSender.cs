@@ -40,6 +40,16 @@ namespace JustPlanes.Network.Client
             buffer.Dispose();
         }
 
+        public static void SendGiveMeMission()
+        {
+            using (var buffer = new ByteBuffer())
+            {
+                buffer.WriteInteger((int)ClientPackets.CGiveMeMission);
+                // TODO: what if I do send in dispose method?
+                ClientTCP.SendData(buffer.ToArray());
+            }
+        }
+
         // public static void SendHereIsMyPosition(int x, int y)
         // {
         //     ByteBuffer buffer = new ByteBuffer();

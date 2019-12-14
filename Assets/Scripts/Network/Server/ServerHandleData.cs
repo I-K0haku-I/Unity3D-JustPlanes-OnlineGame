@@ -15,6 +15,7 @@ namespace JustPlanes.Network.Server
             packets.Add((int)ClientPackets.CGiveMePlayers, DataReceiver.HandleGiveMePlayers);
             packets.Add((int)ClientPackets.CGiveMeUnits, DataReceiver.HandleGiveMeUnits);
             packets.Add((int)ClientPackets.CUnitDamaged, DataReceiver.HandleUnitDamaged);
+            packets.Add((int)ClientPackets.CGiveMeMission, DataReceiver.HandleGiveMeMission);
         }
 
         public static void HandleData(int connectionID, byte[] data)

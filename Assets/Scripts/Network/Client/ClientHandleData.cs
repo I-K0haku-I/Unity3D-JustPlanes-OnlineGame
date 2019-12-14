@@ -21,6 +21,9 @@ namespace JustPlanes.Network.Client
             packets.Add((int)ServerPackets.SUnitDied, DataReceiver.HandleUnitDied);
             packets.Add((int)ServerPackets.SUnitsDied, DataReceiver.HandleUnitsDied);
             packets.Add((int)ServerPackets.SUnitsDamaged, DataReceiver.HandleUnitsDamaged);
+            packets.Add((int)ServerPackets.SGiveMission, DataReceiver.HandleGiveMission);
+            packets.Add((int)ServerPackets.SUpdateMission, DataReceiver.HandleUpdateMission);
+            packets.Add((int)ServerPackets.SCompleteMission, DataReceiver.HandleCompleteMission);
         }
 
         public static void HandleData(byte[] data)

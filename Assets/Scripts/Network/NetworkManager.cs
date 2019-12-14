@@ -29,6 +29,16 @@ namespace JustPlanes.Network
     {
 
     }
+    [System.Serializable]
+    public class MissionEvent : UnityEvent<MissionHandler>
+    {
+    }
+
+    [System.Serializable]
+    public class IntegerEvent : UnityEvent<int>
+    {
+
+    }
 
     public class NetworkManager : MonoBehaviour
     {
@@ -50,6 +60,17 @@ namespace JustPlanes.Network
         public UnitEvent OnUnitDies = new UnitEvent();
         public UnitDamageEvent OnUnitGetsDamaged = new UnitDamageEvent();
 
+        public MissionHandler mission = new MissionHandler();
+        private MissionEvent OnMissionAdd = new MissionEvent();
+
+        internal void AcknowledgeMissionComplete()
+        {
+            OnMissionComplete.Invoke();
+        }
+
+        private IntegerEvent OnMissionUpdate = new IntegerEvent();
+        private UnityEvent OnMissionComplete = new UnityEvent();
+
         private void Awake()
         {
             instance = this;
@@ -68,6 +89,12 @@ namespace JustPlanes.Network
             ClientTCP.InitializingNetworking();
         }
 
+        internal void UpdateMission(int enemiesKilledDelta)
+        {
+            mission.Update(enemiesKilledDelta);
+            OnMissionUpdate.Invoke(enemiesKilledDelta);
+        }
+
         internal void AcknowledgeUnitDied(string id)
         {
             units.TryGetValue(id, out Unit unit);
@@ -76,6 +103,15 @@ namespace JustPlanes.Network
             OnUnitDies.Invoke(unit);
             units.Remove(unit.ID);
         }
+
+        internal void AddMission(MissionTypes type, int target, int start)
+        {
+            mission.enemiesToKill = target;
+            mission.enemiesKilled = start;
+            OnMissionAdd.Invoke(mission);
+        }
+
+
 
         internal void AcknowledgeUnitDamaged(string id, int dmg)
         {

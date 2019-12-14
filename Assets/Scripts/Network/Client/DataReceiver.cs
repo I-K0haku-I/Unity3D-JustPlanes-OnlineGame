@@ -15,6 +15,7 @@ namespace JustPlanes.Network.Client
             DataSender.SendHelloServer();
             DataSender.SendGiveMePlayers();
             DataSender.SendGiveMeUnits();
+            DataSender.SendGiveMeMission();
         }
 
         public static void HandleGivePlayers(ByteBuffer buffer)
@@ -41,6 +42,26 @@ namespace JustPlanes.Network.Client
             int damageItemAmount = buffer.ReadInteger();
             for (int i = 0; i < damageItemAmount; i++)
                 ClientHandleData.Manager.AcknowledgeUnitDamaged(buffer.ReadString(), buffer.ReadInteger());
+        }
+
+        internal static void HandleCompleteMission(ByteBuffer buffer)
+        {
+            ClientHandleData.Manager.AcknowledgeMissionComplete();
+        }
+
+        internal static void HandleUpdateMission(ByteBuffer buffer)
+        {
+            int enemiesKilledDelta = buffer.ReadInteger();
+            ClientHandleData.Manager.UpdateMission(enemiesKilledDelta);
+        }
+
+        internal static void HandleGiveMission(ByteBuffer buffer)
+        {
+            // TODO: could add buffer method that reads an integer and returns the enum instance directly
+            int type = buffer.ReadInteger();
+            int enemiesToKill = buffer.ReadInteger();
+            int enemiesKilled = buffer.ReadInteger();
+            ClientHandleData.Manager.AddMission((MissionTypes)type, enemiesToKill, enemiesToKill);
         }
 
         internal static void HandleUnitDied(ByteBuffer buffer)

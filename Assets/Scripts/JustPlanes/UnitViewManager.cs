@@ -12,7 +12,9 @@ namespace JustPlanes
         public static Transform UnitParent;
 
         private Dictionary<string, UnitView> onlineUnits = new Dictionary<string, UnitView>();
+        private Dictionary<string, PlayerView> onlinePlayers = new Dictionary<string, PlayerView>();
         private static Object testUnit;
+        private static Object playerUnit;
 
         private void Awake()
         {
@@ -24,10 +26,13 @@ namespace JustPlanes
 
             Instance = this;
             testUnit = Resources.Load("TestUnit");
+            playerUnit = Resources.Load("PlayerUnit");
         }
 
         private void Start()
         {
+            #region HandleUnitEvent
+
             NetworkManager.instance.OnUnitAdd.AddListener(
                 (u) => Spawn(u));
 
@@ -36,6 +41,33 @@ namespace JustPlanes
 
             NetworkManager.instance.OnUnitGetsDamaged.AddListener(
                 (u, i) => Damage(u, i));
+
+            #endregion HandleUnitEvent
+
+
+            #region HandlePlayerEvent
+
+            //NetworkManager.instance.OnPlayerAdd.AddListener(
+            //    (p) => Spawn(p));
+
+            #endregion HandlePlayerEvent
+        }
+
+        private GameObject Spawn(Object obj, string id, float x, float y)
+        {
+            GameObject clonedObj = (GameObject)Instantiate(obj, new Vector3(x, y, 0.0F), new Quaternion(), UnitParent);
+            clonedObj.name = (obj.name + "-" + id);
+            return clonedObj;
+        }
+
+        private GameObject Spawn(Player player) {
+            GameObject playerObj = Spawn(playerUnit, player.Name, player.X, player.Y);
+            PlayerView playerView = playerObj.GetComponent<PlayerView>();
+            playerView.player = player;
+
+            onlinePlayers.Add(player.Name, playerView);
+
+            return playerObj;
         }
 
         private GameObject Spawn(Unit unit)
@@ -49,12 +81,6 @@ namespace JustPlanes
             return unitObj;
         }
 
-        private GameObject Spawn(Object obj, string id, float x, float y)
-        {
-            GameObject clonedObj = (GameObject)Instantiate(obj, new Vector3(x, y, 0.0F), new Quaternion(), UnitParent);
-            clonedObj.name = (obj.name + "-" + id);
-            return clonedObj;
-        }
 
         private void Kill(Unit unit)
         {
@@ -62,14 +88,14 @@ namespace JustPlanes
             {
                 Unit u = uv.unit;
 
-                if (!u.IsDead())
+                if (!u.IsDead() | !unit.IsDead())
                 {
                     Debug.LogWarning("Unit [" + u.ID + "] is not dead, but called kill.");
                 }
 
                 uv.OnUnitDeathEvent.Invoke(uv.gameObject);
                 onlineUnits.Remove(unit.ID);
-                Destroy(uv);
+                Destroy(uv.gameObject);
 
                 Debug.LogFormat("Killed Unit ID: {0} HP: {1}", u.ID, u.hp);
             }

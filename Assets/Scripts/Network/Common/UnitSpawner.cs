@@ -36,7 +36,7 @@ namespace JustPlanes.Network
         public Dictionary<string, Unit> units = new Dictionary<string, Unit>();
         public Queue<Unit> unitsToSend = new Queue<Unit>();
         private int maxUnitAmount = 10;
-        private Rectangle spawnRect = new Rectangle(-150, 150, 300, 300);
+        private Rectangle spawnRect = new Rectangle(-100, 100, 200, 200);
 
         public UnitSpawner()
         {

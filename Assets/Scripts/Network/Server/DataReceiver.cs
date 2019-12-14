@@ -39,5 +39,13 @@ namespace JustPlanes.Network.Server
             Game.msgQueue.Enqueue(msg);
             DataSender.SendGiveUnits(connectionID);
         }
+
+        public static void HandleGiveMeMission(int connectionID, ByteBuffer buffer)
+        {
+            string msg = $"{connectionID} wants to know the mission.";
+            // TOOD: opportunity to do a method here like Game.print(msg);
+            Game.msgQueue.Enqueue(msg);
+            DataSender.SendGiveMission(connectionID, Game.mission);
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace JustPlanes.Network.Server
@@ -102,6 +103,36 @@ namespace JustPlanes.Network.Server
 
             ClientManager.SendDataToAll(buffer.ToArray());
             buffer.Dispose();
+        }
+
+        internal static void SendMissionComplete()
+        {
+            using (var buffer = new ByteBuffer())
+            {
+                buffer.WriteInteger((int)ServerPackets.SCompleteMission);
+            }
+        }
+
+        internal static void SendGiveMission(int connectionID, MissionHandler mission)
+        {
+            using (var buffer = new ByteBuffer())
+            {
+                buffer.WriteInteger((int)ServerPackets.SGiveMission);
+                buffer.WriteInteger((int)MissionTypes.MTKILLRats);
+                buffer.WriteInteger(mission.enemiesToKill);
+                buffer.WriteInteger(mission.enemiesKilled);
+                ClientManager.SendDataToAll(buffer.ToArray());
+            }
+        }
+
+        internal static void SendMissionUpdate(List<int> missionToSend)
+        {
+            using (var buffer = new ByteBuffer())
+            {
+                buffer.WriteInteger((int)ServerPackets.SUpdateMission);
+                buffer.WriteInteger(missionToSend.Sum());
+                ClientManager.SendDataToAll(buffer.ToArray());
+            }
         }
     }
 }

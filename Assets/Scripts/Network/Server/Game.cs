@@ -20,6 +20,9 @@ namespace JustPlanes.Network.Server
         internal static List<Unit> unitDeathToSend = new List<Unit>();
         internal static List<Tuple<string, int>> damageToSend = new List<Tuple<string, int>>();
 
+        public static MissionHandler mission = new MissionHandler();
+        private static List<int> missionUpdates = new List<int>();
+
         public static void StartLoop()
         {
             int millisecondsToTick = (int)(1000 / tickRate);
@@ -39,12 +42,7 @@ namespace JustPlanes.Network.Server
             if (msgQueue.TryDequeue(out string result))
                 Console.WriteLine(result);
 
-            unitSpawner.Tick(elapsedMilliseconds);
-            foreach (var unit in unitSpawner.unitsToSend)
-            {
-                DataSender.SendUnitSpawned(unit);
-            }
-            unitSpawner.unitsToSend.Clear();
+            // mission.Tick(elapsedMilliseconds);
 
             while (damageQueue.TryDequeue(out var damageItem))
             {
@@ -55,14 +53,24 @@ namespace JustPlanes.Network.Server
                     u.hp -= damage;
                     damageToSend.Add(damageItem);
                     if (u.IsDead())
+                    {
                         unitDeathToSend.Add(u);
-                    // DataSender.SendUnitDied(u);
+                        mission.Progress();
+                        missionUpdates.Add(1);
+                    }
                 }
                 else
                 {
                     Console.WriteLine($"Tried to damage but id does not exist: {damageItem.Item1}");
                 }
             }
+
+            unitSpawner.Tick(elapsedMilliseconds);
+            foreach (var unit in unitSpawner.unitsToSend)
+            {
+                DataSender.SendUnitSpawned(unit);
+            }
+            unitSpawner.unitsToSend.Clear();
 
             if (damageToSend.Count > 0)
             {
@@ -73,15 +81,23 @@ namespace JustPlanes.Network.Server
             if (unitDeathToSend.Count > 0)
             {
                 DataSender.SendUnitsDied(unitDeathToSend);
-                unitDeathToSend.ForEach(unit => {
+                unitDeathToSend.ForEach(unit =>
+                {
                     unitSpawner.units.Remove(unit.ID);
                 });
                 unitDeathToSend.Clear();
             }
 
-            // foreach ((var, var) id, damage in damageQueue.)
-            // if (unitSpawner.unitsToSend.TryDequeue(out Unit unit))
-            //     DataSender.SendUnitSpawned(unit);
+            if (missionUpdates.Count > 0)
+            {
+                DataSender.SendMissionUpdate(missionUpdates);
+            }
+
+            if (mission.IsDone)
+            {
+                DataSender.SendMissionComplete();
+                mission.Reset();
+            }
         }
 
         internal static Unit GetUnit(string id)

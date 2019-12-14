@@ -12,6 +12,9 @@ namespace JustPlanes.Network
         SUnitDied = 6,
         SUnitsDied = 7,
         SUnitsDamaged = 8,
+        SUpdateMission = 9,
+        SGiveMission = 10,
+        SCompleteMission = 11,
     }
     
     public enum ClientPackets
@@ -20,5 +23,11 @@ namespace JustPlanes.Network
         CGiveMePlayers = 2,
         CGiveMeUnits = 3,
         CUnitDamaged = 4,
+        CGiveMeMission = 5,
+    }
+
+    public enum MissionTypes
+    {
+        MTKILLRats = 1,
     }
 }
