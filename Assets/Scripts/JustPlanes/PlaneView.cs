@@ -13,15 +13,20 @@ namespace JustPlanes
         public float speedMultiplier = 1.5F;
         public float turnSpeedMultiplier = 150.0F;
         public float bulletCoolDownTime = 0.2f;
-        public KeyCode scoreboardKey = KeyCode.Tab;
+        public float yBound = 150.0F;
+        public float xBound = 150.0F;
+        public float maxOutOfBoundTime = 10.0F;
+
 
         protected float _currentThrottle;
         protected float _currentBulletCoolDown;
+        protected float _currentOutOfBoundTime;
 
         public GameObject bullet;
         public Transform bulletParent;
         public Rigidbody rb;
         // TODO: this is smells a bit, not sure why
+        // Note: this will be PlayerView soonish (after you actually made Player class extending Unit class) - SleepyNewbie
         public UnitView uv;
 
         private void Awake()
@@ -29,6 +34,10 @@ namespace JustPlanes
             bullet = Resources.Load("Bullet") as GameObject;
             rb = GetComponent<Rigidbody>();
             uv = GetComponent<UnitView>();
+
+            // TODO: do not new unit inside planeview - should be assigned somewhere
+            //       also change it to Guid.NewGuid() when GUID change has done
+
             uv.unit = new Network.Unit("local:playerplane", 0, 0);
         }
 
@@ -42,6 +51,9 @@ namespace JustPlanes
 
         private void Update()
         {
+            // TODO: controlls should be on another class.
+            //       probably on LocalPlayerView.cs => PlaneView.cs
+
             // Control
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
@@ -55,13 +67,26 @@ namespace JustPlanes
             {
                 Shoot();
             }
+
+            if (Mathf.Abs(this.transform.position.x) > xBound || Mathf.Abs(this.transform.position.y) > yBound)
+            {
+                _currentOutOfBoundTime += Time.deltaTime;
+            }
+            else
+            {
+                _currentOutOfBoundTime = 0;
+            }
+
+            if (_currentOutOfBoundTime > maxOutOfBoundTime)
+            {
+                gameObject.transform.position = new Vector3(0, 0, gameObject.transform.position.z);
+            }
         }
 
         public void SetThrottle(float throttle)
         {
             _currentThrottle = throttle;
 
-            // apprently System.Math.Clamp doesn't exist? :thinking:
             _currentThrottle = Mathf.Clamp(throttle, minThrottle, maxThrottle);
         }
 

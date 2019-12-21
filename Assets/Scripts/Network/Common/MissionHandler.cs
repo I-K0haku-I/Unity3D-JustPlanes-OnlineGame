@@ -7,20 +7,35 @@ namespace JustPlanes.Network
     {
         // TODO: add ID if we want more of the same mission type
         public int enemiesKilled;
-        public int enemiesToKill = 25;
-        
+        public int enemiesToKill = 5;
+
         public bool IsDone = false;
 
         public MissionTypes type = MissionTypes.MTKILLRats;
+
+        private Random rand = new Random();
+        private IPlayerHolder playerHolder;
 
         public MissionHandler()
         {
 
         }
 
+        public MissionHandler(IPlayerHolder _playerHolder)
+        {
+            playerHolder = _playerHolder;
+        }
+
+
         internal void Start()
         {
             enemiesKilled = 0;
+            int playerAmount = 0;
+            if (Server.Game.IsRunning)
+                playerAmount = Server.Game.players.Count;
+            else if (playerHolder != null)
+                playerAmount = playerHolder.GetPlayerAmount();
+            enemiesToKill = rand.Next(1 + playerAmount, 6 + playerAmount);
         }
 
         internal void Tick(long elapsedMilliseconds)
@@ -50,5 +65,10 @@ namespace JustPlanes.Network
             Start();
             IsDone = false;
         }
+    }
+
+    public interface IPlayerHolder
+    {
+        int GetPlayerAmount();
     }
 }

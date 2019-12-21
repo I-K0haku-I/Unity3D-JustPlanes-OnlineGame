@@ -14,13 +14,29 @@ namespace JustPlanes
         private void Start()
         {
             if (slider == null)
-                slider = this.gameObject.GetComponentInChildren<Slider>();
+            {
+                slider = gameObject.GetComponentInChildren<Slider>();
+            }
+
             slider.value = (float)unit.hp / unit.maxHP;
         }
 
         private void Update()
         {
             slider.value = (float)unit.hp / unit.maxHP;
+        }
+
+
+        public override string ToString()
+        {
+            if (unit != null)
+            {
+                return $"{{UnitView: {unit.ID}, {unit.hp}, {unit.X}, {unit.Y}}}";
+            }
+            else
+            {
+                return "{{UNIT_IS_NULL}}";
+            }
         }
     }
 }

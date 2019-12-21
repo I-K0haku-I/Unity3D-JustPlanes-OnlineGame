@@ -8,5 +8,11 @@ namespace JustPlanes
 
         public Network.Player player;
 
+
+        public override string ToString()
+        {
+            return $"{{PlayerView: {player.Name}, {player.X}, {player.Y}}}";
+        }
+
     }
 }

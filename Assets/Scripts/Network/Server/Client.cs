@@ -16,6 +16,11 @@ namespace JustPlanes.Network.Server
 
         public void Start()
         {
+            // TODO: this needs to be gone
+            // maybe do an event in here and subscribe with game
+            Game.players.TryAdd(connectionID, player);
+            DataSender.SendPlayerJoined(player);
+    
             socket.SendBufferSize = 4096;
             socket.ReceiveBufferSize = 4096;
             stream = socket.GetStream();
@@ -53,9 +58,11 @@ namespace JustPlanes.Network.Server
 
         private void CloseConnection()
         {
+            ClientManager.clients.Remove(connectionID);
+            Game.players.TryRemove(connectionID, out Player p);
+            DataSender.SendPlayerLeft(player);
             Console.WriteLine("Connection from '{0}' has been terminated.", socket.Client.RemoteEndPoint.ToString());
             Console.WriteLine(string.Join(", ", ClientManager.clients.Values.ToList().Select(c => c.connectionID.ToString())));
-            ClientManager.clients.Remove(connectionID);
             socket.Close();
         }
     }

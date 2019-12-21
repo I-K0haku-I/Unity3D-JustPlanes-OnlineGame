@@ -33,8 +33,6 @@ namespace JustPlanes
 
             //Debug.Log("Target: " + target.transform.forward + "Offset Pos: " + targetPosition + ", TargetVelocity: " + targetRigidbody.velocity);
 
-            // Smoothly move the camera towards that target position
-            //transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime, 500.0F);
         }
     }
 }

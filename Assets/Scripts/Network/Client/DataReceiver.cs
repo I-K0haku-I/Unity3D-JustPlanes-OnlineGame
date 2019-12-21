@@ -61,7 +61,7 @@ namespace JustPlanes.Network.Client
             int type = buffer.ReadInteger();
             int enemiesToKill = buffer.ReadInteger();
             int enemiesKilled = buffer.ReadInteger();
-            ClientHandleData.Manager.AddMission((MissionTypes)type, enemiesToKill, enemiesToKill);
+            ClientHandleData.Manager.AddMission((MissionTypes)type, enemiesToKill, enemiesKilled);
         }
 
         internal static void HandleUnitDied(ByteBuffer buffer)

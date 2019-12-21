@@ -55,6 +55,7 @@ namespace JustPlanes.Network.Server
                     if (u.IsDead())
                     {
                         unitDeathToSend.Add(u);
+                        unitSpawner.units.Remove(u.ID);
                         mission.Progress();
                         missionUpdates.Add(1);
                     }
@@ -81,22 +82,20 @@ namespace JustPlanes.Network.Server
             if (unitDeathToSend.Count > 0)
             {
                 DataSender.SendUnitsDied(unitDeathToSend);
-                unitDeathToSend.ForEach(unit =>
-                {
-                    unitSpawner.units.Remove(unit.ID);
-                });
                 unitDeathToSend.Clear();
             }
 
             if (missionUpdates.Count > 0)
             {
                 DataSender.SendMissionUpdate(missionUpdates);
+                missionUpdates.Clear();
             }
 
             if (mission.IsDone)
             {
                 DataSender.SendMissionComplete();
                 mission.Reset();
+                DataSender.SendGiveMission(mission);
             }
         }
 
@@ -115,6 +114,7 @@ namespace JustPlanes.Network.Server
             Console.WriteLine("CANCELED GAME LOOP!! EXITING...");
             IsRunning = false;
         }
+
     }
 
 }

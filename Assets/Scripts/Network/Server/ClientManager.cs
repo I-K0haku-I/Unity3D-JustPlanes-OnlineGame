@@ -18,8 +18,7 @@ namespace JustPlanes.Network.Server
             // TODO: is this unique? some kind of uuid better?
             newClient.connectionID = ((IPEndPoint)tempClient.Client.RemoteEndPoint).Port;
             newClient.player = new Player(newClient.connectionID.ToString(), 0, 0);
-            Game.players.TryAdd(newClient.connectionID, newClient.player);
-            DataSender.SendPlayerJoined(newClient.player);
+
             newClient.Start();
             clients.Add(newClient.connectionID, newClient);
 

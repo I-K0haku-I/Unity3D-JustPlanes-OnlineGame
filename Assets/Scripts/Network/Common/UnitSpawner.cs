@@ -51,6 +51,7 @@ namespace JustPlanes.Network
 
                 if (units.Count < maxUnitAmount)
                 {
+                    // TODO: make Unit hold Guid by them selves instead of string
                     string id = Guid.NewGuid().ToString();
                     Point point = spawnRect.GetRandomPoint();
                     Unit unit = new Unit(id, point);

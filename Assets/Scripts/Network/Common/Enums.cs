@@ -15,6 +15,8 @@ namespace JustPlanes.Network
         SUpdateMission = 9,
         SGiveMission = 10,
         SCompleteMission = 11,
+        SPlayerLeft = 12,
+        SLoginResp = 13,
     }
     
     public enum ClientPackets
@@ -24,6 +26,7 @@ namespace JustPlanes.Network
         CGiveMeUnits = 3,
         CUnitDamaged = 4,
         CGiveMeMission = 5,
+        CLoginReq = 6,
     }
 
     public enum MissionTypes

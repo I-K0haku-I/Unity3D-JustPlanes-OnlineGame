@@ -40,7 +40,7 @@ namespace JustPlanes.Network
 
     }
 
-    public class NetworkManager : MonoBehaviour
+    public class NetworkManager : MonoBehaviour, IPlayerHolder
     {
         public static NetworkManager instance;
 
@@ -49,7 +49,7 @@ namespace JustPlanes.Network
         [SerializeField]
         private string serverAddress = "localhost";
 
-        private List<Player> players = new List<Player>();
+        public List<Player> players = new List<Player>();
         public Player[] playerDisplayed = new Player[100];
         public PlayerEvent OnPlayerAdd = new PlayerEvent();
         private int playerCount = 0;
@@ -61,15 +61,19 @@ namespace JustPlanes.Network
         public UnitDamageEvent OnUnitGetsDamaged = new UnitDamageEvent();
 
         public MissionHandler mission = new MissionHandler();
-        private MissionEvent OnMissionAdd = new MissionEvent();
+
+        public MissionEvent OnMissionAdd = new MissionEvent();
+        public IntegerEvent OnMissionUpdate = new IntegerEvent();
+        public UnityEvent OnMissionComplete = new UnityEvent();
+        public PlayerEvent OnPlayerRemove = new PlayerEvent();
+
+        public NetworkMagic net = new NetworkMagic();
 
         internal void AcknowledgeMissionComplete()
         {
             OnMissionComplete.Invoke();
         }
 
-        private IntegerEvent OnMissionUpdate = new IntegerEvent();
-        private UnityEvent OnMissionComplete = new UnityEvent();
 
         private void Awake()
         {
@@ -106,11 +110,11 @@ namespace JustPlanes.Network
 
         internal void AddMission(MissionTypes type, int target, int start)
         {
+            mission = new MissionHandler(this);
             mission.enemiesToKill = target;
             mission.enemiesKilled = start;
             OnMissionAdd.Invoke(mission);
         }
-
 
 
         internal void AcknowledgeUnitDamaged(string id, int dmg)
@@ -139,6 +143,14 @@ namespace JustPlanes.Network
             OnPlayerAdd.Invoke(player);
         }
 
+        public void RemovePlayer(Player player)
+        {
+            players.Remove(player);
+            playerDisplayed[playerCount] = null;
+            playerCount++;
+            OnPlayerRemove.Invoke(player);
+        }
+
         public void AddUnit(Unit unit)
         {
             Debug.Log($"Spawned: {unit.ID}");
@@ -155,6 +167,11 @@ namespace JustPlanes.Network
         public void DamageUnit(Unit unit, int damage)
         {
             DataSender.SendUnitDamaged(unit, damage);
+        }
+
+        public int GetPlayerAmount()
+        {
+            return players.Count;
         }
     }
 }

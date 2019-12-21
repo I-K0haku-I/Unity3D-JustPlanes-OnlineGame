@@ -10,7 +10,7 @@ namespace JustPlanes
 
         public float aliveTime = 30.0F;
         public float speed = 30.0F;
-        public float damage = 5.0F;
+        public int damage = 5;
         public GameObject owner;
 
         public Rigidbody2D rb;
@@ -35,13 +35,16 @@ namespace JustPlanes
                     // TODO: don't leave random debugs like that
                     // I don't even know why this is here, it's not self explanatory at all
                     // also, why do we even care about local or not local units? we only display server units
-                    Debug.Log("Found local unit, ejecting!");
+
+                    // Note: this is not debug.
+                    //       there are some local units exist (PlaneView) on project currently.
+                    //       until it'll be fixed or will be no longer needed, this will stay here to try-not-to-send-invalid-packets.
+                    DebugLog.Warning(this, $"Bullet has found local units (shouldn't happen!)!!");
                     return;
                 }
-                // instead of rounding, you should just cast to int
-                // or just change damage to ints, I don't see a reason to work with floats here
-                Network.NetworkManager.instance.DamageUnit(unitView.unit, Mathf.RoundToInt(damage));
-                Destroy(this.gameObject);
+
+                Network.NetworkManager.instance.DamageUnit(unitView.unit, damage);
+                Destroy(gameObject);
             }
         }
 

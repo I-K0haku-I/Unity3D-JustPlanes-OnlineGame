@@ -66,6 +66,16 @@ namespace JustPlanes.Network.Server
             buffer.Dispose();
         }
 
+        internal static void SendPlayerLeft(Player player)
+        {
+            using (var buffer = new ByteBuffer())
+            {
+                buffer.WriteInteger((int)ServerPackets.SPlayerLeft);
+                buffer.WritePlayer(player);
+                ClientManager.SendDataToAll(buffer.ToArray());
+            }
+        }
+
         internal static void SendUnitDied(Unit unit)
         {
             ByteBuffer buffer = new ByteBuffer();
@@ -110,6 +120,19 @@ namespace JustPlanes.Network.Server
             using (var buffer = new ByteBuffer())
             {
                 buffer.WriteInteger((int)ServerPackets.SCompleteMission);
+                ClientManager.SendDataToAll(buffer.ToArray());
+            }
+        }
+
+        internal static void SendGiveMission(MissionHandler mission)
+        {
+            using (var buffer = new ByteBuffer())
+            {
+                buffer.WriteInteger((int)ServerPackets.SGiveMission);
+                buffer.WriteInteger((int)MissionTypes.MTKILLRats);
+                buffer.WriteInteger(mission.enemiesToKill);
+                buffer.WriteInteger(mission.enemiesKilled);
+                ClientManager.SendDataToAll(buffer.ToArray());
             }
         }
 
@@ -121,7 +144,7 @@ namespace JustPlanes.Network.Server
                 buffer.WriteInteger((int)MissionTypes.MTKILLRats);
                 buffer.WriteInteger(mission.enemiesToKill);
                 buffer.WriteInteger(mission.enemiesKilled);
-                ClientManager.SendDataToAll(buffer.ToArray());
+                ClientManager.SendDataTo(connectionID, buffer.ToArray());
             }
         }
 
