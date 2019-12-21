@@ -14,7 +14,7 @@ namespace JustPlanes
         [SerializeField] public Level loggingLevel = Level.L_ALL;
         [SerializeField] public bool setLogLevel = false;
         [SerializeField] public bool testLogger = false;
-        [SerializeField] public bool killAllOnTest = false;
+        [SerializeField] public bool killAllOnKillUnitTest = false;
         [SerializeField] public bool deathCounter = false;
         [SerializeField] public bool listenMission = false;
         [SerializeField] public bool listenUnit = false;
@@ -66,7 +66,13 @@ namespace JustPlanes
             if (Input.GetKeyDown(killUnitTest))
             {
                 Dictionary<string, UnitView>.ValueCollection unitViews = UnitViewManager.Instance.GetOnlineUnits().Values;
-                if (killAllOnTest)
+                if (unitViews.Count == 0)
+                {
+                    DebugLog.Warning(this, $"{_prefix} You cannot kill units because unit doesn't exist!!");
+                    return;
+                }
+
+                if (killAllOnKillUnitTest)
                 {
                     foreach(UnitView unitView in unitViews)
                     {
@@ -75,7 +81,7 @@ namespace JustPlanes
                 }
                 else
                 {
-                    UnitView[] viewArrays = new UnitView[0];
+                    UnitView[] viewArrays = new UnitView[unitViews.Count];
                     unitViews.CopyTo(viewArrays, 0);
 
                     NetworkManager.instance.DamageUnit(viewArrays[0].unit, viewArrays[0].unit.hp);

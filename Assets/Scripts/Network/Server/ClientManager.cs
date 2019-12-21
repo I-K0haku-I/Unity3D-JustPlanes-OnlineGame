@@ -19,6 +19,8 @@ namespace JustPlanes.Network.Server
             newClient.connectionID = ((IPEndPoint)tempClient.Client.RemoteEndPoint).Port;
             newClient.player = new Player(newClient.connectionID.ToString(), 0, 0);
 
+            Console.WriteLine($"Someone connected at: {newClient.player.Name}");
+
             newClient.Start();
             clients.Add(newClient.connectionID, newClient);
 
