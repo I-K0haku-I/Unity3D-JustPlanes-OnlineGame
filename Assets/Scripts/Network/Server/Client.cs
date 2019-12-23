@@ -50,7 +50,7 @@ namespace JustPlanes.Network.Server
             }
             catch (System.Exception e)
             {
-                Console.WriteLine($"OnRecvData something went extremely wrong!: {newBytes.ToString()} from {connectionID.ToString()}");
+                Console.WriteLine($"OnRecvData something went extremely wrong at conn id {connectionID.ToString()}");
                 Console.WriteLine(e);
                 CloseConnection();
                 return;
@@ -59,11 +59,12 @@ namespace JustPlanes.Network.Server
 
         private void CloseConnection()
         {
+            string name = socket.Client.RemoteEndPoint.ToString();
             socket.Close();
             ClientManager.clients.Remove(connectionID);
             Game.players.TryRemove(connectionID, out Player p);
             DataSender.SendPlayerLeft(player);
-            Console.WriteLine("Connection from '{0}' has been terminated.", socket.Client.RemoteEndPoint.ToString());
+            Console.WriteLine("Connection from '{0}' has been terminated.", name);
             Console.WriteLine(string.Join(", ", ClientManager.clients.Values.ToList().Select(c => c.connectionID.ToString())));
         }
     }

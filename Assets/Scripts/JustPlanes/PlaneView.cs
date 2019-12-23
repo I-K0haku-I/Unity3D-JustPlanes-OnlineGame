@@ -13,9 +13,9 @@ namespace JustPlanes
         public float speedMultiplier = 1.5F;
         public float turnSpeedMultiplier = 150.0F;
         public float bulletCoolDownTime = 0.2f;
-        public float yBound = 150.0F;
-        public float xBound = 150.0F;
-        public float maxOutOfBoundTime = 10.0F;
+        public float yBound = 100.0F;
+        public float xBound = 100.0F;
+        public float maxOutOfBoundTime = 0.1F;
 
 
         protected float _currentThrottle;
