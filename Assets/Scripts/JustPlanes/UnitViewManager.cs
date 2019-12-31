@@ -10,13 +10,14 @@ namespace JustPlanes
         private static readonly string _prefix = "UV Mgr:";
 
         public static UnitViewManager Instance;
+        [SerializeField] public Object balloonUnit;
+        [SerializeField] public Object testUnit;
+        [SerializeField] public Object playerUnit;
         [SerializeField] public Transform UnitParent;
         [SerializeField] public Transform PlayerParent;
 
         private Dictionary<string, UnitView> onlineUnits = new Dictionary<string, UnitView>();
         private Dictionary<string, PlayerView> onlinePlayers = new Dictionary<string, PlayerView>();
-        private static Object testUnit;
-        private static Object playerUnit;
 
         public UnitViewEvent OnUnitViewAddEvent = new UnitViewEvent();
         public UnitViewEvent OnUnitViewRemoveEvent = new UnitViewEvent();
@@ -34,8 +35,6 @@ namespace JustPlanes
             }
 
             Instance = this;
-            testUnit = Resources.Load("TestUnit");
-            playerUnit = Resources.Load("PlayerUnit");
         }
 
         private void Start()
@@ -110,7 +109,7 @@ namespace JustPlanes
         {
             DebugLog.Fine(this, $"{_prefix} Spawning Unit {{{unit.ID}}}");
 
-            GameObject unitObj = Spawn(testUnit, unit.ID, unit.X, unit.Y);
+            GameObject unitObj = Spawn(balloonUnit, unit.ID, unit.X, unit.Y);
             UnitView unitView = unitObj.GetComponent<UnitView>();
             unitView.unit = unit;
 

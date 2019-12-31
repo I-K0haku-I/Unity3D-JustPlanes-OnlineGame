@@ -3,7 +3,15 @@ guid: 02e6901cb52c6b445903e33dfb2f42f7
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - balloonUnit: {fileID: 1968116644557932747, guid: cf6e892036995344fa9830d9a9c7fd27,
+      type: 3}
+  - testUnit: {fileID: 1968116644557932747, guid: 7ab5ee1dbeab5be48b8cc48e404603a7,
+      type: 3}
+  - playerUnit: {fileID: 3789916023138151561, guid: e9752848e9df9d843a8292428b353c6f,
+      type: 3}
+  - UnitParent: {instanceID: 0}
+  - PlayerParent: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

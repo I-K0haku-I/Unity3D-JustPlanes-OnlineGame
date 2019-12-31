@@ -7,23 +7,25 @@ namespace JustPlanes
     public class PlaneView : MonoBehaviour
     {
 
-        public float maxThrottle = 20.0F;
-        public float minThrottle = 10.0F;
-        public float throttleMultiplier = 10.0F;
-        public float speedMultiplier = 1.5F;
-        public float turnSpeedMultiplier = 150.0F;
-        public float bulletCoolDownTime = 0.2f;
-        public float yBound = 100.0F;
-        public float xBound = 100.0F;
-        public float maxOutOfBoundTime = 0.1F;
+        [SerializeField] public Object bullet;
+        [SerializeField] public Transform bulletParent;
+
+        [SerializeField] public float maxThrottle = 20.0F;
+        [SerializeField] public float minThrottle = 10.0F;
+        [SerializeField] public float throttleMultiplier = 10.0F;
+        [SerializeField] public float speedMultiplier = 1.5F;
+        [SerializeField] public float turnSpeedMultiplier = 150.0F;
+        [SerializeField] public float bulletCoolDownTime = 0.2f;
+        [SerializeField] public float yBound = 100.0F;
+        [SerializeField] public float xBound = 100.0F;
+        [SerializeField] public float maxOutOfBoundTime = 0.1F;
 
 
         protected float _currentThrottle;
+        protected float _rotationBuffer;
         protected float _currentBulletCoolDown;
         protected float _currentOutOfBoundTime;
 
-        public GameObject bullet;
-        public Transform bulletParent;
         public Rigidbody rb;
         // TODO: this is smells a bit, not sure why
         // Note: this will be PlayerView soonish (after you actually made Player class extending Unit class) - SleepyNewbie
@@ -31,7 +33,6 @@ namespace JustPlanes
 
         private void Awake()
         {
-            bullet = Resources.Load("Bullet") as GameObject;
             rb = GetComponent<Rigidbody>();
             uv = GetComponent<UnitView>();
 
@@ -43,8 +44,6 @@ namespace JustPlanes
 
         private void Start()
         {
-            // Set owner to prevent damaging self
-            bullet.GetComponent<BulletView>().owner = gameObject;
             // Listen to event that triggers on death
             uv.OnUnitDeathEvent.AddListener((o) => Death(o));
         }
@@ -58,10 +57,8 @@ namespace JustPlanes
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
 
-            SetThrottle(_currentThrottle + (vertical * throttleMultiplier * Time.deltaTime));
-            transform.Rotate(Vector3.back, horizontal * Time.deltaTime * turnSpeedMultiplier);
-
-            rb.velocity = GetSpeed();
+            AddThrottle(vertical);
+            AddRotation(horizontal);
 
             if (Input.GetButton("Fire1"))
             {
@@ -83,16 +80,31 @@ namespace JustPlanes
             }
         }
 
-        public void SetThrottle(float throttle)
+        private void FixedUpdate()
         {
-            _currentThrottle = throttle;
+            rb.velocity = GetSpeed();
+            rb.MoveRotation(rb.rotation * GetRotation());
+            _rotationBuffer = 0;
+        }
 
-            _currentThrottle = Mathf.Clamp(throttle, minThrottle, maxThrottle);
+        public void AddThrottle(float throttle)
+        {
+            _currentThrottle = Mathf.Clamp(_currentThrottle + (throttle * throttleMultiplier * Time.deltaTime), minThrottle, maxThrottle);
+        }
+
+        public void AddRotation(float rotation)
+        {
+            _rotationBuffer += rotation * Time.deltaTime * turnSpeedMultiplier;
         }
 
         public Vector3 GetSpeed()
         {
             return transform.up * _currentThrottle * speedMultiplier;
+        }
+
+        public Quaternion GetRotation()
+        {
+            return Quaternion.AngleAxis(_rotationBuffer, Vector3.back);
         }
 
         // TODO: Explooosion! (animated sprite? particles?)
@@ -110,7 +122,9 @@ namespace JustPlanes
             }
             else
             {
-                GameObject obj = Instantiate(bullet, transform.position, transform.rotation, bulletParent);
+                GameObject obj = (GameObject) Instantiate(bullet, transform.position, transform.rotation, bulletParent);
+                // Set owner to prevent damaging self
+                obj.GetComponent<BulletView>().owner = gameObject;
                 obj.name = "Bullet<" + gameObject.name + ">";
                 _currentBulletCoolDown = bulletCoolDownTime;
             }

@@ -38,6 +38,7 @@ namespace JustPlanes.UI.MissionPanel
 
             _inProgress = true;
 
+            _panel.transform.SetAsLastSibling();
             _descriptionFormat = descriptionFormat;
             _progressFormat = progressFormat;
 
