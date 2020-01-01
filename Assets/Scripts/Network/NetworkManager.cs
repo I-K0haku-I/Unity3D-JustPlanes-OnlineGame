@@ -6,6 +6,8 @@ using UnityEngine.Events;
 
 namespace JustPlanes.Network
 {
+
+
     [System.Serializable]
     public class PlayerEvent : UnityEvent<Player>
     {
@@ -40,6 +42,12 @@ namespace JustPlanes.Network
 
     }
 
+    // [System.Serializable]
+    // public class RequestResponseEvent : UnityEvent<IRequestorResponse>
+    // {
+
+    // }
+
     public class NetworkManager : MonoBehaviour, IPlayerHolder
     {
         public static NetworkManager instance;
@@ -47,7 +55,7 @@ namespace JustPlanes.Network
         [SerializeField]
         private bool isOnline = false;
         [SerializeField]
-        private string serverAddress = "localhost";
+        public string serverAddress = "localhost";
 
         public List<Player> players = new List<Player>();
         public Player[] playerDisplayed = new Player[100];
@@ -67,9 +75,7 @@ namespace JustPlanes.Network
         public UnityEvent OnMissionComplete = new UnityEvent();
         public PlayerEvent OnPlayerRemove = new PlayerEvent();
 
-        public NetworkMagic net = new NetworkMagic();
-
-        internal void AcknowledgeMissionComplete()
+        public void AcknowledgeMissionComplete()
         {
             OnMissionComplete.Invoke();
         }
@@ -77,7 +83,11 @@ namespace JustPlanes.Network
 
         private void Awake()
         {
-            instance = this;
+            if (instance == null)
+            {
+                instance = this;
+                // NetworkMagic.IsClient = true;
+            }
         }
 
         private void Start()
@@ -87,19 +97,22 @@ namespace JustPlanes.Network
 
             DontDestroyOnLoad(this);
             UnityThread.initUnityThread();
+        }
 
-            ClientHandleData.InitializePackets(this);
+        public void StartConnection()
+        {
+            ClientHandleData.InitializePackets(instance);
             ClientTCP.ServerAddress = serverAddress;
             ClientTCP.InitializingNetworking();
         }
 
-        internal void UpdateMission(int enemiesKilledDelta)
+        public void UpdateMission(int enemiesKilledDelta)
         {
             mission.Update(enemiesKilledDelta);
             OnMissionUpdate.Invoke(enemiesKilledDelta);
         }
 
-        internal void AcknowledgeUnitDied(string id)
+        public void AcknowledgeUnitDied(string id)
         {
             units.TryGetValue(id, out Unit unit);
             if (unit == null)
@@ -108,7 +121,7 @@ namespace JustPlanes.Network
             units.Remove(unit.ID);
         }
 
-        internal void AddMission(MissionTypes type, int target, int start)
+        public void AddMission(MissionTypes type, int target, int start)
         {
             mission = new MissionHandler(this);
             mission.enemiesToKill = target;
@@ -117,7 +130,7 @@ namespace JustPlanes.Network
         }
 
 
-        internal void AcknowledgeUnitDamaged(string id, int dmg)
+        public void AcknowledgeUnitDamaged(string id, int dmg)
         {
             units.TryGetValue(id, out Unit unit);
             if (unit == null)
@@ -158,7 +171,7 @@ namespace JustPlanes.Network
             OnUnitAdd.Invoke(unit);
         }
 
-        internal void ReceivedMsg(string msg)
+        public void ReceivedMsg(string msg)
         {
             Debug.Log(msg);
             OnReceiveMsg.Invoke(msg);

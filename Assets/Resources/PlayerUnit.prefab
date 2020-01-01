@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3789916023138151564}
   - component: {fileID: 3789916023138151566}
   m_Layer: 0
-  m_Name: PlaneObject
+  m_Name: PlayerUnit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -272,7 +272,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 50
   m_TargetDisplay: 0
 --- !u!114 &3789916023676130856
 MonoBehaviour:
