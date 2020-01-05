@@ -26,14 +26,18 @@ namespace JustPlanes.UI
 
         private void Start()
         {
-            if (!NetworkMagic.IsConnected)
-                menu.DisplayServerNotFound();
-
             auth = Unity.GameManager.instance.authenticator;
             auth.OnLoginFailed += HandleLoginFailed;
             auth.OnLoginSucceeded += HandleLoginSucceeded;
         }
 
+        private void Update()
+        {
+            if (!NetworkMagic.IsConnected)
+                menu.DisplayServerNotFound();
+            else
+                menu.DisplayNormal();
+        }
         private void HandleLoginSucceeded(string msg)
         {
             menu.DisplayStartingGame();

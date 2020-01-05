@@ -40,7 +40,10 @@ namespace JustPlanes
 
         public void RemovePlayer(string name)
         {
-            removePlayer(new NameNetworkData() { Name = name });
+            if (players.Contains(name))
+                removePlayer(new NameNetworkData() { Name = name });
+            else
+                DebugLog.Warning($"[PlayerManager] Tried to remove a player with no name yet, not broadcasting.");
         }
         
         private void BroadcastedRemovePlayer(NameNetworkData data)

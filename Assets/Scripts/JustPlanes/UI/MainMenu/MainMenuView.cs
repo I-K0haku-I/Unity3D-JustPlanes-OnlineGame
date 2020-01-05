@@ -3,6 +3,7 @@ using UnityEngine.Events;
 using JustPlanes.Network;
 using TMPro;
 using UnityEngine.UI;
+using System;
 
 namespace JustPlanes.UI
 {
@@ -29,6 +30,11 @@ namespace JustPlanes.UI
             textField = GetComponentInChildren<TMP_InputField>();
             submitBtn = GetComponentInChildren<Button>();
             submitBtn.onClick.AddListener(() => OnLoginSubmit.Invoke(textField.text));
+        }
+
+        internal void DisplayNormal()
+        {
+            popUp.SetActive(false);
         }
 
         public void DisplayFailPopup(string msg)
