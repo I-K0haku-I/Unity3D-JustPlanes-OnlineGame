@@ -40,6 +40,7 @@ namespace JustPlanes
             }
 
             playerManager.AddPlayer(data.Name);
+            Network.Server.GameRunner.Game.AddPlayerName(data.connId, data.Name);
             resp.IsSuccess = true;
             handleLogin(resp);
         }

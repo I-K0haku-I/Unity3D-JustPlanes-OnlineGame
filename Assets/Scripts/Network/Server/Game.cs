@@ -46,7 +46,7 @@ namespace JustPlanes.Network.Server
         internal ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
         internal List<Unit> unitDeathToSend = new List<Unit>();
 
-        internal void addPlayerName(string connId, string name)
+        internal void AddPlayerName(string connId, string name)
         {
             clients[connId] = name;
         }

@@ -32,10 +32,6 @@ namespace JustPlanes
         {
             DebugLog.Warning($"[PlayerManager] Player added: {data.Name}");
             players.Add(data.Name);
-            if (NetworkMagic.IsServer)
-            {
-                Network.Server.GameRunner.Game.addPlayerName(data.connId, data.Name);
-            }
         }
 
         public void RemovePlayer(string name)
