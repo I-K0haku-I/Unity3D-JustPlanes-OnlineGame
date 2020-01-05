@@ -8,17 +8,19 @@ namespace JustPlanes.Network.Server
     {
         public delegate void Packet(int connectionID, ByteBuffer data);
         public static Dictionary<int, Packet> packets = new Dictionary<int, Packet>();
+        private static Dictionary<int, Requestor> packetsNew = new Dictionary<int, Requestor>();
 
         public static void InitializePackets()
         {
-            packets.Add((int)ClientPackets.CHelloServer, DataReceiver.HandleHelloServer);
-            packets.Add((int)ClientPackets.CGiveMePlayers, DataReceiver.HandleGiveMePlayers);
-            packets.Add((int)ClientPackets.CGiveMeUnits, DataReceiver.HandleGiveMeUnits);
-            packets.Add((int)ClientPackets.CUnitDamaged, DataReceiver.HandleUnitDamaged);
-            packets.Add((int)ClientPackets.CGiveMeMission, DataReceiver.HandleGiveMeMission);
+            // packets.Add((int)ClientPackets.CHelloServer, DataReceiver.HandleHelloServer);
+            // packets.Add((int)ClientPackets.CGiveMePlayers, DataReceiver.HandleGiveMePlayers);
+            // packets.Add((int)ClientPackets.CGiveMeUnits, DataReceiver.HandleGiveMeUnits);
+            // packets.Add((int)ClientPackets.CUnitDamaged, DataReceiver.HandleUnitDamaged);
+            // packets.Add((int)ClientPackets.CGiveMeMission, DataReceiver.HandleGiveMeMission);
+            packetsNew.Add((int)ClientPackets.CLoginReq, new LoginRequestor());
         }
 
-        public static void HandleData(int connectionID, byte[] data)
+        public static void HandleData(string connectionID, byte[] data)
         {
             byte[] incomingBuffer = (byte[])data.Clone();
             int packetLength = 0;
@@ -74,16 +76,20 @@ namespace JustPlanes.Network.Server
 
         }
 
-        private static void HandleDataPackets(int connectionID, byte[] data)
+        private static void HandleDataPackets(string connectionID, byte[] data)
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteBytes(data);
             // Console.WriteLine(string.Join(",", data.ToList().Select(b => b.ToString())));
+            int packageType = buffer.ReadInteger();
             int packetID = buffer.ReadInteger();
-            if (packets.TryGetValue(packetID, out Packet packet))
-            {
-                packet.Invoke(connectionID, buffer);
-            }
+            // if (packets.TryGetValue(packetID, out Packet packet))
+            // {
+            //     packet.Invoke(connectionID, buffer);
+            // }
+            // if (packetsNew.TryGetValue(packetID, out Requestor requestor))
+            //     requestor.Receive(buffer, connectionID);
+            NetworkMagic.Receive(packageType, connectionID, packetID, buffer);
             buffer.Dispose();
         }
     }

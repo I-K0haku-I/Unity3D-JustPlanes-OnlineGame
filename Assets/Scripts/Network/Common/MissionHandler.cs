@@ -31,8 +31,8 @@ namespace JustPlanes.Network
         {
             enemiesKilled = 0;
             int playerAmount = 0;
-            if (Server.Game.IsRunning)
-                playerAmount = Server.Game.players.Count;
+            if (Server.GameRunner.Game.IsRunning)
+                playerAmount = Server.GameRunner.Game.clients.Count;
             else if (playerHolder != null)
                 playerAmount = playerHolder.GetPlayerAmount();
             enemiesToKill = rand.Next(1 + playerAmount, 6 + playerAmount);

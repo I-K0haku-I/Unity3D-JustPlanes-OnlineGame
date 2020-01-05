@@ -6,7 +6,7 @@ namespace JustPlanes.Network.Server
 {
     static class DataSender
     {
-        public static void SendWelcomeMessage(int connectionID)
+        public static void SendWelcomeMessage(string connectionID)
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((int)ServerPackets.SWelcomeMsg);
@@ -16,27 +16,27 @@ namespace JustPlanes.Network.Server
             buffer.Dispose();
         }
 
-        public static void SendGivePlayers(int connectionID)
+        public static void SendGivePlayers(string connectionID)
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((int)ServerPackets.SGivePlayers);
 
-            List<Player> players = ClientManager.GetPlayers();
-            buffer.WriteInteger(players.Count);
+            // List<Player> players = ClientManager.GetPlayers();
+            // buffer.WriteInteger(players.Count);
 
-            foreach (var p in players)
-                buffer.WritePlayer(p);
+            // foreach (var p in players)
+            //     buffer.WritePlayer(p);
 
             ClientManager.SendDataTo(connectionID, buffer.ToArray());
             buffer.Dispose();
         }
 
-        public static void SendGiveUnits(int connectionID)
+        public static void SendGiveUnits(string connectionID)
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((int)ServerPackets.SGiveUnits);
 
-            List<Unit> units = Game.GetUnits();
+            List<Unit> units = GameRunner.Game.GetUnits();
             buffer.WriteInteger(units.Count);
 
             foreach (var u in units)
@@ -136,7 +136,7 @@ namespace JustPlanes.Network.Server
             }
         }
 
-        internal static void SendGiveMission(int connectionID, MissionHandler mission)
+        internal static void SendGiveMission(string connectionID, MissionHandler mission)
         {
             using (var buffer = new ByteBuffer())
             {

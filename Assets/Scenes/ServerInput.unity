@@ -150,7 +150,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isOnline: 1
-  serverAddress: localhost
+  isSelfInitialize: 0
+  serverAddress: 127.0.0.1
   OnPlayerAdd:
     m_PersistentCalls:
       m_Calls: []

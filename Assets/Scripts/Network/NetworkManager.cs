@@ -42,18 +42,20 @@ namespace JustPlanes.Network
 
     }
 
-    // [System.Serializable]
-    // public class RequestResponseEvent : UnityEvent<IRequestorResponse>
-    // {
+    [System.Serializable]
+    public class RequestResponseEvent : UnityEvent<IRequestorResponse>
+    {
 
-    // }
+    }
 
-    public class NetworkManager : MonoBehaviour, IPlayerHolder
+    public class NetworkManager : MonoBehaviour, IPlayerHolder, INetworkManager
     {
         public static NetworkManager instance;
 
         [SerializeField]
-        private bool isOnline = false;
+        private bool isOnline = true;
+        [SerializeField]
+        private bool isSelfInitialize = false;
         [SerializeField]
         public string serverAddress = "localhost";
 
@@ -86,7 +88,7 @@ namespace JustPlanes.Network
             if (instance == null)
             {
                 instance = this;
-                // NetworkMagic.IsClient = true;
+                NetworkMagic.IsClient = true;
             }
         }
 
@@ -97,13 +99,16 @@ namespace JustPlanes.Network
 
             DontDestroyOnLoad(this);
             UnityThread.initUnityThread();
+
+            if (isSelfInitialize)
+                StartConnection();
         }
 
         public void StartConnection()
         {
             ClientHandleData.InitializePackets(instance);
             ClientTCP.ServerAddress = serverAddress;
-            ClientTCP.InitializingNetworking();
+            ClientTCP.InitializingNetworking((IUnityThread)UnityThread.instance);
         }
 
         public void UpdateMission(int enemiesKilledDelta)

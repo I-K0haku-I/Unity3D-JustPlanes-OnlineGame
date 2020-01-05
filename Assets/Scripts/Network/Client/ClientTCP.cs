@@ -9,9 +9,13 @@ namespace JustPlanes.Network.Client
         private static NetworkStream myStream;
         private static byte[] recvBuffer;
         public static string ServerAddress = "127.0.0.1";
+        private static IUnityThread unityThread;
 
-        public static void InitializingNetworking()
+        public static bool IsConnected { get { return clientSocket.Connected; } }
+
+        public static void InitializingNetworking(IUnityThread thread)
         {
+            unityThread = thread;
             clientSocket = new TcpClient();
             clientSocket.ReceiveBufferSize = 4096;
             clientSocket.SendBufferSize = 4096;
@@ -42,7 +46,7 @@ namespace JustPlanes.Network.Client
 
                 byte[] newBytes = new byte[length];
                 Array.Copy(recvBuffer, newBytes, length);
-                UnityThread.executeInFixedUpdate(() =>
+                unityThread.executeInFixedUpdateClean(() =>
                 {
                     ClientHandleData.HandleData(newBytes);
                 });
@@ -69,4 +73,8 @@ namespace JustPlanes.Network.Client
         }
     }
 
+    internal interface IUnityThread
+    {
+        void executeInFixedUpdateClean(Action p);
+    }
 }

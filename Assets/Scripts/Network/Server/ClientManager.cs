@@ -8,7 +8,7 @@ namespace JustPlanes.Network.Server
 {
     static class ClientManager
     {
-        public static Dictionary<int, Client> clients = new Dictionary<int, Client>();
+        public static Dictionary<string, Client> clients = new Dictionary<string, Client>();
 
         public static void CreateNewConnection(TcpClient tempClient)
         {
@@ -16,18 +16,17 @@ namespace JustPlanes.Network.Server
             newClient.socket = tempClient;
 
             // TODO: is this unique? some kind of uuid better?
-            newClient.connectionID = ((IPEndPoint)tempClient.Client.RemoteEndPoint).Port;
-            newClient.player = new Player(newClient.connectionID.ToString(), 0, 0);
+            newClient.connectionID = ((IPEndPoint)tempClient.Client.RemoteEndPoint).Port.ToString();
 
-            Console.WriteLine($"Someone connected at: {newClient.player.Name}");
+            Console.WriteLine($"Someone connected at: {newClient.connectionID}");
 
             newClient.Start();
-            clients.Add(newClient.connectionID, newClient);
+            clients.Add(newClient.connectionID.ToString(), newClient);
 
-            DataSender.SendWelcomeMessage(newClient.connectionID);
+            // DataSender.SendWelcomeMessage(newClient.connectionID);
         }
 
-        public static void SendDataTo(int connectionID, byte[] data)
+        public static void SendDataTo(string connectionID, byte[] data)
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((data.GetUpperBound(0) - data.GetLowerBound(0)) + 1);
@@ -36,10 +35,6 @@ namespace JustPlanes.Network.Server
             buffer.Dispose();
         }
 
-        public static List<Player> GetPlayers()
-        {
-            return clients.Values.ToList().Select(c => c.player).ToList();
-        }
 
         public static void SendDataToAll(byte[] data)
         {

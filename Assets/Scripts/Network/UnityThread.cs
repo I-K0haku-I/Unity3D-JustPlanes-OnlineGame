@@ -11,10 +11,10 @@ using System.Collections.Generic;
 
 namespace JustPlanes.Network
 {
-    public class UnityThread : MonoBehaviour
+    public class UnityThread : MonoBehaviour, Client.IUnityThread
     {
         //our (singleton) instance
-        private static UnityThread instance = null;
+        public static UnityThread instance = null;
 
 
         ////////////////////////////////////////////////UPDATE IMPL////////////////////////////////////////////////////////
@@ -49,7 +49,6 @@ namespace JustPlanes.Network
 
         // Used to know if whe have new Action function to execute. This prevents the use of the lock keyword every frame
         private volatile static bool noActionQueueToExecuteFixedUpdateFunc = true;
-
 
         //Used to initialize UnityThread. Call once before any function here
         public static void initUnityThread(bool visible = false)
@@ -220,6 +219,11 @@ namespace JustPlanes.Network
             {
                 instance = null;
             }
+        }
+
+        public void executeInFixedUpdateClean(Action action)
+        {
+            UnityThread.executeInFixedUpdate(action);
         }
     }
 }

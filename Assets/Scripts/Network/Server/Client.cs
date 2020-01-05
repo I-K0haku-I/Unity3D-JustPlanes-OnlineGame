@@ -7,26 +7,22 @@ namespace JustPlanes.Network.Server
 {
     public class Client
     {
-        public int connectionID;
+        public string connectionID;
         public TcpClient socket;
         public NetworkStream stream;
         private byte[] recvBuffer;
         public ByteBuffer buffer;
-        public Player player;
 
         public void Start()
         {
-            // TODO: this needs to be gone
-            // maybe do an event in here and subscribe with game
-            Game.players.TryAdd(connectionID, player);
-            DataSender.SendPlayerJoined(player);
-    
             socket.SendBufferSize = 4096;
             socket.ReceiveBufferSize = 4096;
             stream = socket.GetStream();
             recvBuffer = new byte[4096 * 2];
             stream.BeginRead(recvBuffer, 0, recvBuffer.Length, OnRecvData, null);
             Console.WriteLine("Incoming packets from '{0}", socket.Client.RemoteEndPoint.ToString());
+
+            GameRunner.Game.clientConnectedQueue.Enqueue(connectionID);
         }
 
         private void OnRecvData(IAsyncResult result)
@@ -44,6 +40,7 @@ namespace JustPlanes.Network.Server
                 newBytes = new byte[length];
                 Array.Copy(recvBuffer, newBytes, length);
 
+                // TODO: this has to be done in the game loop!!!
                 ServerHandleData.HandleData(connectionID, newBytes);
 
                 stream.BeginRead(recvBuffer, 0, socket.ReceiveBufferSize, OnRecvData, null);
@@ -62,10 +59,12 @@ namespace JustPlanes.Network.Server
             string name = socket.Client.RemoteEndPoint.ToString();
             socket.Close();
             ClientManager.clients.Remove(connectionID);
-            Game.players.TryRemove(connectionID, out Player p);
-            DataSender.SendPlayerLeft(player);
+            // GameRunner.Game.clients.TryRemove(connectionID, out Player p);
+            // DataSender.SendPlayerLeft(player);
             Console.WriteLine("Connection from '{0}' has been terminated.", name);
             Console.WriteLine(string.Join(", ", ClientManager.clients.Values.ToList().Select(c => c.connectionID.ToString())));
+
+            GameRunner.Game.clientDisconnectedQueue.Enqueue(connectionID);
         }
     }
 }

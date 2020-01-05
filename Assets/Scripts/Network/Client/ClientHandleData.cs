@@ -8,22 +8,24 @@ namespace JustPlanes.Network.Client
         private static ByteBuffer playerBuffer;
         public delegate void Packet(ByteBuffer buffer);
         public static Dictionary<int, Packet> packets = new Dictionary<int, Packet>();
-        public static NetworkManager Manager;
+        private static Dictionary<int, Requestor> packetsNew = new Dictionary<int, Requestor>();
+        public static INetworkManager Manager;
 
-        public static void InitializePackets(NetworkManager manager)
+        public static void InitializePackets(INetworkManager manager)
         {
             Manager = manager;
-            packets.Add((int)ServerPackets.SWelcomeMsg, DataReceiver.HandleWelcomeMsg);
-            packets.Add((int)ServerPackets.SGivePlayers, DataReceiver.HandleGivePlayers);
-            packets.Add((int)ServerPackets.SGiveUnits, DataReceiver.HandleGiveUnits);
-            packets.Add((int)ServerPackets.SPlayerJoined, DataReceiver.HandlePlayerJoined);
-            packets.Add((int)ServerPackets.SUnitSpawned, DataReceiver.HandleUnitSpawned);
-            packets.Add((int)ServerPackets.SUnitDied, DataReceiver.HandleUnitDied);
-            packets.Add((int)ServerPackets.SUnitsDied, DataReceiver.HandleUnitsDied);
-            packets.Add((int)ServerPackets.SUnitsDamaged, DataReceiver.HandleUnitsDamaged);
-            packets.Add((int)ServerPackets.SGiveMission, DataReceiver.HandleGiveMission);
-            packets.Add((int)ServerPackets.SUpdateMission, DataReceiver.HandleUpdateMission);
-            packets.Add((int)ServerPackets.SCompleteMission, DataReceiver.HandleCompleteMission);
+            // packets.Add((int)ServerPackets.SWelcomeMsg, DataReceiver.HandleWelcomeMsg);
+            // packets.Add((int)ServerPackets.SGivePlayers, DataReceiver.HandleGivePlayers);
+            // packets.Add((int)ServerPackets.SGiveUnits, DataReceiver.HandleGiveUnits);
+            // packets.Add((int)ServerPackets.SPlayerJoined, DataReceiver.HandlePlayerJoined);
+            // packets.Add((int)ServerPackets.SUnitSpawned, DataReceiver.HandleUnitSpawned);
+            // packets.Add((int)ServerPackets.SUnitDied, DataReceiver.HandleUnitDied);
+            // packets.Add((int)ServerPackets.SUnitsDied, DataReceiver.HandleUnitsDied);
+            // packets.Add((int)ServerPackets.SUnitsDamaged, DataReceiver.HandleUnitsDamaged);
+            // packets.Add((int)ServerPackets.SGiveMission, DataReceiver.HandleGiveMission);
+            // packets.Add((int)ServerPackets.SUpdateMission, DataReceiver.HandleUpdateMission);
+            // packets.Add((int)ServerPackets.SCompleteMission, DataReceiver.HandleCompleteMission);
+            packetsNew.Add((int)ServerPackets.SLoginResp, new LoginRequestor());
         }
 
         public static void HandleData(byte[] data)
@@ -88,12 +90,28 @@ namespace JustPlanes.Network.Client
             // Debug.Log(string.Join(" ", data));
 
             buffer.WriteBytes(data);
+            int packageType = buffer.ReadInteger();
             int packetID = buffer.ReadInteger();
-            if (packets.TryGetValue(packetID, out Packet packet))
-            {
-                packet.Invoke(buffer);
-            }
+            // if (packets.TryGetValue(packetID, out Packet packet))
+            // {
+            //     packet.Invoke(buffer);
+            // }
+            NetworkMagic.Receive(packageType, "", packetID, buffer);
+            // if (packetsNew.TryGetValue(packetID, out Requestor requestor))
+            //     requestor.Receive(buffer);
             buffer.Dispose();
         }
+    }
+
+    public interface INetworkManager
+    {
+        void AcknowledgeMissionComplete();
+        void AcknowledgeUnitDamaged(string v1, int v2);
+        void AcknowledgeUnitDied(string id);
+        void AddMission(MissionTypes type, int enemiesToKill, int enemiesKilled);
+        void AddPlayer(Player player);
+        void AddUnit(Unit unit);
+        void ReceivedMsg(string msg);
+        void UpdateMission(int enemiesKilledDelta);
     }
 }

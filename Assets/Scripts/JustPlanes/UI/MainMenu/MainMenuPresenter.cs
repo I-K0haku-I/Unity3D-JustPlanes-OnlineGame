@@ -1,55 +1,60 @@
 using System;
+using JustPlanes.Network;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace JustPlanes.UI
 {
-    interface IAuthenticator
-    {
-        void TryLogin(string name);
-        UnityEvent<ILoginResponse> OnLogin(); // won't be an actual UnityEvent, probably
-    }
-
-    interface IUIManager
+    interface ISceneManager
     {
         void DisplayGame();
     }
 
-    interface ILoginResponse
-    {
-        bool Ok { get; }
-    }
 
     class MainMenuPresenter : MonoBehaviour
     {
-        private IAuthenticator auth; // not a monobehavior
-        private IUIManager manager;
+        private Authenticator auth;
+        private ISceneManager manager;
         private MainMenuView menu;
 
         private void Awake()
         {
-            auth = new Authenticator();
+            menu = GetComponent<MainMenuView>();
             menu.OnLoginSubmit.AddListener(HandleLoginInput);
             menu.OnLoginFinish.AddListener(HandleLoginFinish);
-            auth.OnLogin().AddListener(HandleLogin);
         }
 
-        private void HandleLogin(ILoginResponse resp)
+        private void Start()
         {
-            if (resp.Ok)
-                menu.SucceedLoad();
-            else
-                menu.FailLoad();
+            if (!NetworkMagic.IsConnected)
+                menu.DisplayServerNotFound();
+
+            auth = Unity.GameManager.instance.authenticator;
+            auth.OnLoginFailed += HandleLoginFailed;
+            auth.OnLoginSucceeded += HandleLoginSucceeded;
+        }
+
+        private void HandleLoginSucceeded(string msg)
+        {
+            menu.DisplayStartingGame();
+        }
+
+        private void HandleLoginFailed(string msg)
+        {
+            menu.DisplayFailPopup(msg);
         }
 
         private void HandleLoginFinish()
         {
-            manager.DisplayGame();
+            DebugLog.Warning("Start the game scene");
+            // manager.DisplayGame();
         }
 
         private void HandleLoginInput(string name)
         {
-            menu.StartLoad(); // should probably be done in menu itself
+            if (name == null || name == "" || auth.isAuthenticated)
+                return;
+            menu.DisplayWaitingForServer();
             auth.TryLogin(name);
         }
     }
