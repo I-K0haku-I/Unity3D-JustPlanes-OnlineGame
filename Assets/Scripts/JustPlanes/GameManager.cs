@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace JustPlanes.Unity
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviour, UI.ISceneManager
     {
         public static GameManager instance;
 
@@ -17,14 +17,29 @@ namespace JustPlanes.Unity
             if (instance == null)
             {
                 instance = this;
-                playerManager = new PlayerManager();
-                authenticator = new Authenticator(playerManager);
+                // TODO: remove this when we have scene manager and call it from there
+                StartMainMenu();
             }
+        }
+
+        public void StartMainMenu()
+        {
+            authenticator = new Authenticator();
+        }
+
+        public void StartGame()
+        {
+            playerManager = new PlayerManager();
         }
 
         void Update()
         {
 
+        }
+
+        public void DisplayGame()
+        {
+            StartGame();
         }
     }
 

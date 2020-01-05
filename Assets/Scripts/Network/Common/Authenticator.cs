@@ -6,7 +6,6 @@ namespace JustPlanes
 
     public class Authenticator
     {
-        private PlayerManager playerManager;
         private Action<NameNetworkData> tryLogin;
         private Action<MessageResponseNetworkData> handleLogin;
         public bool isAuthenticated = false;
@@ -15,9 +14,8 @@ namespace JustPlanes
         public event Login OnLoginSucceeded;
         public event Login OnLoginFailed;
 
-        public Authenticator(PlayerManager playerManager)
+        public Authenticator()
         {
-            this.playerManager = playerManager;
             tryLogin = NetworkMagic.RegisterCommand<NameNetworkData>(1, CmdTryLogin);
             handleLogin = NetworkMagic.RegisterTargeted<MessageResponseNetworkData>(1, TargetedRPCHandleLogin);
         }
@@ -32,16 +30,10 @@ namespace JustPlanes
         private void CmdTryLogin(NameNetworkData data)
         {
             MessageResponseNetworkData resp = new MessageResponseNetworkData { connId = data.connId };
-            if (playerManager.IsNameTaken(data.Name))
-            {
+            if (Network.Server.GameRunner.Game.AddPlayerName(data.connId, data.Name))
+                resp.IsSuccess = true;
+            else
                 resp.Message = "Name already taken.";
-                handleLogin(resp);
-                return;
-            }
-
-            playerManager.AddPlayer(data.Name);
-            Network.Server.GameRunner.Game.AddPlayerName(data.connId, data.Name);
-            resp.IsSuccess = true;
             handleLogin(resp);
         }
 

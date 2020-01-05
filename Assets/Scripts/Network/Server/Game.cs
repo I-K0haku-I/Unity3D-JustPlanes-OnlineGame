@@ -46,9 +46,13 @@ namespace JustPlanes.Network.Server
         internal ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
         internal List<Unit> unitDeathToSend = new List<Unit>();
 
-        internal void AddPlayerName(string connId, string name)
+        internal bool AddPlayerName(string connId, string name)
         {
+            if (clients.ContainsValue(name))
+                return false;
             clients[connId] = name;
+            playerManager.AddPlayer(name);
+            return true;
         }
 
         internal List<Tuple<string, int>> damageToSend = new List<Tuple<string, int>>();
@@ -61,7 +65,7 @@ namespace JustPlanes.Network.Server
             int millisecondsToTick = (int)(1000 / tickRate);
             Stopwatch stopwatch = new Stopwatch();
             JustPlanes.Network.NetworkMagic.IsServer = true;
-            auth = new Authenticator(playerManager);
+            auth = new Authenticator();
             unitSpawner.Start();
             IsRunning = true;
             while (IsRunning)

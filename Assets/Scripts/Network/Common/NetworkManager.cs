@@ -69,14 +69,14 @@ namespace JustPlanes.Network
                 if (targetHandlers.TryGetValue(packetID, out IHandleCommand targetedRPC))
                     targetedRPC.HandleCommand(connectionID, buffer);
                 else
-                    DebugLog.Warning($"Trying to handle targetedRCP {packetID}, but it's not registered.");
+                    DebugLog.Warning($"Trying to handle targeted {packetID}, but it's not registered.");
             }
             else if (packageType == (int)PackageTypes.Broadcast)
             {
                 if (broadcastHandlers.TryGetValue(packetID, out IHandleCommand broadcastRPC))
                     broadcastRPC.HandleCommand(connectionID, buffer);
                 else
-                    DebugLog.Warning($"Trying to handle generalRCP {packetID}, but it's not registered.");
+                    DebugLog.Warning($"Trying to handle broadcasted {packetID}, but it's not registered.");
             }
         }
     }
@@ -174,12 +174,12 @@ namespace JustPlanes.Network
             var buffer = new ByteBuffer();
             buffer.WriteInteger((int)packageType);
             buffer.WriteInteger(packageId);
+            DebugLog.Warning($"[NetworkMagic] Writing a packet of type {packageType.ToString()}:");
             foreach (var field in typeof(T).GetFields())
             {
                 if (field.Name == "connId")
                     continue;
 
-                DebugLog.Warning("Writing a packet:");
                 var value = field.GetValue(data);
                 if (value is string)
                 {
@@ -196,8 +196,18 @@ namespace JustPlanes.Network
                     DebugLog.Warning($"writing an int: {value.ToString()}");
                     buffer.WriteInteger((int)value);
                 }
+                else if (value is List<string>)
+                {
+                    List<string> someList = (List<string>)value;
+                    DebugLog.Warning($"writing a list of string: {string.Join(", ", someList)}");
+                    buffer.WriteInteger(someList.Count);
+                    foreach (var item in someList)
+                    {
+                        buffer.WriteString(item);
+                    }
+                }
             }
-            DebugLog.Warning("---");
+            DebugLog.Warning("Writing---");
             return buffer;
         }
 
@@ -219,6 +229,7 @@ namespace JustPlanes.Network
         public void HandleCommand(string connectionID, ByteBuffer buffer)
         {
             T data = (T)Activator.CreateInstance(typeof(T));
+            DebugLog.Warning($"[NetworkMagic] Reading a packet {packageType.ToString()}:");
             foreach (var field in typeof(T).GetFields())
             {
                 if (field.Name == "connId")
@@ -226,16 +237,29 @@ namespace JustPlanes.Network
 
                 if (field.FieldType == typeof(string))
                 {
-                    DebugLog.Warning("Decrypting string");
-                    field.SetValue(data, buffer.ReadString());
+                    string value = buffer.ReadString();
+                    DebugLog.Warning($"Decrypted bool: {value}");
+                    field.SetValue(data, value);
                 }
                 else if (field.FieldType == typeof(bool))
                 {
-                    DebugLog.Warning("Decrypting bool");
-                    field.SetValue(data, buffer.ReadBool());
+                    bool value = buffer.ReadBool();
+                    DebugLog.Warning($"Decrypted bool: {value}");
+                    field.SetValue(data, value);
                 }
-                DebugLog.Warning($"and the value is: {field.GetValue(data).ToString()}");
+                else if (field.FieldType == typeof(List<string>))
+                {
+                    List<string> someList = new List<string>();
+                    int length = buffer.ReadInteger();
+                    for (int i = 0; i < length; i++)
+                    {
+                        someList.Add(buffer.ReadString());
+                    }
+                    DebugLog.Warning($"Decrypted list of string: {string.Join(", ", someList)}");
+                    field.SetValue(data, someList);
+                }
             }
+            DebugLog.Warning("Reading---");
             data.connId = connectionID;
             HandleData(data);
         }

@@ -14,8 +14,10 @@ namespace JustPlanes.UI
     class MainMenuPresenter : MonoBehaviour
     {
         private Authenticator auth;
-        private ISceneManager manager;
+        private ISceneManager sceneManager;
         private MainMenuView menu;
+
+        private bool IsReset = false;
 
         private void Awake()
         {
@@ -26,17 +28,24 @@ namespace JustPlanes.UI
 
         private void Start()
         {
+            sceneManager = Unity.GameManager.instance;
             auth = Unity.GameManager.instance.authenticator;
             auth.OnLoginFailed += HandleLoginFailed;
             auth.OnLoginSucceeded += HandleLoginSucceeded;
+            if (!NetworkMagic.IsConnected)
+            {
+                menu.DisplayServerNotFound();
+                IsReset = true;
+            }
         }
 
         private void Update()
         {
-            if (!NetworkMagic.IsConnected)
-                menu.DisplayServerNotFound();
-            else
+            if (IsReset)
+            {
                 menu.DisplayNormal();
+                IsReset = false;
+            }
         }
         private void HandleLoginSucceeded(string msg)
         {
@@ -51,7 +60,7 @@ namespace JustPlanes.UI
         private void HandleLoginFinish()
         {
             DebugLog.Warning("Start the game scene");
-            // manager.DisplayGame();
+            sceneManager.DisplayGame();
         }
 
         private void HandleLoginInput(string name)

@@ -16,11 +16,30 @@ namespace JustPlanes
 
         private Action<NameNetworkData> addPlayer;
         private Action<NameNetworkData> removePlayer;
+        private Action<NetworkData> initialize;
+        private Action<InitialPlayerManagerData> handleInitialize;
 
         public PlayerManager()
         {
             addPlayer = NetworkMagic.RegisterBroadcasted<NameNetworkData>(1, BroadcastedAddPlayer);
             removePlayer = NetworkMagic.RegisterBroadcasted<NameNetworkData>(2, BroadcastedRemovePlayer);
+            initialize = NetworkMagic.RegisterCommand<NetworkData>(2, CmdInitializePlayerManager);
+            handleInitialize = NetworkMagic.RegisterTargeted<InitialPlayerManagerData>(2, TargetedHandleInitialize);
+
+            initialize(new NetworkData());
+        }
+
+        private void TargetedHandleInitialize(InitialPlayerManagerData data)
+        {
+            players = data.playerList;
+            DebugLog.Warning($"[PlayerManager] Initialized, players: {string.Join(", ", players)}");
+        }
+
+        private void CmdInitializePlayerManager(NetworkData data)
+        {
+            InitialPlayerManagerData resp = new InitialPlayerManagerData { connId = data.connId };
+            resp.playerList = players;
+            handleInitialize(resp);
         }
 
         public void AddPlayer(string name)
@@ -41,7 +60,7 @@ namespace JustPlanes
             else
                 DebugLog.Warning($"[PlayerManager] Tried to remove a player with no name yet, not broadcasting.");
         }
-        
+
         private void BroadcastedRemovePlayer(NameNetworkData data)
         {
             DebugLog.Warning($"[PlayerManager] Player removed: {data.Name}");
@@ -52,6 +71,11 @@ namespace JustPlanes
         {
             return players.Contains(name);
         }
+    }
+
+    public class InitialPlayerManagerData : NetworkData
+    {
+        public List<string> playerList;
     }
 
 }
