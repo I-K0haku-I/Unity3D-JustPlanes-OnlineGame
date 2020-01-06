@@ -412,7 +412,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1314975377}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &75475139
 MonoBehaviour:
@@ -445,7 +445,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &100294885
 RectTransform:
   m_ObjectHideFlags: 0
@@ -599,7 +599,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &113819196
 Transform:
   m_ObjectHideFlags: 0
@@ -643,7 +643,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 114877250}
-  - component: {fileID: 114877249}
   m_Layer: 0
   m_Name: Networking
   m_TagString: Untagged
@@ -651,48 +650,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &114877249
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 114877248}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c17250243edfb5c4ab670f1429bbebe3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isOnline: 1
-  isSelfInitialize: 1
-  serverAddress: 127.0.0.1
-  OnPlayerAdd:
-    m_PersistentCalls:
-      m_Calls: []
-  OnUnitAdd:
-    m_PersistentCalls:
-      m_Calls: []
-  OnReceiveMsg:
-    m_PersistentCalls:
-      m_Calls: []
-  OnUnitDies:
-    m_PersistentCalls:
-      m_Calls: []
-  OnUnitGetsDamaged:
-    m_PersistentCalls:
-      m_Calls: []
-  OnMissionAdd:
-    m_PersistentCalls:
-      m_Calls: []
-  OnMissionUpdate:
-    m_PersistentCalls:
-      m_Calls: []
-  OnMissionComplete:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPlayerRemove:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &114877250
 Transform:
   m_ObjectHideFlags: 0
@@ -1202,7 +1159,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &233296202
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1496,7 +1453,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 65.3
+  m_fontSize: 65
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2439,15 +2396,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 565cfc8ff0c17614792f59b40aac5b2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnLoginSubmit:
-    m_PersistentCalls:
-      m_Calls: []
-  OnRetryServer:
-    m_PersistentCalls:
-      m_Calls: []
-  OnLoginFinish:
-    m_PersistentCalls:
-      m_Calls: []
   popUp: {fileID: 912139375}
   popUpMessageText: {fileID: 416175626}
 --- !u!114 &542883421
@@ -2771,6 +2719,66 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 612964792}
   m_CullTransparentMesh: 0
+--- !u!1 &618469280
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 618469281}
+  - component: {fileID: 618469283}
+  - component: {fileID: 618469282}
+  m_Layer: 0
+  m_Name: PlayerList
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &618469281
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618469280}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1314975377}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &618469282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618469280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aff039dbe3e44c34eb377a41c7ce5cb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TogglePlayerListKey: 9
+--- !u!114 &618469283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618469280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc765b39929db7249bbf332360714af6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayerListGameObject: {fileID: 528684704}
+  TemplatePanel: {fileID: 1128243172}
+  PanelParentTransform: {fileID: 1547366910}
 --- !u!1 &647571098
 GameObject:
   m_ObjectHideFlags: 0
@@ -4690,13 +4698,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1128243166}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ab6add4ab4b11241858e27bfa83ff7e, type: 3}
+  m_Script: {fileID: 11500000, guid: 7326fdb425ea7b64ea4fb3d489b8c6f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _panel: {fileID: 1128243166}
-  _usernameText: {fileID: 1216006885}
-  _userStatsKillText: {fileID: 1580548059}
-  _userStatsDeathText: {fileID: 100294886}
+  Panel: {fileID: 1128243166}
+  PlayerNameText: {fileID: 1216006885}
 --- !u!1 &1169038746
 GameObject:
   m_ObjectHideFlags: 0
@@ -4801,7 +4807,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 127.1
+  m_fontSize: 125.9
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5345,8 +5351,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2059326500}
-  - {fileID: 1465919649}
   - {fileID: 75475137}
+  - {fileID: 618469281}
+  - {fileID: 1465919649}
   - {fileID: 1436860809}
   m_Father: {fileID: 0}
   m_RootOrder: 7
@@ -5554,23 +5561,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7837ee99c9e821347862339d8f0c1134, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bullet: {fileID: 4498760227430251570, guid: dba3b374731b7a443b637cf42f1a158f, type: 3}
-  bulletParent: {fileID: 420742259}
-  maxThrottle: 20
-  minThrottle: 10
-  throttleMultiplier: 10
-  speedMultiplier: 1.5
-  turnSpeedMultiplier: 150
-  bulletCoolDownTime: 0.2
-  yBound: 160
-  xBound: 115
-  maxOutOfBoundTime: 1
-  _currentThrottle: 0
-  _rotationBuffer: 0
-  _currentBulletCoolDown: 0
-  _currentOutOfBoundTime: 0
-  rb: {fileID: 1327614140}
-  uv: {fileID: 1327614144}
 --- !u!212 &1327614142
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5907,7 +5897,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1314975377}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1436860810
 MonoBehaviour:
@@ -6060,12 +6050,12 @@ GameObject:
   - component: {fileID: 1465919650}
   - component: {fileID: 1465919651}
   m_Layer: 0
-  m_Name: PlayerListUIManager
+  m_Name: OldPlayerListUIManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1465919649
 Transform:
   m_ObjectHideFlags: 0
@@ -6078,7 +6068,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1314975377}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1465919650
 MonoBehaviour:
@@ -6699,7 +6689,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1580548058
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7884,6 +7874,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 849951481}
     m_Modifications:
+    - target: {fileID: 3513001423255561098, guid: bf96b844571c94f4cb1ec366624b938a,
+        type: 3}
+      propertyPath: m_Name
+      value: World Map Grid
+      objectReference: {fileID: 0}
     - target: {fileID: 3513001423255561100, guid: bf96b844571c94f4cb1ec366624b938a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -7938,11 +7933,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3513001423255561098, guid: bf96b844571c94f4cb1ec366624b938a,
-        type: 3}
-      propertyPath: m_Name
-      value: World Map Grid
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf96b844571c94f4cb1ec366624b938a, type: 3}

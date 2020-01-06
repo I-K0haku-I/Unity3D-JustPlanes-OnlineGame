@@ -1,17 +1,16 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 using TMPro;
-using JustPlanes.Core.Network;
 
 namespace JustPlanes.Unity.UI
 {
     class MainMenuView : MonoBehaviour
     {
-        public StringEvent OnLoginSubmit = new StringEvent();
-        public UnityEvent OnRetryServer = new UnityEvent();
-        public UnityEvent OnLoginFinish = new UnityEvent();
+        public event Action<string> OnLoginSubmit;
+        public event Action OnLoginFinish;
+        public event Action OnRetryServer;
+
         private Button popUpBtn;
         private TMP_InputField textField;
         private Button submitBtn;

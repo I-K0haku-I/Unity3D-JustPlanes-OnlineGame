@@ -14,6 +14,10 @@ namespace JustPlanes.Core
     {
         public List<string> players = new List<string>();
 
+        public event Action<string> OnPlayerJoin;
+        public event Action<string> OnPlayerQuit;
+
+
         private Action<NameNetworkData> addPlayer;
         private Action<NameNetworkData> removePlayer;
         private Action<NetworkData> initialize;
@@ -51,6 +55,7 @@ namespace JustPlanes.Core
         {
             DebugLog.Warning($"[PlayerManager] Player added: {data.Name}");
             players.Add(data.Name);
+            OnPlayerJoin?.Invoke(data.Name);
         }
 
         public void RemovePlayer(string name)
@@ -64,6 +69,7 @@ namespace JustPlanes.Core
         private void BroadcastedRemovePlayer(NameNetworkData data)
         {
             DebugLog.Warning($"[PlayerManager] Player removed: {data.Name}");
+            OnPlayerQuit?.Invoke(data.Name);
             players.Remove(data.Name);
         }
 

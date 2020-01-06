@@ -18,12 +18,18 @@ namespace JustPlanes.Unity
                 slider = gameObject.GetComponentInChildren<Slider>();
             }
 
-            slider.value = (float)unit.hp / unit.maxHP;
+            if (unit != null)
+            {
+                slider.value = (float)unit.hp / unit.maxHP;
+            }
         }
 
         private void Update()
         {
-            slider.value = (float)unit.hp / unit.maxHP;
+            if (unit != null)
+            {
+                slider.value = (float)unit.hp / unit.maxHP;
+            }
         }
 
 
