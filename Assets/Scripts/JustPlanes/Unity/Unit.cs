@@ -32,6 +32,7 @@ namespace JustPlanes.Unity
             }
         }
 
+// please dlete this si a tes
 
         public override string ToString()
         {
