@@ -4,7 +4,7 @@ using UnityEngine;
 namespace JustPlanes.Unity.UI
 {
 
-    public class PlayerListPanel : MonoBehaviour
+    public class PlayerListPanelOld : MonoBehaviour
     {
         private static readonly string _prefix = "PLPanel:";
 

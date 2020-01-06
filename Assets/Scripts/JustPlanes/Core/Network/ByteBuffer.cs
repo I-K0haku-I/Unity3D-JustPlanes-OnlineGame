@@ -72,20 +72,20 @@ namespace JustPlanes.Core.Network
             WriteBytes(BitConverter.GetBytes(input));
         }
 
-        public void WriteUnit(Unit unit)
-        {
-            WriteString(unit.ID);
-            WriteInteger(unit.hp);
-            WriteInteger(unit.X);
-            WriteInteger(unit.Y);
-        }
+        // public void WriteUnit(Unit unit)
+        // {
+        //     WriteString(unit.ID);
+        //     WriteInteger(unit.hp);
+        //     WriteInteger(unit.X);
+        //     WriteInteger(unit.Y);
+        // }
 
-        public void WritePlayer(Player player)
-        {
-            WriteString(player.Name);
-            WriteInteger(player.X);
-            WriteInteger(player.Y);
-        }
+        // public void WritePlayer(Player player)
+        // {
+        //     WriteString(player.Name);
+        //     WriteInteger(player.X);
+        //     WriteInteger(player.Y);
+        // }
 
         public void WriteFloat(float input)
         {
@@ -306,22 +306,22 @@ namespace JustPlanes.Core.Network
         }
         
 
-        public Player ReadPlayer()
-        {
-            string name = ReadString();
-            int x = ReadInteger();
-            int y = ReadInteger();
-            return new Player(name, x, y);
-        }
+        // public Player ReadPlayer()
+        // {
+        //     string name = ReadString();
+        //     int x = ReadInteger();
+        //     int y = ReadInteger();
+        //     return new Player(name, x, y);
+        // }
 
-        public Unit ReadUnit()
-        {
-            string id = ReadString();
-            int hp = ReadInteger();
-            int x = ReadInteger();
-            int y = ReadInteger();
-            return new Unit(id, hp, x, y);
-        }
+        // public Unit ReadUnit()
+        // {
+        //     string id = ReadString();
+        //     int hp = ReadInteger();
+        //     int x = ReadInteger();
+        //     int y = ReadInteger();
+        //     return new Unit(id, hp, x, y);
+        // }
 
         #endregion
 

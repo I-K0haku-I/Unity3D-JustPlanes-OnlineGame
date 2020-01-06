@@ -40,11 +40,11 @@ namespace JustPlanes.Core.Network.Server
         // internal ConcurrentDictionary<string, Client> clients = new ConcurrentDictionary<string, Client>();
         // public Dictionary<string, Player
 
-        private UnitSpawner unitSpawner = new UnitSpawner();
+        // private UnitSpawner unitSpawner = new UnitSpawner();
         public PlayerManager playerManager = new PlayerManager();
         public Authenticator auth;
-        internal ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
-        internal List<Unit> unitDeathToSend = new List<Unit>();
+        // internal ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
+        // internal List<Unit> unitDeathToSend = new List<Unit>();
 
         internal bool AddPlayerName(string connId, string name)
         {
@@ -57,7 +57,7 @@ namespace JustPlanes.Core.Network.Server
 
         internal List<Tuple<string, int>> damageToSend = new List<Tuple<string, int>>();
 
-        public MissionHandler mission = new MissionHandler();
+        // public MissionHandler mission = new MissionHandler();
         private List<int> missionUpdates = new List<int>();
         public ConcurrentQueue<Action> handleDataQueue = new ConcurrentQueue<Action>();
 
@@ -67,7 +67,7 @@ namespace JustPlanes.Core.Network.Server
             Stopwatch stopwatch = new Stopwatch();
             NetworkMagic.IsServer = true;
             auth = new Authenticator();
-            unitSpawner.Start();
+            // unitSpawner.Start();
             IsRunning = true;
             while (IsRunning)
             {
@@ -152,15 +152,15 @@ namespace JustPlanes.Core.Network.Server
             // }
         }
 
-        internal Unit GetUnit(string id)
-        {
-            return unitSpawner.units[id];
-        }
+        // internal Unit GetUnit(string id)
+        // {
+        //     return unitSpawner.units[id];
+        // }
 
-        internal List<Unit> GetUnits()
-        {
-            return unitSpawner.units.Values.ToList();
-        }
+        // internal List<Unit> GetUnits()
+        // {
+        //     return unitSpawner.units.Values.ToList();
+        // }
 
         public void Stop()
         {

@@ -11,7 +11,7 @@ namespace JustPlanes.Unity.UI
         [SerializeField] public GameObject playerListPanel = null;
         [SerializeField] public KeyCode showPlayerList = KeyCode.Tab;
 
-        public Dictionary<PlayerView, PlayerListPanel> playerListPanelPairs = new Dictionary<PlayerView, PlayerListPanel>();
+        public Dictionary<PlayerView, PlayerListPanelOld> playerListPanelPairs = new Dictionary<PlayerView, PlayerListPanelOld>();
 
         //private readonly bool _isLocallyVisible;
 
@@ -40,8 +40,8 @@ namespace JustPlanes.Unity.UI
         {
             DebugLog.Finer(this, $"{_prefix} Adding player {playerView.ToString()}");
 
-            GameObject obj = (GameObject)Instantiate(PlayerListPanel.panelObject, PlayerListPanel.parentTransform);
-            PlayerListPanel panel = obj.GetComponent<PlayerListPanel>();
+            GameObject obj = (GameObject)Instantiate(PlayerListPanelOld.panelObject, PlayerListPanelOld.parentTransform);
+            PlayerListPanelOld panel = obj.GetComponent<PlayerListPanelOld>();
 
             panel.SetPlayerView(playerView);
 
@@ -52,7 +52,7 @@ namespace JustPlanes.Unity.UI
         {
             DebugLog.Finer(this, $"{_prefix} Removing player panel of {playerView.ToString()}");
 
-            if (playerListPanelPairs.TryGetValue(playerView, out PlayerListPanel panel))
+            if (playerListPanelPairs.TryGetValue(playerView, out PlayerListPanelOld panel))
             {
                 playerListPanelPairs.Remove(playerView);
 

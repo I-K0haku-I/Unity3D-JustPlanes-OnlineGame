@@ -1,4 +1,6 @@
-﻿using JustPlanes.Core;
+﻿using System;
+using System.Collections.Generic;
+using JustPlanes.Core;
 using UnityEngine;
 
 namespace JustPlanes.Unity.UI
@@ -8,10 +10,10 @@ namespace JustPlanes.Unity.UI
     public class PlayerListPresenter : MonoBehaviour
     {
         [SerializeField]
-        private KeyCode TogglePlayerListKey = KeyCode.Tab;
+        private KeyCode toggleKey = KeyCode.Tab;
 
-        private PlayerListView view;
         private PlayerManager playerManager;
+        private PlayerListView view;
 
         private void Awake()
         {
@@ -23,20 +25,15 @@ namespace JustPlanes.Unity.UI
         {
             playerManager = GameManager.instance.playerManager;
 
-            foreach (string player in playerManager.players)
-            {
-                view.AddPanel(player);
-            }
-
             playerManager.OnPlayerJoin += view.AddPanel;
             playerManager.OnPlayerQuit += view.RemovePanel;
         }
 
         private void Update()
         {
-            if (Input.GetKeyDown(TogglePlayerListKey))
+            if (Input.GetKeyDown(toggleKey))
                 view.Show();
-            if (Input.GetKeyUp(TogglePlayerListKey))
+            if (Input.GetKeyUp(toggleKey))
                 view.Hide();
         }
     }

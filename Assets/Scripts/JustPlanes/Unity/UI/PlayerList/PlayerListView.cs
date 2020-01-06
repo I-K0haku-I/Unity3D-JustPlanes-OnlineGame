@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -7,33 +8,42 @@ namespace JustPlanes.Unity.UI
 
     public class PlayerListView : MonoBehaviour
     {
-        private Dictionary<string, TextMeshProUGUI> playerPanels = new Dictionary<string, TextMeshProUGUI>();
+        [SerializeField]
+        private GameObject playerListUI;
+        [SerializeField]
+        private Transform panelHolder;
+        [SerializeField]
+        private GameObject panelPrefab;
+
+
+        private Dictionary<string, PlayerListPanel> playerPanels = new Dictionary<string, PlayerListPanel>();
 
         public void AddPanel(string name)
         {
-            GameObject panelObj = new GameObject($"Panel for {name}");
-            TextMeshProUGUI textComp = panelObj.AddComponent<TextMeshProUGUI>();
-            textComp.SetText(name);
+            GameObject panelObj = Instantiate(panelPrefab);
+            panelObj.transform.SetParent(panelHolder, false);
 
-            playerPanels.Add(name, textComp);
+            PlayerListPanel panel = panelObj.GetComponent<PlayerListPanel>();
+            panel.SetPlayerName(name);
+            playerPanels.Add(name, panel);
         }
 
         public void RemovePanel(string name)
         {
-            if (playerPanels.TryGetValue(name, out TextMeshProUGUI text))
+            if (playerPanels.TryGetValue(name, out PlayerListPanel panel))
             {
-                Destroy(text.gameObject);
+                Destroy(panel);
             }
         }
 
         public void Show()
         {
-            gameObject.SetActive(true);
+            playerListUI.SetActive(true);
         }
 
         public void Hide()
         {
-            gameObject.SetActive(false);
+            playerListUI.SetActive(false);
         }
 
     }

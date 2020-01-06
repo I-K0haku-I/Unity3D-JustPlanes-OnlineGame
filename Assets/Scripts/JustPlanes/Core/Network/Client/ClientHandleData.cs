@@ -108,9 +108,9 @@ namespace JustPlanes.Core.Network.Client
         void AcknowledgeMissionComplete();
         void AcknowledgeUnitDamaged(string v1, int v2);
         void AcknowledgeUnitDied(string id);
-        void AddMission(MissionTypes type, int enemiesToKill, int enemiesKilled);
-        void AddPlayer(Player player);
-        void AddUnit(Unit unit);
+        // void AddMission(MissionTypes type, int enemiesToKill, int enemiesKilled);
+        // void AddPlayer(Player player);
+        // void AddUnit(Unit unit);
         void ReceivedMsg(string msg);
         void UpdateMission(int enemiesKilledDelta);
     }

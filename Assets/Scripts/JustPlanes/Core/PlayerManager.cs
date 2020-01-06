@@ -36,6 +36,8 @@ namespace JustPlanes.Core
         private void TargetedHandleInitialize(InitialPlayerManagerData data)
         {
             players = data.playerList;
+            foreach(string name in data.playerList)
+                OnPlayerJoin?.Invoke(name);
             DebugLog.Warning($"[PlayerManager] Initialized, players: {string.Join(", ", players)}");
         }
 

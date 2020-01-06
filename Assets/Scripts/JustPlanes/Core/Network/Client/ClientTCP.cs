@@ -11,7 +11,7 @@ namespace JustPlanes.Core.Network.Client
         public static string ServerAddress = "127.0.0.1";
         private static IUnityThread unityThread;
 
-        public static bool IsConnected { get { return clientSocket.Connected; } }
+        public static bool IsConnected { get { return (clientSocket != null ? clientSocket.Connected : false); } }
 
         public static void InitializingNetworking(IUnityThread thread)
         {

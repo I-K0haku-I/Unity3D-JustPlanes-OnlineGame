@@ -15,10 +15,11 @@ namespace JustPlanes.Unity
         public PlayerManager playerManager;
 
         [SerializeField]
-        private UI.PlayerListPresenter playerListPrefab;
+        private GameObject playerListUIManager;
 
         private void Awake()
         {
+            playerListUIManager.SetActive(false);
             if (instance == null)
             {
                 instance = this;
@@ -34,11 +35,9 @@ namespace JustPlanes.Unity
 
         public void StartGame()
         {
-            playerManager = new PlayerManager();
+            playerListUIManager.SetActive(true);
 
-            GameObject obj = new GameObject("PlayerList");
-            obj.AddComponent<UI.PlayerListPresenter>();
-            obj.AddComponent<UI.PlayerListView>();
+            playerManager = new PlayerManager();
         }
 
         void Update()

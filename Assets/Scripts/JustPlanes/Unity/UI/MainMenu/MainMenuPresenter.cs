@@ -19,7 +19,7 @@ namespace JustPlanes.Unity.UI
         private ISceneManager sceneManager;
         private MainMenuView menu;
 
-        private bool IsReset = false;
+        private bool IsConnected { get { return NetworkMagic.IsConnected; }}
 
         private void Awake()
         {
@@ -28,6 +28,7 @@ namespace JustPlanes.Unity.UI
             menu.OnLoginFinish += () =>
             {
                 DebugLog.Warning("Start the game scene");
+                gameObject.SetActive(false);
                 sceneManager.DisplayGame();
             };
         }
@@ -38,21 +39,14 @@ namespace JustPlanes.Unity.UI
             auth = Unity.GameManager.instance.authenticator;
             auth.OnLoginFailed += menu.DisplayFailPopup;
             auth.OnLoginSucceeded += (string msg) => menu.DisplayStartingGame();
-
-            if (!NetworkMagic.IsConnected)
-            {
-                menu.DisplayServerNotFound();
-                IsReset = true;
-            }
         }
 
         private void Update()
         {
-            if (IsReset)
-            {
+            if (IsConnected)
                 menu.DisplayNormal();
-                IsReset = false;
-            }
+            else
+                menu.DisplayServerNotFound();
         }
 
         private void HandleLoginInput(string name)
