@@ -50,9 +50,9 @@ namespace JustPlanes.Unity
 
     }
 
-    public class NetworkManager : MonoBehaviour, IPlayerHolder, INetworkManager
+    public class NetworkManagerOld : MonoBehaviour, IPlayerHolder, INetworkManager
     {
-        public static NetworkManager instance;
+        public static NetworkManagerOld instance;
 
         [SerializeField]
         private bool isOnline = true;
@@ -108,7 +108,7 @@ namespace JustPlanes.Unity
 
         public void StartConnection()
         {
-            ClientHandleData.InitializePackets(instance);
+            ClientHandleData.InitializePackets();
             ClientTCP.ServerAddress = serverAddress;
             ClientTCP.InitializingNetworking((IUnityThread)UnityThread.instance);
         }

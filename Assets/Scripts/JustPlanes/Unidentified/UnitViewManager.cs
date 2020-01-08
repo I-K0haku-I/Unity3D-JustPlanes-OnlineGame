@@ -42,16 +42,16 @@ namespace JustPlanes.Unity
             #region HandleUnitEvent
 
             // TOOD: can give methods directly here
-            NetworkManager.instance.OnUnitAdd.AddListener((u) => Spawn(u));
-            NetworkManager.instance.OnUnitDies.AddListener((u) => Kill(u));
-            NetworkManager.instance.OnUnitGetsDamaged.AddListener((u, i) => Damage(u, i));
+            NetworkManagerOld.instance.OnUnitAdd.AddListener((u) => Spawn(u));
+            NetworkManagerOld.instance.OnUnitDies.AddListener((u) => Kill(u));
+            NetworkManagerOld.instance.OnUnitGetsDamaged.AddListener((u, i) => Damage(u, i));
 
             #endregion HandleUnitEvent
 
             #region HandlePlayerEvent
 
-            NetworkManager.instance.OnPlayerAdd.AddListener((p) => Spawn(p));
-            NetworkManager.instance.OnPlayerRemove.AddListener((p) => Remove(p));
+            NetworkManagerOld.instance.OnPlayerAdd.AddListener((p) => Spawn(p));
+            NetworkManagerOld.instance.OnPlayerRemove.AddListener((p) => Remove(p));
 
             #endregion HandlePlayerEvent
         }

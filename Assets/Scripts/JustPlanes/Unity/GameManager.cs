@@ -15,29 +15,37 @@ namespace JustPlanes.Unity
         public PlayerManager playerManager;
 
         [SerializeField]
+        private GameObject mainMenuUIManager;
+        [SerializeField]
         private GameObject playerListUIManager;
 
         private void Awake()
         {
+            mainMenuUIManager.SetActive(false);
             playerListUIManager.SetActive(false);
             if (instance == null)
             {
                 instance = this;
                 // TODO: remove this when we have scene manager and call it from there
-                StartMainMenu();
             }
+        }
+
+        private void Start()
+        {
+            StartMainMenu();
         }
 
         public void StartMainMenu()
         {
+            NetworkManager.instance.StartConnection();
             authenticator = new Authenticator();
+            mainMenuUIManager.SetActive(true);
         }
 
         public void StartGame()
         {
-            playerListUIManager.SetActive(true);
-
             playerManager = new PlayerManager();
+            playerListUIManager.SetActive(true);
         }
 
         void Update()

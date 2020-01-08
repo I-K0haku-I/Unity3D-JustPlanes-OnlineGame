@@ -13,8 +13,8 @@ namespace JustPlanes.Unity.UI
             serverDomain = GUI.TextField(new Rect(10, 10, 200, 20), serverDomain, 25);
             if (GUI.Button(new Rect(10, 30, 200, 20), "Start"))
             {
-                NetworkManager.instance.serverAddress = serverDomain;
-                NetworkManager.instance.StartConnection();
+                NetworkManagerOld.instance.serverAddress = serverDomain;
+                NetworkManagerOld.instance.StartConnection();
                 SceneManager.LoadScene("SampleScene");
             }
         }

@@ -43,7 +43,7 @@ namespace JustPlanes.Unity
                     return;
                 }
 
-                NetworkManager.instance.DamageUnit(unitView.unit, damage);
+                NetworkManagerOld.instance.DamageUnit(unitView.unit, damage);
                 Destroy(gameObject);
             }
         }

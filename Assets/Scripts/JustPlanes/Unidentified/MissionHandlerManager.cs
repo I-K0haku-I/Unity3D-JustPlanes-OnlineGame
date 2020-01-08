@@ -31,9 +31,9 @@ namespace JustPlanes.Unity
 
         private void Start()
         {
-            NetworkManager.instance.OnMissionAdd.AddListener((handler) => AddMission(handler));
-            NetworkManager.instance.OnMissionUpdate.AddListener((val) => UpdateMission(val));
-            NetworkManager.instance.OnMissionComplete.AddListener(() => CompleteMission());
+            NetworkManagerOld.instance.OnMissionAdd.AddListener((handler) => AddMission(handler));
+            NetworkManagerOld.instance.OnMissionUpdate.AddListener((val) => UpdateMission(val));
+            NetworkManagerOld.instance.OnMissionComplete.AddListener(() => CompleteMission());
         }
 
         // MissionHandlerManager sequence

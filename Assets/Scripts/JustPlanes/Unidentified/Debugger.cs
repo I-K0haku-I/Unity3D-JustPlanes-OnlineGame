@@ -42,21 +42,21 @@ namespace JustPlanes.Unity
             if (deathCounter)
             {
                 DebugLog.Warning($"{_prefix} death counter is enabled!");
-                NetworkManager.instance.OnUnitDies.AddListener((u) => CountDeath());
+                NetworkManagerOld.instance.OnUnitDies.AddListener((u) => CountDeath());
             }
             if (listenMission)
             {
                 DebugLog.Warning($"{_prefix} listen mission is enabled!");
-                NetworkManager.instance.OnMissionAdd.AddListener((handler) => MissionInfo(handler));
-                NetworkManager.instance.OnMissionUpdate.AddListener((val) => MissionInfo(val));
-                NetworkManager.instance.OnMissionComplete.AddListener(() => MissionInfo());
+                NetworkManagerOld.instance.OnMissionAdd.AddListener((handler) => MissionInfo(handler));
+                NetworkManagerOld.instance.OnMissionUpdate.AddListener((val) => MissionInfo(val));
+                NetworkManagerOld.instance.OnMissionComplete.AddListener(() => MissionInfo());
             }
             if (listenUnit)
             {
                 DebugLog.Warning($"{_prefix} listen unit is enabled!");
-                NetworkManager.instance.OnUnitAdd.AddListener((unit) => UnitInfo(UnitEventType.Add, unit));
-                NetworkManager.instance.OnUnitGetsDamaged.AddListener((unit, val) => UnitInfo(UnitEventType.GetsDamaged, unit, val));
-                NetworkManager.instance.OnUnitDies.AddListener((unit) => UnitInfo(UnitEventType.Dies, unit));
+                NetworkManagerOld.instance.OnUnitAdd.AddListener((unit) => UnitInfo(UnitEventType.Add, unit));
+                NetworkManagerOld.instance.OnUnitGetsDamaged.AddListener((unit, val) => UnitInfo(UnitEventType.GetsDamaged, unit, val));
+                NetworkManagerOld.instance.OnUnitDies.AddListener((unit) => UnitInfo(UnitEventType.Dies, unit));
             }
         }
 
@@ -76,7 +76,7 @@ namespace JustPlanes.Unity
                 {
                     foreach(Unit unitView in unitViews)
                     {
-                        NetworkManager.instance.DamageUnit(unitView.unit, unitView.unit.hp);
+                        NetworkManagerOld.instance.DamageUnit(unitView.unit, unitView.unit.hp);
                     }
                 }
                 else
@@ -84,7 +84,7 @@ namespace JustPlanes.Unity
                     Unit[] viewArrays = new Unit[unitViews.Count];
                     unitViews.CopyTo(viewArrays, 0);
 
-                    NetworkManager.instance.DamageUnit(viewArrays[0].unit, viewArrays[0].unit.hp);
+                    NetworkManagerOld.instance.DamageUnit(viewArrays[0].unit, viewArrays[0].unit.hp);
                 }
             }
 
