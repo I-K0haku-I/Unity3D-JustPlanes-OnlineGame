@@ -7,7 +7,7 @@ namespace JustPlanes.Core
 {
     public class SyncedListOfString
     {
-        private int entityId;
+        public int EntityId;
         public List<string> ItemList { get { return itemListServer; } }
         private List<string> itemListServer = new List<string>();
 
@@ -21,7 +21,7 @@ namespace JustPlanes.Core
 
         public SyncedListOfString(int entityId)
         {
-            this.entityId = entityId;
+            this.EntityId = entityId;
 
             initialize = NetworkMagic.RegisterCommand<NetworkData>(1, CmdInitialize, entityId);
             handleInitialize = NetworkMagic.RegisterTargeted<ListOfStringData>(1, TargetedHandleInitialize, entityId);
@@ -29,8 +29,9 @@ namespace JustPlanes.Core
             removeItem = NetworkMagic.RegisterBroadcasted<NameNetworkData>(2, BroadcastRemove, entityId);
 
             // TODO: register some sort of callback for adding and removing
-
-            initialize(new NetworkData());
+            
+            if (NetworkMagic.IsClient)
+                initialize(new NetworkData());
         }
 
         private void TargetedHandleInitialize(ListOfStringData data)
@@ -57,8 +58,8 @@ namespace JustPlanes.Core
 
         private void BroadcastAdd(NameNetworkData data)
         {
-            if (!NetworkMagic.IsServer)
-                return;
+            // if (!NetworkMagic.IsServer)
+            //     return;
 
             itemListServer.Add(data.Name);
             OnItemAdd?.Invoke(data.Name);
@@ -71,8 +72,8 @@ namespace JustPlanes.Core
 
         private void BroadcastRemove(NameNetworkData data)
         {
-            if (!NetworkMagic.IsServer)
-                return;
+            // if (!NetworkMagic.IsServer)
+            //     return;
 
             if (!itemListServer.Contains(data.Name))
                 DebugLog.Warning($"Tried to remove an item from empty list.");

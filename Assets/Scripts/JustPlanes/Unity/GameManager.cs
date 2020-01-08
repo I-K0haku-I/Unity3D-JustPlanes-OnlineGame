@@ -11,8 +11,8 @@ namespace JustPlanes.Unity
     {
         public static GameManager instance;
 
-        public Authenticator authenticator;
-        public PlayerManager playerManager;
+        public Authenticator Authenticator;
+        public PlayerManager PlayerManager;
 
         [SerializeField]
         private GameObject mainMenuUIManager;
@@ -38,13 +38,13 @@ namespace JustPlanes.Unity
         public void StartMainMenu()
         {
             NetworkManager.instance.StartConnection();
-            authenticator = new Authenticator();
+            Authenticator = new Authenticator();
             mainMenuUIManager.SetActive(true);
         }
 
         public void StartGame()
         {
-            playerManager = new PlayerManager();
+            PlayerManager = new PlayerManager();
             playerListUIManager.SetActive(true);
         }
 

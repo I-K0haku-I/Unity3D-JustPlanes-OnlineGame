@@ -36,7 +36,7 @@ namespace JustPlanes.Unity.UI
         private void Start()
         {
             sceneManager = Unity.GameManager.instance;
-            auth = Unity.GameManager.instance.authenticator;
+            auth = Unity.GameManager.instance.Authenticator;
             auth.OnLoginFailed += menu.DisplayFailPopup;
             auth.OnLoginSucceeded += (string msg) => menu.DisplayStartingGame();
         }

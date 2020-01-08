@@ -41,7 +41,7 @@ namespace JustPlanes.Core.Network.Server
         // public Dictionary<string, Player
 
         // private UnitSpawner unitSpawner = new UnitSpawner();
-        public PlayerManager playerManager = new PlayerManager();
+        public PlayerManager playerManager;
         public Authenticator auth;
         // internal ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
         // internal List<Unit> unitDeathToSend = new List<Unit>();
@@ -67,6 +67,9 @@ namespace JustPlanes.Core.Network.Server
             Stopwatch stopwatch = new Stopwatch();
             NetworkMagic.IsServer = true;
             auth = new Authenticator();
+            playerManager = new PlayerManager();
+            // playerManager.AddPlayer("Test1");
+            // playerManager.AddPlayer("Test2");
             // unitSpawner.Start();
             IsRunning = true;
             while (IsRunning)

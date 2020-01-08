@@ -13,16 +13,17 @@ namespace JustPlanes.Core.Network
         public static bool IsServer;
         internal static bool IsClient;
         // private static HashSet<string> registeredActions = new HashSet<string>();
-        private static Dictionary<string, object> registeredActions = new Dictionary<string, object>();
+        private static Dictionary<(int, string), object> registeredActions = new Dictionary<(int, string), object>();
 
         public static bool IsConnected { get { return Client.ClientTCP.IsConnected; } }
 
         internal static Action<T> GenericRegister<T>(int id, Action<T> action, int entityId, PackageTypes packType, Dictionary<(int, int), IHandleCommand> handleDict) where T : NetworkData
         {
-            if (registeredActions.ContainsKey(action.Method.Name))
+            var actionKey = (entityId, action.Method.Name);
+            if (registeredActions.ContainsKey(actionKey))
             {
                 DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {action.Method.Name}");
-                return (Action<T>)registeredActions[action.Method.Name];
+                return (Action<T>)registeredActions[actionKey];
             }
 
             var key = (id, entityId);
@@ -31,8 +32,13 @@ namespace JustPlanes.Core.Network
 
             NetworkMagicCommand<T> operation = new NetworkMagicCommand<T>(id, packType, entityId, action);
             handleDict.Add(key, (IHandleCommand)operation);
-            registeredActions.Add(action.Method.Name, (Action<T>)operation.HandleData);
+            registeredActions.Add((entityId, action.Method.Name), (Action<T>)operation.HandleData);
             return operation.HandleData;
+        }
+
+        internal static Action<T> GetHandler<T>(string name, int entityId)
+        {
+            return (Action<T>)registeredActions[(entityId, name)];
         }
 
         public static Action<T> RegisterCommand<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData

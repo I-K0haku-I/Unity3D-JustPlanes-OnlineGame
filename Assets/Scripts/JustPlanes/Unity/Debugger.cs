@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using JustPlanes.Core;
+using JustPlanes.Core.Network;
 
 namespace JustPlanes.Unity
 {
@@ -31,7 +31,8 @@ namespace JustPlanes.Unity
             if (Input.GetKeyDown(addTestPlayer))
             {
                 string name = $"testplayer:{GenerateRandomName(6)}";
-                GameManager.instance.playerManager.AddPlayer(name);
+                var action = NetworkMagic.GetHandler<Core.NameNetworkData>("BroadcastAdd", GameManager.instance.PlayerManager.Players.EntityId);
+                action(new Core.NameNetworkData() { Name = name });
                 DebugLog.Info($"<color=#FF69B4>[Debugger] Added new test player: {name}</color>");
             }
         }
