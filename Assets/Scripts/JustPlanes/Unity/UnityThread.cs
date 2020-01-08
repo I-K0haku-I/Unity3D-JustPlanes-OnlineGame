@@ -11,10 +11,10 @@ using System.Collections.Generic;
 
 namespace JustPlanes.Unity
 {
-    public class UnityThread : MonoBehaviour, Core.Network.Client.IUnityThread
+    public class UnityThread : MonoBehaviour
     {
         //our (singleton) instance
-        public static UnityThread instance = null;
+        private static UnityThread instance = null;
 
 
         ////////////////////////////////////////////////UPDATE IMPL////////////////////////////////////////////////////////
@@ -219,11 +219,6 @@ namespace JustPlanes.Unity
             {
                 instance = null;
             }
-        }
-
-        public void executeInFixedUpdateClean(Action action)
-        {
-            UnityThread.executeInFixedUpdate(action);
         }
     }
 }

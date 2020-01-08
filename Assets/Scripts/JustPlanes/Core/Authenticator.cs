@@ -14,16 +14,21 @@ namespace JustPlanes.Core
         public event Login OnLoginSucceeded;
         public event Login OnLoginFailed;
 
+        private int entityId;
+
         public Authenticator()
         {
-            tryLogin = NetworkMagic.RegisterCommand<NameNetworkData>(1, CmdTryLogin);
-            handleLogin = NetworkMagic.RegisterTargeted<MessageResponseNetworkData>(1, TargetedRPCHandleLogin);
+            entityId = 23135;
+            tryLogin = NetworkMagic.RegisterCommand<NameNetworkData>(1, CmdTryLogin, entityId);
+            handleLogin = NetworkMagic.RegisterTargeted<MessageResponseNetworkData>(1, TargetedRPCHandleLogin, entityId);
         }
 
         public void TryLogin(string name)
         {
             if (isAuthenticated)
                 return;
+
+            DebugLog.Warning("[Auth] Attempting to log in...");
             tryLogin(new NameNetworkData { Name = name });
         }
 
@@ -34,6 +39,7 @@ namespace JustPlanes.Core
                 resp.IsSuccess = true;
             else
                 resp.Message = "Name already taken.";
+            DebugLog.Warning($"[Auth] Login response: IsSuccess: {resp.IsSuccess.ToString()}; Msg: {resp.Message}");
             handleLogin(resp);
         }
 
@@ -47,20 +53,24 @@ namespace JustPlanes.Core
             if (loginResponse.IsSuccess)
             {
                 isAuthenticated = true;
+                DebugLog.Warning("[Auth] Login successfully.");
                 OnLoginSucceeded(loginResponse.Message);
             }
             else
+            {
+                DebugLog.Warning("[Auth] Log-in failed.");
                 OnLoginFailed(loginResponse.Message);
+            }
         }
     }
 
-    internal class MessageResponseNetworkData : NetworkData
+    public class MessageResponseNetworkData : NetworkData
     {
         public bool IsSuccess = false;
         public string Message = "0";
     }
 
-    internal class NameNetworkData : NetworkData
+    public class NameNetworkData : NetworkData
     {
         public string Name = "Guest";
     }

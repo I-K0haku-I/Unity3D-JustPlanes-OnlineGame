@@ -110,7 +110,7 @@ namespace JustPlanes.Unity
         {
             ClientHandleData.InitializePackets();
             ClientTCP.ServerAddress = serverAddress;
-            ClientTCP.InitializingNetworking((IUnityThread)UnityThread.instance);
+            ClientTCP.InitializingNetworking();
         }
 
         public void UpdateMission(int enemiesKilledDelta)

@@ -47,7 +47,7 @@ namespace JustPlanes.Unity
         {
             ClientTCP.ServerAddress = serverAddress;
             ClientTCP.ServerPort = serverPort;
-            ClientTCP.InitializingNetworking((IUnityThread)UnityThread.instance);
+            ClientTCP.InitializingNetworking();
         }
 
         private void OnApplicationQuit()

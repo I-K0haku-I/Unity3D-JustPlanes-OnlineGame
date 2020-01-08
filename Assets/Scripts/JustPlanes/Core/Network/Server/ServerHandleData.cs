@@ -79,17 +79,19 @@ namespace JustPlanes.Core.Network.Server
         private static void HandleDataPackets(string connectionID, byte[] data)
         {
             ByteBuffer buffer = new ByteBuffer();
+            DebugLog.Info("[Connection] Receiving data!");
             buffer.WriteBytes(data);
             // Console.WriteLine(string.Join(",", data.ToList().Select(b => b.ToString())));
             int packageType = buffer.ReadInteger();
             int packetID = buffer.ReadInteger();
+            int entityId = buffer.ReadInteger();
             // if (packets.TryGetValue(packetID, out Packet packet))
             // {
             //     packet.Invoke(connectionID, buffer);
             // }
             // if (packetsNew.TryGetValue(packetID, out Requestor requestor))
             //     requestor.Receive(buffer, connectionID);
-            NetworkMagic.Receive(packageType, connectionID, packetID, buffer);
+            NetworkMagic.Receive(packageType, connectionID, packetID, entityId, buffer);
             buffer.Dispose();
         }
     }

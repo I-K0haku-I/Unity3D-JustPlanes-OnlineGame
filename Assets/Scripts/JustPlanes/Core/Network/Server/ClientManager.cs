@@ -28,6 +28,7 @@ namespace JustPlanes.Core.Network.Server
 
         public static void SendDataTo(string connectionID, byte[] data)
         {
+            DebugLog.Info($"[Connection] Send data to all! {data.Count()}");
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((data.GetUpperBound(0) - data.GetLowerBound(0)) + 1);
             buffer.WriteBytes(data);
@@ -38,6 +39,7 @@ namespace JustPlanes.Core.Network.Server
 
         public static void SendDataToAll(byte[] data)
         {
+            DebugLog.Info($"[Connection] Send data! {data.Count()}");
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((data.GetUpperBound(0) - data.GetLowerBound(0)) + 1);
             buffer.WriteBytes(data);

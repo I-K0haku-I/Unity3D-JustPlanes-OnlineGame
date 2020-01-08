@@ -10,13 +10,10 @@ namespace JustPlanes.Core.Network.Client
         private static byte[] recvBuffer;
         public static string ServerAddress = "127.0.0.1";
         public static int ServerPort = 5569;
-        private static IUnityThread unityThread;
-
         public static bool IsConnected { get { return (clientSocket != null ? clientSocket.Connected : false); } }
 
-        public static void InitializingNetworking(IUnityThread thread)
+        public static void InitializingNetworking()
         {
-            unityThread = thread;
             clientSocket = new TcpClient();
             clientSocket.ReceiveBufferSize = 4096;
             clientSocket.SendBufferSize = 4096;
@@ -47,7 +44,7 @@ namespace JustPlanes.Core.Network.Client
 
                 byte[] newBytes = new byte[length];
                 Array.Copy(recvBuffer, newBytes, length);
-                unityThread.executeInFixedUpdateClean(() =>
+                Unity.UnityThread.executeInFixedUpdate(() =>
                 {
                     ClientHandleData.HandleData(newBytes);
                 });
@@ -61,6 +58,7 @@ namespace JustPlanes.Core.Network.Client
 
         public static void SendData(byte[] data)
         {
+            DebugLog.Info("[Connection] Sending Data!");
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((data.GetUpperBound(0) - data.GetLowerBound(0)) + 1);
             buffer.WriteBytes(data);

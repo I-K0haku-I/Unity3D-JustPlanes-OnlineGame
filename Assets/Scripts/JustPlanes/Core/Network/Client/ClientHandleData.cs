@@ -75,15 +75,17 @@ namespace JustPlanes.Core.Network.Client
             ByteBuffer buffer = new ByteBuffer();
 
             // Debug.Log(string.Join(" ", data));
+            DebugLog.Info("[Connection] Receiving Data!");
 
             buffer.WriteBytes(data);
             int packageType = buffer.ReadInteger();
             int packetID = buffer.ReadInteger();
+            int entityId = buffer.ReadInteger();
             // if (packets.TryGetValue(packetID, out Packet packet))
             // {
             //     packet.Invoke(buffer);
             // }
-            NetworkMagic.Receive(packageType, "", packetID, buffer);
+            NetworkMagic.Receive(packageType, "", packetID, entityId, buffer);
             // if (packetsNew.TryGetValue(packetID, out Requestor requestor))
             //     requestor.Receive(buffer);
             buffer.Dispose();

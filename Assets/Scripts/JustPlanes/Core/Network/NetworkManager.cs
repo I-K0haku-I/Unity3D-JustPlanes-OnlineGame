@@ -6,9 +6,9 @@ namespace JustPlanes.Core.Network
     public static class NetworkMagic
     {
         private static Dictionary<int, Requestor> reqs = new Dictionary<int, Requestor>();
-        private static Dictionary<int, IHandleCommand> commandHandlers = new Dictionary<int, IHandleCommand>();
-        private static Dictionary<int, IHandleCommand> targetHandlers = new Dictionary<int, IHandleCommand>();
-        private static Dictionary<int, IHandleCommand> broadcastHandlers = new Dictionary<int, IHandleCommand>();
+        private static Dictionary<(int, int), IHandleCommand> commandHandlers = new Dictionary<(int, int), IHandleCommand>();
+        private static Dictionary<(int, int), IHandleCommand> targetHandlers = new Dictionary<(int, int), IHandleCommand>();
+        private static Dictionary<(int, int), IHandleCommand> broadcastHandlers = new Dictionary<(int, int), IHandleCommand>();
 
         public static bool IsServer;
         internal static bool IsClient;
@@ -17,28 +17,7 @@ namespace JustPlanes.Core.Network
 
         public static bool IsConnected { get { return Client.ClientTCP.IsConnected; } }
 
-        internal static Action<T> RegisterCommand<T>(int id, Action<T> action) where T : NetworkData
-        {
-            if (commandHandlers.ContainsKey(id))
-                throw new Exception($"There already is a command with the id \"{id}\", choose another one");
-
-            NetworkMagicCommand<T> command = new NetworkMagicCommand<T>(id, PackageTypes.Command, action);
-            commandHandlers.Add(id, (IHandleCommand)command);
-            return command.HandleData;
-        }
-
-        internal static Action<T> RegisterTargeted<T>(int id, Action<T> action) where T : NetworkData
-        {
-            if (targetHandlers.ContainsKey(id))
-                throw new Exception($"There already is a targeted RPC with the id \"{id}\", choose another one");
-
-            // NetowrkMagicTargetedRPC<T> targetedRPC = new NetowrkMagicTargetedRPC<T>(id, action);
-            NetworkMagicCommand<T> targetedRPC = new NetworkMagicCommand<T>(id, PackageTypes.Targeted, action);
-            targetHandlers.Add(id, (IHandleCommand)targetedRPC);
-            return targetedRPC.HandleData;
-        }
-
-        internal static Action<T> RegisterBroadcasted<T>(int id, Action<T> action) where T : NetworkData
+        internal static Action<T> GenericRegister<T>(int id, Action<T> action, int entityId, PackageTypes packType, Dictionary<(int, int), IHandleCommand> handleDict) where T : NetworkData
         {
             if (registeredActions.ContainsKey(action.Method.Name))
             {
@@ -46,34 +25,79 @@ namespace JustPlanes.Core.Network
                 return (Action<T>)registeredActions[action.Method.Name];
             }
 
-            if (broadcastHandlers.ContainsKey(id))
-                throw new Exception($"There already is a broadcast RPC with the id \"{id}\", choose another one");
+            var key = (id, entityId);
+            if (handleDict.ContainsKey(key))
+                throw new Exception($"There already is a command with the id \"{id}, {entityId}\", choose another one");
 
-            NetworkMagicCommand<T> broadcast = new NetworkMagicCommand<T>(id, PackageTypes.Broadcast, action);
-            broadcastHandlers.Add(id, (IHandleCommand)broadcast);
-            registeredActions.Add(action.Method.Name, (Action<T>)broadcast.HandleData);
-            return broadcast.HandleData;
+            NetworkMagicCommand<T> operation = new NetworkMagicCommand<T>(id, packType, entityId, action);
+            handleDict.Add(key, (IHandleCommand)operation);
+            registeredActions.Add(action.Method.Name, (Action<T>)operation.HandleData);
+            return operation.HandleData;
         }
 
-        internal static void Receive(int packageType, string connectionID, int packetID, ByteBuffer buffer)
+        public static Action<T> RegisterCommand<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
         {
+            return NetworkMagic.GenericRegister<T>(id, action, entityId, PackageTypes.Command, commandHandlers);
+        }
+
+        public static Action<T> RegisterTargeted<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
+        {
+            return NetworkMagic.GenericRegister<T>(id, action, entityId, PackageTypes.Targeted, targetHandlers);
+        }
+
+        public static Action<T> RegisterBroadcasted<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
+        {
+            return NetworkMagic.GenericRegister<T>(id, action, entityId, PackageTypes.Broadcast, broadcastHandlers);
+        }
+
+        // internal static Action<T> RegisterTargeted<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
+        // {
+        //     if (targetHandlers.ContainsKey(id))
+        //         throw new Exception($"There already is a targeted RPC with the id \"{id}\", choose another one");
+
+        //     // NetowrkMagicTargetedRPC<T> targetedRPC = new NetowrkMagicTargetedRPC<T>(id, action);
+        //     NetworkMagicCommand<T> targetedRPC = new NetworkMagicCommand<T>(id, PackageTypes.Targeted, entityId, action);
+        //     targetHandlers.Add(id, (IHandleCommand)targetedRPC);
+        //     return targetedRPC.HandleData;
+        // }
+
+        // internal static Action<T> RegisterBroadcasted<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
+        // {
+        //     if (registeredActions.ContainsKey(action.Method.Name))
+        //     {
+        //         DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {action.Method.Name}");
+        //         return (Action<T>)registeredActions[action.Method.Name];
+        //     }
+
+        //     if (broadcastHandlers.ContainsKey(id))
+        //         throw new Exception($"There already is a broadcast RPC with the id \"{id}\", choose another one");
+
+        //     NetworkMagicCommand<T> broadcast = new NetworkMagicCommand<T>(id, PackageTypes.Broadcast, entityId, action);
+        //     broadcastHandlers.Add(id, (IHandleCommand)broadcast);
+        //     registeredActions.Add(action.Method.Name, (Action<T>)broadcast.HandleData);
+        //     return broadcast.HandleData;
+        // }
+
+        internal static void Receive(int packageType, string connectionID, int packetID, int entityId, ByteBuffer buffer)
+        {
+            var key = (packetID, entityId);
             if (packageType == (int)PackageTypes.Command)
             {
-                if (commandHandlers.TryGetValue(packetID, out IHandleCommand command))
+                if (commandHandlers.TryGetValue(key, out IHandleCommand command))
                     command.HandleCommand(connectionID, buffer);
                 else
                     DebugLog.Warning($"Trying to handle command {packetID}, but it's not registered.");
             }
             else if (packageType == (int)PackageTypes.Targeted)
             {
-                if (targetHandlers.TryGetValue(packetID, out IHandleCommand targetedRPC))
+                if (targetHandlers.TryGetValue(key, out IHandleCommand targetedRPC))
                     targetedRPC.HandleCommand(connectionID, buffer);
                 else
                     DebugLog.Warning($"Trying to handle targeted {packetID}, but it's not registered.");
             }
             else if (packageType == (int)PackageTypes.Broadcast)
             {
-                if (broadcastHandlers.TryGetValue(packetID, out IHandleCommand broadcastRPC))
+                if (broadcastHandlers.TryGetValue(key, out IHandleCommand broadcastRPC))
                     broadcastRPC.HandleCommand(connectionID, buffer);
                 else
                     DebugLog.Warning($"Trying to handle broadcasted {packetID}, but it's not registered.");
@@ -106,11 +130,15 @@ namespace JustPlanes.Core.Network
         private int packageId;
         private PackageTypes packageType;
 
-        public NetworkMagicCommand(int packageId, PackageTypes packageType, Action<T> action)
+        // 1 is default and ignored
+        private int entityId;
+
+        public NetworkMagicCommand(int packageId, PackageTypes packageType, int entityId, Action<T> action)
         {
             this.packageId = packageId;
             this.action = action;
             this.packageType = packageType;
+            this.entityId = entityId;
         }
 
         public void HandleData(T data)
@@ -174,7 +202,8 @@ namespace JustPlanes.Core.Network
             var buffer = new ByteBuffer();
             buffer.WriteInteger((int)packageType);
             buffer.WriteInteger(packageId);
-            DebugLog.Warning($"[NetworkMagic] Writing a packet of type {packageType.ToString()}:");
+            buffer.WriteInteger(entityId);
+            DebugLog.Info($"[NetworkMagic] Writing a packet of type {packageType.ToString()}:");
             foreach (var field in typeof(T).GetFields())
             {
                 if (field.Name == "connId")
@@ -183,23 +212,23 @@ namespace JustPlanes.Core.Network
                 var value = field.GetValue(data);
                 if (value is string)
                 {
-                    DebugLog.Warning($"writing a string for {field.Name}: {value.ToString()}");
+                    DebugLog.Info($"writing a string for {field.Name}: {value.ToString()}");
                     buffer.WriteString((string)value);
                 }
                 else if (value is bool)
                 {
-                    DebugLog.Warning($"writing a bool for {field.Name}: {value.ToString()}");
+                    DebugLog.Info($"writing a bool for {field.Name}: {value.ToString()}");
                     buffer.WriteBool((bool)value);
                 }
                 else if (value is int)
                 {
-                    DebugLog.Warning($"writing an int: {value.ToString()}");
+                    DebugLog.Info($"writing an int: {value.ToString()}");
                     buffer.WriteInteger((int)value);
                 }
                 else if (value is List<string>)
                 {
                     List<string> someList = (List<string>)value;
-                    DebugLog.Warning($"writing a list of string: {string.Join(", ", someList)}");
+                    DebugLog.Info($"writing a list of string: {string.Join(", ", someList)}");
                     buffer.WriteInteger(someList.Count);
                     foreach (var item in someList)
                     {
@@ -207,7 +236,7 @@ namespace JustPlanes.Core.Network
                     }
                 }
             }
-            DebugLog.Warning("Writing---");
+            DebugLog.Info("Writing---");
             return buffer;
         }
 
@@ -229,7 +258,7 @@ namespace JustPlanes.Core.Network
         public void HandleCommand(string connectionID, ByteBuffer buffer)
         {
             T data = (T)Activator.CreateInstance(typeof(T));
-            DebugLog.Warning($"[NetworkMagic] Reading a packet {packageType.ToString()}:");
+            DebugLog.Info($"[NetworkMagic] Reading a packet {packageType.ToString()}:");
             foreach (var field in typeof(T).GetFields())
             {
                 if (field.Name == "connId")
@@ -238,13 +267,13 @@ namespace JustPlanes.Core.Network
                 if (field.FieldType == typeof(string))
                 {
                     string value = buffer.ReadString();
-                    DebugLog.Warning($"Decrypted string: {value}");
+                    DebugLog.Info($"Decrypted string: {value}");
                     field.SetValue(data, value);
                 }
                 else if (field.FieldType == typeof(bool))
                 {
                     bool value = buffer.ReadBool();
-                    DebugLog.Warning($"Decrypted bool: {value}");
+                    DebugLog.Info($"Decrypted bool: {value}");
                     field.SetValue(data, value);
                 }
                 else if (field.FieldType == typeof(List<string>))
@@ -255,11 +284,11 @@ namespace JustPlanes.Core.Network
                     {
                         someList.Add(buffer.ReadString());
                     }
-                    DebugLog.Warning($"Decrypted list of string: {string.Join(", ", someList)}");
+                    DebugLog.Info($"Decrypted list of string: {string.Join(", ", someList)}");
                     field.SetValue(data, someList);
                 }
             }
-            DebugLog.Warning("Reading---");
+            DebugLog.Info("Reading---");
             data.connId = connectionID;
             HandleData(data);
         }

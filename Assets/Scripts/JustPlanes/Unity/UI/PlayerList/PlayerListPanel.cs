@@ -17,7 +17,6 @@ namespace JustPlanes.Unity.UI
 
         public void SetPlayerName(string name)
         {
-            DebugLog.Warning($"aflkjda lkSetting name to {name}");
             nameUI.SetText(name);
         }
     }

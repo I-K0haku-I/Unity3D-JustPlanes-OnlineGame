@@ -25,8 +25,8 @@ namespace JustPlanes.Unity.UI
         {
             playerManager = GameManager.instance.playerManager;
 
-            playerManager.OnPlayerJoin += view.AddPanel;
-            playerManager.OnPlayerQuit += view.RemovePanel;
+            playerManager.Players.OnItemAdd += view.AddPanel;
+            playerManager.Players.OnItemRemove += view.RemovePanel;
         }
 
         private void Update()
