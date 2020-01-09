@@ -8,7 +8,7 @@ namespace JustPlanes.Core
     public class SyncedListOfString
     {
         public int EntityId;
-        public List<string> ItemList { get { return itemListServer; } }
+        public List<string> ItemList => itemListServer;
         private List<string> itemListServer = new List<string>();
 
         private Action<NameNetworkData> addItem;
@@ -23,10 +23,10 @@ namespace JustPlanes.Core
         {
             this.EntityId = entityId;
 
-            initialize = NetworkMagic.RegisterCommand<NetworkData>(1, CmdInitialize, entityId);
-            handleInitialize = NetworkMagic.RegisterTargeted<ListOfStringData>(1, TargetedHandleInitialize, entityId);
-            addItem = NetworkMagic.RegisterBroadcasted<NameNetworkData>(1, BroadcastAdd, entityId);
-            removeItem = NetworkMagic.RegisterBroadcasted<NameNetworkData>(2, BroadcastRemove, entityId);
+            initialize = NetworkMagic.RegisterAtServer<NetworkData>(1, CmdInitialize, entityId);
+            handleInitialize = NetworkMagic.RegisterOnClient<ListOfStringData>(1, TargetedHandleInitialize, entityId);
+            addItem = NetworkMagic.RegisterAtAllClients<NameNetworkData>(1, BroadcastAdd, entityId);
+            removeItem = NetworkMagic.RegisterAtAllClients<NameNetworkData>(2, BroadcastRemove, entityId);
 
             // TODO: register some sort of callback for adding and removing
             
@@ -36,7 +36,7 @@ namespace JustPlanes.Core
 
         private void TargetedHandleInitialize(ListOfStringData data)
         {
-            foreach (string name in data.itemList)
+            foreach (var name in data.ItemList)
             {
                 itemListServer.Add(name);
                 OnItemAdd?.Invoke(name);
@@ -46,8 +46,7 @@ namespace JustPlanes.Core
 
         private void CmdInitialize(NetworkData data)
         {
-            ListOfStringData resp = new ListOfStringData { connId = data.connId };
-            resp.itemList = itemListServer;
+            var resp = new ListOfStringData {ConnId = data.ConnId, ItemList = itemListServer};
             handleInitialize(resp);
         }
 
@@ -182,7 +181,7 @@ namespace JustPlanes.Core
 
     public class ListOfStringData : NetworkData
     {
-        public List<string> itemList;
+        public List<string> ItemList;
     }
 
 }

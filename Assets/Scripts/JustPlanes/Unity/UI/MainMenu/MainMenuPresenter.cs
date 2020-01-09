@@ -51,7 +51,7 @@ namespace JustPlanes.Unity.UI
 
         private void HandleLoginInput(string name)
         {
-            if (name == null || name == "" || auth.isAuthenticated)
+            if (name == null || name == "" || auth.IsAuthenticated)
                 return;
             menu.DisplayWaitingForServer();
             auth.TryLogin(name);

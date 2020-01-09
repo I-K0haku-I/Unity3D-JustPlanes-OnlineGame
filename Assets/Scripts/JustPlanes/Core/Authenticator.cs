@@ -8,7 +8,7 @@ namespace JustPlanes.Core
     {
         private Action<NameNetworkData> tryLogin;
         private Action<MessageResponseNetworkData> handleLogin;
-        public bool isAuthenticated = false;
+        public bool IsAuthenticated = false;
 
         public delegate void Login(string msg);
         public event Login OnLoginSucceeded;
@@ -19,13 +19,13 @@ namespace JustPlanes.Core
         public Authenticator()
         {
             entityId = 23135;
-            tryLogin = NetworkMagic.RegisterCommand<NameNetworkData>(1, CmdTryLogin, entityId);
-            handleLogin = NetworkMagic.RegisterTargeted<MessageResponseNetworkData>(1, TargetedRPCHandleLogin, entityId);
+            tryLogin = NetworkMagic.RegisterAtServer<NameNetworkData>(1, CmdTryLogin, entityId);
+            handleLogin = NetworkMagic.RegisterOnClient<MessageResponseNetworkData>(1, TargetedRpcHandleLogin, entityId);
         }
 
         public void TryLogin(string name)
         {
-            if (isAuthenticated)
+            if (IsAuthenticated)
                 return;
 
             DebugLog.Warning("[Auth] Attempting to log in...");
@@ -34,8 +34,8 @@ namespace JustPlanes.Core
 
         private void CmdTryLogin(NameNetworkData data)
         {
-            MessageResponseNetworkData resp = new MessageResponseNetworkData { connId = data.connId };
-            if (Network.Server.GameRunner.Game.AddPlayerName(data.connId, data.Name))
+            MessageResponseNetworkData resp = new MessageResponseNetworkData { ConnId = data.ConnId };
+            if (Network.Server.GameRunner.Game.AddPlayerName(data.ConnId, data.Name))
                 resp.IsSuccess = true;
             else
                 resp.Message = "Name already taken.";
@@ -48,18 +48,18 @@ namespace JustPlanes.Core
         //     handleLogin.Invoke(loginResponse);
         // }
 
-        private void TargetedRPCHandleLogin(MessageResponseNetworkData loginResponse)
+        private void TargetedRpcHandleLogin(MessageResponseNetworkData loginResponse)
         {
             if (loginResponse.IsSuccess)
             {
-                isAuthenticated = true;
+                IsAuthenticated = true;
                 DebugLog.Warning("[Auth] Login successfully.");
-                OnLoginSucceeded(loginResponse.Message);
+                OnLoginSucceeded?.Invoke(loginResponse.Message);
             }
             else
             {
                 DebugLog.Warning("[Auth] Log-in failed.");
-                OnLoginFailed(loginResponse.Message);
+                OnLoginFailed?.Invoke(loginResponse.Message);
             }
         }
     }
