@@ -44,12 +44,6 @@ namespace JustPlanes.Unity
 
     }
 
-    [System.Serializable]
-    public class RequestResponseEvent : UnityEvent<IRequestorResponse>
-    {
-
-    }
-
     public class NetworkManagerOld : MonoBehaviour, IPlayerHolder, INetworkManager
     {
         public static NetworkManagerOld instance;

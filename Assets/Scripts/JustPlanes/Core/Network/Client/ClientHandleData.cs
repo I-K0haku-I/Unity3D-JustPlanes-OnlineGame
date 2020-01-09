@@ -8,7 +8,6 @@ namespace JustPlanes.Core.Network.Client
         private static ByteBuffer playerBuffer;
         public delegate void Packet(ByteBuffer buffer);
         public static Dictionary<int, Packet> packets = new Dictionary<int, Packet>();
-        private static Dictionary<int, Requestor> packetsNew = new Dictionary<int, Requestor>();
 
         public static void InitializePackets()
         {

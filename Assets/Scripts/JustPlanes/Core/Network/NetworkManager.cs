@@ -5,7 +5,6 @@ namespace JustPlanes.Core.Network
 {
     public static class NetworkMagic
     {
-        private static Dictionary<int, Requestor> reqs = new Dictionary<int, Requestor>();
         private static Dictionary<(int, int), IHandleCommand> commandHandlers = new Dictionary<(int, int), IHandleCommand>();
         private static Dictionary<(int, int), IHandleCommand> targetHandlers = new Dictionary<(int, int), IHandleCommand>();
         private static Dictionary<(int, int), IHandleCommand> broadcastHandlers = new Dictionary<(int, int), IHandleCommand>();
@@ -55,34 +54,6 @@ namespace JustPlanes.Core.Network
         {
             return NetworkMagic.GenericRegister<T>(id, action, entityId, PackageTypes.Broadcast, broadcastHandlers);
         }
-
-        // internal static Action<T> RegisterTargeted<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
-        // {
-        //     if (targetHandlers.ContainsKey(id))
-        //         throw new Exception($"There already is a targeted RPC with the id \"{id}\", choose another one");
-
-        //     // NetowrkMagicTargetedRPC<T> targetedRPC = new NetowrkMagicTargetedRPC<T>(id, action);
-        //     NetworkMagicCommand<T> targetedRPC = new NetworkMagicCommand<T>(id, PackageTypes.Targeted, entityId, action);
-        //     targetHandlers.Add(id, (IHandleCommand)targetedRPC);
-        //     return targetedRPC.HandleData;
-        // }
-
-        // internal static Action<T> RegisterBroadcasted<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
-        // {
-        //     if (registeredActions.ContainsKey(action.Method.Name))
-        //     {
-        //         DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {action.Method.Name}");
-        //         return (Action<T>)registeredActions[action.Method.Name];
-        //     }
-
-        //     if (broadcastHandlers.ContainsKey(id))
-        //         throw new Exception($"There already is a broadcast RPC with the id \"{id}\", choose another one");
-
-        //     NetworkMagicCommand<T> broadcast = new NetworkMagicCommand<T>(id, PackageTypes.Broadcast, entityId, action);
-        //     broadcastHandlers.Add(id, (IHandleCommand)broadcast);
-        //     registeredActions.Add(action.Method.Name, (Action<T>)broadcast.HandleData);
-        //     return broadcast.HandleData;
-        // }
 
         internal static void Receive(int packageType, string connectionID, int packetID, int entityId, ByteBuffer buffer)
         {
@@ -307,131 +278,6 @@ namespace JustPlanes.Core.Network
         public void HandleData(NetworkData data)
         {
             HandleData((T)data);
-        }
-    }
-
-
-    public interface IRequestor
-    {
-    }
-
-    public interface IRequestorResponse
-    {
-        bool Ok { get; }
-    }
-
-    public class RequestorResponse : IRequestorResponse
-    {
-        public bool Ok { get; private set; } = false;
-
-        public RequestorResponse(bool v)
-        {
-            this.Ok = v;
-        }
-
-    }
-
-    public abstract class Requestor
-    {
-        public int ReqId;
-        public int RespId;
-
-        public delegate void ResponseAction(RequestorResponse response);
-
-        // this is horrible, but works, if I keep this in it will need some sort of cleaning just in case requests never come back
-        public static Dictionary<int, ResponseAction> responseAwaiting = new Dictionary<int, ResponseAction>();
-
-        public virtual void Send()
-        {
-            using (var buffer = new ByteBuffer())
-            {
-
-            }
-        }
-
-        public virtual void SendReq(ByteBuffer oldBuffer, ResponseAction responseAction)
-        {
-            using (var buffer = new ByteBuffer())
-            {
-                // 1 means it's a request TODO: add an enum instead
-                buffer.WriteInteger(ReqId);
-                buffer.WriteBytes(oldBuffer.ToArray());
-                Client.ClientTCP.SendData(buffer.ToArray());
-            }
-            responseAwaiting.Add(RespId, responseAction);
-        }
-
-        private static int operationNum = 0;
-        private static int GetNextOperationNumber()
-        {
-            operationNum++;
-            if (operationNum > 9999)
-                operationNum = 0;
-            return operationNum;
-        }
-
-        internal abstract void ReceiveReq(int connectionID, ByteBuffer buffer);
-
-        internal virtual void SendResp(ByteBuffer oldBuffer)
-        {
-            using (var buffer = new ByteBuffer())
-            {
-                buffer.WriteInteger(RespId);
-                buffer.WriteBytes(oldBuffer.ToArray());
-                Network.Client.ClientTCP.SendData(buffer.ToArray());
-            }
-        }
-
-        internal abstract void ReceiveResp(ByteBuffer buffer, ResponseAction responseAction);
-
-        internal void Receive(ByteBuffer buffer, int connectionID = 0)
-        {
-            if (connectionID == 0) // Client
-            {
-                if (responseAwaiting.TryGetValue(RespId, out ResponseAction responseAction))
-                    ReceiveResp(buffer, responseAction);
-                else
-                    DebugLog.Warning($"THIS SHOULD NOT HAPPEN, IF IT DOES, CONTACT YOUR AUTHORITIES IMMEDIATELY!!!");
-            }
-            else // Server
-                ReceiveReq(connectionID, buffer);
-        }
-    }
-
-    class LoginRequestor : Requestor
-    {
-        public new int ReqId = (int)ClientPackets.CLoginReq;
-        public new int RespId = (int)ServerPackets.SLoginResp;
-
-        public void SendReq(string name, ResponseAction responseAction = null)
-        {
-            using (var buffer = new ByteBuffer())
-            {
-                buffer.WriteString(name);
-                base.SendReq(buffer, responseAction);
-            }
-        }
-
-        internal override void ReceiveReq(int connectionID, ByteBuffer buffer)
-        {
-            string name = buffer.ReadString();
-            // try to login name
-            SendResp(true);
-        }
-
-        private void SendResp(bool isLoggedIn = false)
-        {
-            using (var buffer = new ByteBuffer())
-            {
-                buffer.WriteBool(isLoggedIn);
-                base.SendResp(buffer);
-            }
-        }
-
-        internal override void ReceiveResp(ByteBuffer buffer, ResponseAction responseAction)
-        {
-            bool isLoggedIn = buffer.ReadBool();
-            responseAction.Invoke(new RequestorResponse(true));
         }
     }
 }

@@ -8,7 +8,6 @@ namespace JustPlanes.Core.Network.Server
     {
         public delegate void Packet(int connectionID, ByteBuffer data);
         public static Dictionary<int, Packet> packets = new Dictionary<int, Packet>();
-        private static Dictionary<int, Requestor> packetsNew = new Dictionary<int, Requestor>();
 
         public static void InitializePackets()
         {
@@ -17,7 +16,6 @@ namespace JustPlanes.Core.Network.Server
             // packets.Add((int)ClientPackets.CGiveMeUnits, DataReceiver.HandleGiveMeUnits);
             // packets.Add((int)ClientPackets.CUnitDamaged, DataReceiver.HandleUnitDamaged);
             // packets.Add((int)ClientPackets.CGiveMeMission, DataReceiver.HandleGiveMeMission);
-            packetsNew.Add((int)ClientPackets.CLoginReq, new LoginRequestor());
         }
 
         public static void HandleData(string connectionID, byte[] data)
