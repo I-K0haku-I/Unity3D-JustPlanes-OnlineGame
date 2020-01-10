@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 namespace JustPlanes.Core.Network
 {
+    // TODO: OK, maybe I should not use package id and use combination of action name and entity id
+
     public interface IHandleCommand
     {
         void HandleBuffer(string connectionId, ByteBuffer buffer);
@@ -22,23 +24,15 @@ namespace JustPlanes.Core.Network
 
         private static Dictionary<(int, string), object> registeredCommands = new Dictionary<(int, string), object>();
 
-        public static NetworkCommand<T> Register<T>(NetworkCommand<T> command) where T : NetworkData
+        private static void Register<T>(NetworkCommand<T> command) where T : NetworkData
         {
-            var actionKey = (command.EntityId, command.Action.Method.Name);
-            if (registeredCommands.ContainsKey(actionKey))
-            {
-                DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {command.Action.Method.Name}");
-                return (NetworkCommand<T>)registeredCommands[actionKey];
-            }
-
             var handleDict = GetHandlersDict(command.PackageType);
             var key = (command.PackageId, command.EntityId);
             if (handleDict.ContainsKey(key))
                 throw new Exception($"There already is a command with the id \"{command.PackageId}, {command.EntityId}\", choose another one");
 
-            handleDict.Add(key, (IHandleCommand)command);
+            handleDict.Add(key, command);
             registeredCommands.Add((command.EntityId, command.Action.Method.Name), command);
-            return command;
         }
 
         private static IDictionary<(int, int), IHandleCommand> GetHandlersDict(PackageTypes packageType)
@@ -77,22 +71,43 @@ namespace JustPlanes.Core.Network
 
         public static Action<T> RegisterAtServer<T>(int packageId, Action<T> action, int entityId) where T : NetworkData
         {
+            var actionKey = (entityId, action.Method.Name);
+            if (registeredCommands.ContainsKey(actionKey))
+            {
+                DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {action.Method.Name}");
+                return GetHandler<T>(action.Method.Name, entityId);
+            }
+
             var command = new AtServerCommand<T>(packageId, entityId, action);
-            command = (AtServerCommand<T>)Register(command);
+            Register(command);
             return command.HandleData;
         }
 
         public static Action<T> RegisterAtClient<T>(int packageId, Action<T> action, int entityId) where T : NetworkData
         {
+            var actionKey = (entityId, action.Method.Name);
+            if (registeredCommands.ContainsKey(actionKey))
+            {
+                DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {action.Method.Name}");
+                return GetHandler<T>(action.Method.Name, entityId);
+            }
+
             var command = new AtClientCommand<T>(packageId, entityId, action);
-            command = (AtClientCommand<T>)Register(command);
+            Register(command);
             return command.HandleData;
         }
 
         public static Action<T> RegisterAtAllClients<T>(int packageId, Action<T> action, int entityId) where T : NetworkData
         {
+            var actionKey = (entityId, action.Method.Name);
+            if (registeredCommands.ContainsKey(actionKey))
+            {
+                DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {action.Method.Name}");
+                return GetHandler<T>(action.Method.Name, entityId);
+            }
+
             var command = new AtAllClientsCommand<T>(packageId, entityId, action);
-            command = (AtAllClientsCommand<T>)Register(command);
+            Register(command);
             return command.HandleData;
         }
     }
