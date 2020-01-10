@@ -19,8 +19,8 @@ namespace JustPlanes.Core
         public Authenticator()
         {
             entityId = 23135;
-            tryLogin = NetworkMagic.RegisterAtServer<NameNetworkData>(1, CmdTryLogin, entityId);
-            handleLogin = NetworkMagic.RegisterOnClient<MessageResponseNetworkData>(1, TargetedRpcHandleLogin, entityId);
+            tryLogin = NetworkCommand<NameNetworkData>.CreateAtServer(1, CmdTryLogin, entityId);
+            handleLogin = NetworkCommand<MessageResponseNetworkData>.CreateAtClient(1, TargetedRpcHandleLogin, entityId);
         }
 
         public void TryLogin(string name)

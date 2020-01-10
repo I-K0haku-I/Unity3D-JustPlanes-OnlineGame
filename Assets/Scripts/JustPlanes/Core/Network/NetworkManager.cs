@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace JustPlanes.Core.Network
@@ -11,74 +12,61 @@ namespace JustPlanes.Core.Network
 
         public static bool IsServer;
         internal static bool IsClient;
-        // private static HashSet<string> registeredActions = new HashSet<string>();
-        private static Dictionary<(int, string), object> registeredActions = new Dictionary<(int, string), object>();
-
         public static bool IsConnected => Client.ClientTCP.IsConnected;
 
-        private static Action<T> GenericRegister<T>(int packageId, Action<T> action, int entityId, PackageTypes packType, IDictionary<(int, int), IHandleCommand> handleDict) where T : NetworkData
+        private static Dictionary<(int, string), object> registeredActions = new Dictionary<(int, string), object>();
+
+        public static Action<T> Register<T>(NetworkCommand<T> command) where T : NetworkData
         {
-            var actionKey = (entityId, action.Method.Name);
+            var actionKey = (command.EntityId, command.Action.Method.Name);
             if (registeredActions.ContainsKey(actionKey))
             {
-                DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {action.Method.Name}");
+                DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {command.Action.Method.Name}");
                 return (Action<T>)registeredActions[actionKey];
             }
 
-            var key = (id: packageId, entityId);
+            var handleDict = GetHandlersDict(command.PackageType);
+            var key = (command.PackageId, command.EntityId);
             if (handleDict.ContainsKey(key))
-                throw new Exception($"There already is a command with the id \"{packageId}, {entityId}\", choose another one");
+                throw new Exception($"There already is a command with the id \"{command.PackageId}, {command.EntityId}\", choose another one");
 
-            var operation = NetworkMagicCommand<T>.Create(packType, packageId, entityId, action);
-            handleDict.Add(key, (IHandleCommand)operation);
-            registeredActions.Add((entityId, action.Method.Name), (Action<T>)operation.HandleData);
-            return operation.HandleData;
+            handleDict.Add(key, (IHandleCommand)command);
+            registeredActions.Add((command.EntityId, command.Action.Method.Name), (Action<T>)command.HandleData);
+            return command.HandleData;
         }
 
-        internal static Action<T> GetHandler<T>(string name, int entityId)
+        private static IDictionary<(int, int), IHandleCommand> GetHandlersDict(PackageTypes packageType)
+        {
+            switch (packageType)
+            {
+                case PackageTypes.AtAllClients:
+                    return atAllClientsHandlers;
+                case PackageTypes.AtClient:
+                    return atClientHandlers;
+                case PackageTypes.AtServer:
+                    return atServerHandlers;
+                default:
+                    return null;
+            }
+        }
+
+        public static Action<T> GetHandler<T>(string name, int entityId)
         {
             return (Action<T>)registeredActions[(entityId, name)];
         }
 
-        public static Action<T> RegisterAtServer<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
+        public static void Receive(int packageType, string connectionId, int packetId, int entityId, ByteBuffer buffer)
         {
-            return NetworkMagic.GenericRegister<T>(id, action, entityId, PackageTypes.AtServer, atServerHandlers);
-        }
+            var key = (packetId, entityId);
+            var handlersDict = GetHandlersDict((PackageTypes)packageType);
 
-        public static Action<T> RegisterOnClient<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
-        {
-            return NetworkMagic.GenericRegister<T>(id, action, entityId, PackageTypes.AtClient, atClientHandlers);
-        }
-
-        public static Action<T> RegisterAtAllClients<T>(int id, Action<T> action, int entityId = 1) where T : NetworkData
-        {
-            return NetworkMagic.GenericRegister<T>(id, action, entityId, PackageTypes.AtAllClients, atAllClientsHandlers);
-        }
-
-        internal static void Receive(int packageType, string connectionId, int packetId, int entityId, ByteBuffer buffer)
-        {
-            var key = (packetID: packetId, entityId);
-            if (packageType == (int)PackageTypes.AtServer)
+            if (handlersDict.TryGetValue(key, out var command))
             {
-                if (atServerHandlers.TryGetValue(key, out var command))
-                    command.HandleCommand(connectionId, buffer);
-                else
-                    DebugLog.Warning($"Trying to handle command {packetId}, but it's not registered.");
+                DebugLog.Warning($"[NetworkMagic] Trying to handle command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}).");
+                command.HandleBuffer(connectionId, buffer);
             }
-            else if (packageType == (int)PackageTypes.AtClient)
-            {
-                if (atClientHandlers.TryGetValue(key, out var command))
-                    command.HandleCommand(connectionId, buffer);
-                else
-                    DebugLog.Warning($"Trying to handle targeted {packetId}, but it's not registered.");
-            }
-            else if (packageType == (int)PackageTypes.AtAllClients)
-            {
-                if (atAllClientsHandlers.TryGetValue(key, out var command))
-                    command.HandleCommand(connectionId, buffer);
-                else
-                    DebugLog.Warning($"Trying to handle broadcasted {packetId}, but it's not registered.");
-            }
+            else
+                DebugLog.Warning($"[NetworkMagic] Trying to handle command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}), but it's not registered.");
         }
     }
 
@@ -89,8 +77,7 @@ namespace JustPlanes.Core.Network
 
     public interface IHandleCommand
     {
-        bool HasAction(object action);
-        void HandleCommand(string connectionId, ByteBuffer buffer);
+        void HandleBuffer(string connectionId, ByteBuffer buffer);
         void HandleData(NetworkData obj);
     }
 
@@ -101,18 +88,15 @@ namespace JustPlanes.Core.Network
         AtAllClients
     }
 
-    public class AtServerCommand<T> : NetworkMagicCommand<T> where T : NetworkData
+    public class AtServerCommand<T> : NetworkCommand<T> where T : NetworkData
     {
-        public AtServerCommand(int packageId, int entityId, Action<T> action) : base(packageId, PackageTypes.AtServer, entityId, action)
-        {
-
-        }
+        public AtServerCommand(int packageId, int entityId, Action<T> action) : base(packageId, PackageTypes.AtServer, entityId, action) { }
 
         public override void HandleData(T data)
         {
             if (NetworkMagic.IsServer)
             {
-                action.Invoke(data);
+                Action.Invoke(data);
             }
             else if (NetworkMagic.IsClient)
             {
@@ -122,59 +106,70 @@ namespace JustPlanes.Core.Network
         }
     }
 
-    public abstract class NetworkMagicCommand<T> : IHandleCommand where T : NetworkData
+    public class AtClientCommand<T> : NetworkCommand<T> where T : NetworkData
     {
-        protected readonly Action<T> action;
-        private int packageId;
-        private PackageTypes packageType;
+        public AtClientCommand(int packageId, int entityId, Action<T> action) : base(packageId, PackageTypes.AtClient, entityId, action) { }
+
+        public override void HandleData(T data)
+        {
+            if (NetworkMagic.IsServer)
+            {
+                var buffer = BuildBuffer(data);
+                SendBufferToClient(data.ConnId, buffer);
+            }
+            else if (NetworkMagic.IsClient)
+            {
+                Action.Invoke(data);
+            }
+        }
+    }
+
+    public class AtAllClientsCommand<T> : NetworkCommand<T> where T : NetworkData
+    {
+        public AtAllClientsCommand(int packageId, int entityId, Action<T> action) : base(packageId, PackageTypes.AtAllClients, entityId, action) { }
+
+        public override void HandleData(T data)
+        {
+            if (NetworkMagic.IsServer)
+            {
+                Action.Invoke(data);
+                var buffer = BuildBuffer(data);
+                SendBufferToAll(buffer);
+            }
+            else if (NetworkMagic.IsClient)
+            {
+                Action.Invoke(data);
+            }
+        }
+    }
+
+    public abstract class NetworkCommand<T> : IHandleCommand where T : NetworkData
+    {
+        public Action<T> Action;
+        public int PackageId;
+        public PackageTypes PackageType;
 
         // 1 is default and ignored
-        private int entityId;
+        public int EntityId;
 
-        public NetworkMagicCommand(int packageId, PackageTypes packageType, int entityId, Action<T> action)
+        public NetworkCommand(int packageId, PackageTypes packageType, int entityId, Action<T> action)
         {
-            this.packageId = packageId;
-            this.action = action;
-            this.packageType = packageType;
-            this.entityId = entityId;
+            this.PackageId = packageId;
+            this.Action = action;
+            this.PackageType = packageType;
+            this.EntityId = entityId;
+            NetworkMagic.Register<T>(this);
         }
 
         public abstract void HandleData(T data);
 
-        private void HandleDataForAtAllClients(T data)
-        {
-            if (NetworkMagic.IsServer)
-            {
-                action.Invoke(data);
-                var buffer = BuildBuffer(data);
-                sendBufferToAll(buffer);
-            }
-            else if (NetworkMagic.IsClient)
-            {
-                action.Invoke(data);
-            }
-        }
-
-        private void HandleDataForAtClient(T data)
-        {
-            if (NetworkMagic.IsServer)
-            {
-                var buffer = BuildBuffer(data);
-                sendBufferToClient(data.ConnId, buffer);
-            }
-            else if (NetworkMagic.IsClient)
-            {
-                action.Invoke(data);
-            }
-        }
-
         protected ByteBuffer BuildBuffer(T data)
         {
             var buffer = new ByteBuffer();
-            buffer.WriteInteger((int)packageType);
-            buffer.WriteInteger(packageId);
-            buffer.WriteInteger(entityId);
-            DebugLog.Info($"[NetworkMagic] Writing a packet of type {packageType.ToString()}:");
+            buffer.WriteInteger((int)PackageType);
+            buffer.WriteInteger(PackageId);
+            buffer.WriteInteger(EntityId);
+            DebugLog.Info($"[NetworkMagic] Writing a packet of type {PackageType.ToString()}:");
             foreach (var field in typeof(T).GetFields())
             {
                 if (field.Name == "connId")
@@ -196,23 +191,23 @@ namespace JustPlanes.Core.Network
                         buffer.WriteInteger(i);
                         break;
                     case List<string> list:
-                    {
-                        DebugLog.Info($"writing a list of string: {string.Join(", ", list)}");
-                        buffer.WriteInteger(list.Count);
-                        foreach (var item in list)
                         {
-                            buffer.WriteString(item);
-                        }
+                            DebugLog.Info($"writing a list of string: {string.Join(", ", list)}");
+                            buffer.WriteInteger(list.Count);
+                            foreach (var item in list)
+                            {
+                                buffer.WriteString(item);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                 }
             }
             DebugLog.Info("Writing---");
             return buffer;
         }
 
-        private void sendBufferToAll(ByteBuffer buffer)
+        protected void SendBufferToAll(ByteBuffer buffer)
         {
             Server.ClientManager.SendDataToAll(buffer.ToArray());
         }
@@ -222,18 +217,18 @@ namespace JustPlanes.Core.Network
             Client.ClientTCP.SendData(buffer.ToArray());
         }
 
-        private void sendBufferToClient(string connId, ByteBuffer buffer)
+        protected void SendBufferToClient(string connId, ByteBuffer buffer)
         {
             Server.ClientManager.SendDataTo(connId, buffer.ToArray());
         }
 
-        public void HandleCommand(string connectionId, ByteBuffer buffer)
+        public void HandleBuffer(string connectionId, ByteBuffer buffer)
         {
             var data = (T)Activator.CreateInstance(typeof(T));
-            DebugLog.Info($"[NetworkMagic] Reading a packet {packageType.ToString()}:");
+            DebugLog.Info($"[NetworkMagic] Reading a packet {PackageType.ToString()} with data type {typeof(T).Name}:");
             foreach (var field in typeof(T).GetFields())
             {
-                if (field.Name == "connId")
+                if (field.Name == nameof(NetworkData.ConnId))
                     continue;
 
                 if (field.FieldType == typeof(string))
@@ -265,29 +260,24 @@ namespace JustPlanes.Core.Network
             HandleData(data);
         }
 
-        public bool HasAction(object otherAction)
+        public static Action<T> CreateAtServer(int packageId, Action<T> action, int entityId)
         {
-            return action == (Action<T>) otherAction;
+            return new AtServerCommand<T>(packageId, entityId, action).HandleData;
+        }
+
+        public static Action<T> CreateAtClient(int packageId, Action<T> action, int entityId)
+        {
+            return new AtClientCommand<T>(packageId, entityId, action).HandleData;
+        }
+
+        public static Action<T> CreateAtAllClients(int packageId, Action<T> action, int entityId)
+        {
+            return new AtAllClientsCommand<T>(packageId, entityId, action).HandleData;
         }
 
         public void HandleData(NetworkData data)
         {
             HandleData((T)data);
-        }
-
-        public static IHandleCommand Create(PackageTypes packType, int packageId, int entityId, Action<T> action1)
-        {
-            switch (packType)
-            {
-                case PackageTypes.AtServer:
-                    return new AtServerCommand<T>(packageId, entityId, action1);
-                case PackageTypes.AtClient:
-                    return new AtServerCommand<T>(packageId, entityId, action1);
-                case PackageTypes.AtAllClients:
-                    return new AtServerCommand<T>(packageId, entityId, action1);
-                default:
-                    return null;
-            }
         }
     }
 }

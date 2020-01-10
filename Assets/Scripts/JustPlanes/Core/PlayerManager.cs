@@ -23,12 +23,10 @@ namespace JustPlanes.Core
         {
             this.EntityId = entityId;
 
-            initialize = NetworkMagic.RegisterAtServer<NetworkData>(1, CmdInitialize, entityId);
-            handleInitialize = NetworkMagic.RegisterOnClient<ListOfStringData>(1, TargetedHandleInitialize, entityId);
-            addItem = NetworkMagic.RegisterAtAllClients<NameNetworkData>(1, BroadcastAdd, entityId);
-            removeItem = NetworkMagic.RegisterAtAllClients<NameNetworkData>(2, BroadcastRemove, entityId);
-
-            // TODO: register some sort of callback for adding and removing
+            initialize = NetworkCommand<NetworkData>.CreateAtServer(1, CmdInitialize, entityId);
+            handleInitialize = NetworkCommand<ListOfStringData>.CreateAtClient(1, TargetedHandleInitialize, entityId);
+            addItem = NetworkCommand<NameNetworkData>.CreateAtAllClients(1, BroadcastAdd, entityId);
+            removeItem = NetworkCommand<NameNetworkData>.CreateAtAllClients(2, BroadcastRemove, entityId);
             
             if (NetworkMagic.IsClient)
                 initialize(new NetworkData());
@@ -41,7 +39,7 @@ namespace JustPlanes.Core
                 itemListServer.Add(name);
                 OnItemAdd?.Invoke(name);
             }
-            DebugLog.Warning($"Initialized, data: {string.Join(", ", itemListServer)}");
+            DebugLog.Warning($"[SyncedListOfString-{EntityId}] Initialized, data: {string.Join(", ", itemListServer)}");
         }
 
         private void CmdInitialize(NetworkData data)
