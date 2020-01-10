@@ -18,7 +18,7 @@ namespace JustPlanes.Core.Network
         SPlayerLeft = 12,
         SLoginResp = 13,
     }
-    
+
     public enum ClientPackets
     {
         CHelloServer = 1,
@@ -27,5 +27,12 @@ namespace JustPlanes.Core.Network
         CUnitDamaged = 4,
         CGiveMeMission = 5,
         CLoginReq = 6,
+    }
+
+    public enum PackageTypes
+    {
+        AtServer,
+        AtClient,
+        AtAllClients
     }
 }
