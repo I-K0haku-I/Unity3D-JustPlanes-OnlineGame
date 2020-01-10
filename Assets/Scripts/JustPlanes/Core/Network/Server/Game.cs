@@ -64,6 +64,9 @@ namespace JustPlanes.Core.Network.Server
         public void StartLoop()
         {
             int millisecondsToTick = (int)(1000 / tickRate);
+            int lastTickElapsed = 0;
+            int toSleep = 0;
+            int toSleepDept = 0;
             Stopwatch stopwatch = new Stopwatch();
             NetworkMagic.IsServer = true;
             auth = new Authenticator();
@@ -74,9 +77,14 @@ namespace JustPlanes.Core.Network.Server
             IsRunning = true;
             while (IsRunning)
             {
+                lastTickElapsed = (int)stopwatch.ElapsedMilliseconds;
+                toSleep = millisecondsToTick + toSleepDept - lastTickElapsed;
+                if (toSleep <= 0)
+                    toSleepDept += (toSleep * -1);
+                else
+                    Thread.Sleep(toSleep);
                 stopwatch.Restart();
-                Thread.Sleep(millisecondsToTick);
-                Update(stopwatch.ElapsedMilliseconds);
+                Update(lastTickElapsed);
             }
         }
 

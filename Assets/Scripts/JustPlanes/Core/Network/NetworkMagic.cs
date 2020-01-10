@@ -62,7 +62,7 @@ namespace JustPlanes.Core.Network
 
             if (handlersDict.TryGetValue(key, out var command))
             {
-                DebugLog.Warning($"[NetworkMagic] Trying to handle command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}).");
+                DebugLog.Warning($"[NetworkMagic] Handling command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}).");
                 command.HandleBuffer(connectionId, buffer);
             }
             else
