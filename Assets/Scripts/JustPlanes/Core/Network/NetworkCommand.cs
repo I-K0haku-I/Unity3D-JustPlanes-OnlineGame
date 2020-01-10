@@ -73,13 +73,12 @@ namespace JustPlanes.Core.Network
         // 1 is default and ignored
         public int EntityId;
 
-        public NetworkCommand(int packageId, PackageTypes packageType, int entityId, Action<T> action)
+        protected NetworkCommand(int packageId, PackageTypes packageType, int entityId, Action<T> action)
         {
             this.PackageId = packageId;
             this.Action = action;
             this.PackageType = packageType;
             this.EntityId = entityId;
-            NetworkMagic.Register<T>(this);
         }
 
         public abstract void HandleData(T data);
@@ -179,21 +178,6 @@ namespace JustPlanes.Core.Network
             DebugLog.Info("Reading---");
             data.ConnId = connectionId;
             HandleData(data);
-        }
-
-        public static Action<T> CreateAtServer(int packageId, Action<T> action, int entityId)
-        {
-            return new AtServerCommand<T>(packageId, entityId, action).HandleData;
-        }
-
-        public static Action<T> CreateAtClient(int packageId, Action<T> action, int entityId)
-        {
-            return new AtClientCommand<T>(packageId, entityId, action).HandleData;
-        }
-
-        public static Action<T> CreateAtAllClients(int packageId, Action<T> action, int entityId)
-        {
-            return new AtAllClientsCommand<T>(packageId, entityId, action).HandleData;
         }
 
         public void HandleData(NetworkData data)

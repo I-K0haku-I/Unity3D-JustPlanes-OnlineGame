@@ -1,85 +1,9 @@
-using System;
 using System.Collections.Generic;
 
 using JustPlanes.Core.Network;
 
 namespace JustPlanes.Core
 {
-    public class SyncedListOfString
-    {
-        public int EntityId;
-        public List<string> ItemList => itemListServer;
-        private List<string> itemListServer = new List<string>();
-
-        private Action<NameNetworkData> addItem;
-        private Action<NameNetworkData> removeItem;
-        private Action<NetworkData> initialize;
-        private Action<ListOfStringData> handleInitialize;
-
-        public event Action<string> OnItemAdd;
-        public event Action<string> OnItemRemove;
-
-        public SyncedListOfString(int entityId)
-        {
-            this.EntityId = entityId;
-
-            initialize = NetworkCommand<NetworkData>.CreateAtServer(1, CmdInitialize, entityId);
-            handleInitialize = NetworkCommand<ListOfStringData>.CreateAtClient(1, TargetedHandleInitialize, entityId);
-            addItem = NetworkCommand<NameNetworkData>.CreateAtAllClients(1, BroadcastAdd, entityId);
-            removeItem = NetworkCommand<NameNetworkData>.CreateAtAllClients(2, BroadcastRemove, entityId);
-            
-            if (NetworkMagic.IsClient)
-                initialize(new NetworkData());
-        }
-
-        private void TargetedHandleInitialize(ListOfStringData data)
-        {
-            foreach (var name in data.ItemList)
-            {
-                itemListServer.Add(name);
-                OnItemAdd?.Invoke(name);
-            }
-            DebugLog.Warning($"[SyncedListOfString-{EntityId}] Initialized, data: {string.Join(", ", itemListServer)}");
-        }
-
-        private void CmdInitialize(NetworkData data)
-        {
-            var resp = new ListOfStringData {ConnId = data.ConnId, ItemList = itemListServer};
-            handleInitialize(resp);
-        }
-
-        public void Add(string item)
-        {
-            addItem(new NameNetworkData() { Name = item });
-        }
-
-        private void BroadcastAdd(NameNetworkData data)
-        {
-            // if (!NetworkMagic.IsServer)
-            //     return;
-
-            itemListServer.Add(data.Name);
-            OnItemAdd?.Invoke(data.Name);
-        }
-
-        public void Remove(string item)
-        {
-            removeItem(new NameNetworkData() { Name = item });
-        }
-
-        private void BroadcastRemove(NameNetworkData data)
-        {
-            // if (!NetworkMagic.IsServer)
-            //     return;
-
-            if (!itemListServer.Contains(data.Name))
-                DebugLog.Warning($"Tried to remove an item from empty list.");
-
-
-            itemListServer.Remove(data.Name);
-            OnItemRemove?.Invoke(data.Name);
-        }
-    }
 
     // TODO: this is a good example where managing a list becomes a annoying and you have to start writing methods for every single thing
     // instead, it should be a custom data type for List that sends out its state to clients and clients synchronize it on their side

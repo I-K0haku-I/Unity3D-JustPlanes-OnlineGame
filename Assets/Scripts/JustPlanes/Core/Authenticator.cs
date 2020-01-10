@@ -19,8 +19,8 @@ namespace JustPlanes.Core
         public Authenticator()
         {
             entityId = 23135;
-            tryLogin = NetworkCommand<NameNetworkData>.CreateAtServer(1, CmdTryLogin, entityId);
-            handleLogin = NetworkCommand<MessageResponseNetworkData>.CreateAtClient(1, TargetedRpcHandleLogin, entityId);
+            tryLogin = NetworkMagic.RegisterAtServer<NameNetworkData>(1, TryLogin_AtServer, entityId);
+            handleLogin = NetworkMagic.RegisterAtClient<MessageResponseNetworkData>(1, HandleLogin_AtClient, entityId);
         }
 
         public void TryLogin(string name)
@@ -32,7 +32,7 @@ namespace JustPlanes.Core
             tryLogin(new NameNetworkData { Name = name });
         }
 
-        private void CmdTryLogin(NameNetworkData data)
+        private void TryLogin_AtServer(NameNetworkData data)
         {
             MessageResponseNetworkData resp = new MessageResponseNetworkData { ConnId = data.ConnId };
             if (Network.Server.GameRunner.Game.AddPlayerName(data.ConnId, data.Name))
@@ -48,7 +48,7 @@ namespace JustPlanes.Core
         //     handleLogin.Invoke(loginResponse);
         // }
 
-        private void TargetedRpcHandleLogin(MessageResponseNetworkData loginResponse)
+        private void HandleLogin_AtClient(MessageResponseNetworkData loginResponse)
         {
             if (loginResponse.IsSuccess)
             {

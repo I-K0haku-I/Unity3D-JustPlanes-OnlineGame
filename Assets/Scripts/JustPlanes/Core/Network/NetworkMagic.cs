@@ -20,15 +20,15 @@ namespace JustPlanes.Core.Network
         internal static bool IsClient;
         public static bool IsConnected => Client.ClientTCP.IsConnected;
 
-        private static Dictionary<(int, string), object> registeredActions = new Dictionary<(int, string), object>();
+        private static Dictionary<(int, string), object> registeredCommands = new Dictionary<(int, string), object>();
 
-        public static Action<T> Register<T>(NetworkCommand<T> command) where T : NetworkData
+        public static NetworkCommand<T> Register<T>(NetworkCommand<T> command) where T : NetworkData
         {
             var actionKey = (command.EntityId, command.Action.Method.Name);
-            if (registeredActions.ContainsKey(actionKey))
+            if (registeredCommands.ContainsKey(actionKey))
             {
                 DebugLog.Warning($"CONTAINS THIS ACTION ALREADY: {command.Action.Method.Name}");
-                return (Action<T>)registeredActions[actionKey];
+                return (NetworkCommand<T>)registeredCommands[actionKey];
             }
 
             var handleDict = GetHandlersDict(command.PackageType);
@@ -37,8 +37,8 @@ namespace JustPlanes.Core.Network
                 throw new Exception($"There already is a command with the id \"{command.PackageId}, {command.EntityId}\", choose another one");
 
             handleDict.Add(key, (IHandleCommand)command);
-            registeredActions.Add((command.EntityId, command.Action.Method.Name), (Action<T>)command.HandleData);
-            return command.HandleData;
+            registeredCommands.Add((command.EntityId, command.Action.Method.Name), command);
+            return command;
         }
 
         private static IDictionary<(int, int), IHandleCommand> GetHandlersDict(PackageTypes packageType)
@@ -56,9 +56,9 @@ namespace JustPlanes.Core.Network
             }
         }
 
-        public static Action<T> GetHandler<T>(string name, int entityId)
+        public static Action<T> GetHandler<T>(string name, int entityId) where T : NetworkData
         {
-            return (Action<T>)registeredActions[(entityId, name)];
+            return ((IHandleCommand)registeredCommands[(entityId, name)]).HandleData;
         }
 
         public static void Receive(int packageType, string connectionId, int packetId, int entityId, ByteBuffer buffer)
@@ -73,6 +73,27 @@ namespace JustPlanes.Core.Network
             }
             else
                 DebugLog.Warning($"[NetworkMagic] Trying to handle command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}), but it's not registered.");
+        }
+
+        public static Action<T> RegisterAtServer<T>(int packageId, Action<T> action, int entityId) where T : NetworkData
+        {
+            var command = new AtServerCommand<T>(packageId, entityId, action);
+            command = (AtServerCommand<T>)Register(command);
+            return command.HandleData;
+        }
+
+        public static Action<T> RegisterAtClient<T>(int packageId, Action<T> action, int entityId) where T : NetworkData
+        {
+            var command = new AtClientCommand<T>(packageId, entityId, action);
+            command = (AtClientCommand<T>)Register(command);
+            return command.HandleData;
+        }
+
+        public static Action<T> RegisterAtAllClients<T>(int packageId, Action<T> action, int entityId) where T : NetworkData
+        {
+            var command = new AtAllClientsCommand<T>(packageId, entityId, action);
+            command = (AtAllClientsCommand<T>)Register(command);
+            return command.HandleData;
         }
     }
 }
