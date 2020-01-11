@@ -9,8 +9,8 @@ namespace JustPlanes.Unity.UI
     {
         private static readonly string _prefix = "MP Presenter:";
 
-        [SerializeField] private MissionPanelView viewRef1;
-        [SerializeField] private MissionPanelView viewRef2;
+        [SerializeField] private MissionPanelView viewRef1 = null;
+        [SerializeField] private MissionPanelView viewRef2 = null;
 
         private MissionPanelView currentView;
 

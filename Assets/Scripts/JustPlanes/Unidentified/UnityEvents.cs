@@ -12,7 +12,5 @@ namespace JustPlanes.Unity
 
     public sealed class UnitViewEvent : UnityEvent<Unit> { }
 
-    public sealed class PlayerViewEvent : UnityEvent<PlayerView> { }
-
 }
 
