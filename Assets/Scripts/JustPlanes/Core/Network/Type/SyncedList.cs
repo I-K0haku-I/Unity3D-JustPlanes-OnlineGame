@@ -25,10 +25,10 @@ namespace JustPlanes.Core
         {
             EntityId = entityId;
 
-            initialize = NetworkCommand<NetworkData>.CreateAtServer(1, CmdInitialize, entityId);
-            handleInitialize = NetworkCommand<ListData<T>>.CreateAtClient(1, TargetedHandleInitialize, entityId);
-            addItem = NetworkCommand<SingleData<T>>.CreateAtAllClients(1, BroadcastAdd, entityId);
-            removeItem = NetworkCommand<SingleData<T>>.CreateAtAllClients(2, BroadcastRemove, entityId);
+            initialize = NetworkMagic.RegisterAtServer<NetworkData>(0, CmdInitialize, entityId);
+            handleInitialize = NetworkMagic.RegisterAtClient<ListData<T>>(0, TargetedHandleInitialize, entityId);
+            addItem = NetworkMagic.RegisterAtAllClients<SingleData<T>>(0, BroadcastAdd, entityId);
+            removeItem = NetworkMagic.RegisterAtAllClients<SingleData<T>>(1, BroadcastRemove, entityId);
 
             if (NetworkMagic.IsClient)
             {
