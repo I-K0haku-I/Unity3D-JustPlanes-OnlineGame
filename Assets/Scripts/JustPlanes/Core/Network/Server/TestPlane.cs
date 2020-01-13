@@ -16,7 +16,7 @@ namespace JustPlanes.Core.Network
         {
             transform2D.Update(deltaTime);
             transform2D.position.X = transform2D.position.X + 10 * deltaTime;
-            DebugLog.Warning($"[TestPlane] WHEE X: {transform2D.position.X}, Y: {transform2D.position.Y}");
+            DebugLog.Warning($"[TestPlane] position: {transform2D.position.ToString()}, Y: {transform2D.position.Y}");
         }
 
         public float GetTime()

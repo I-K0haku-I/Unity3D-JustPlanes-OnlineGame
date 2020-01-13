@@ -58,7 +58,7 @@ namespace JustPlanes.Core.Network.Client
 
         public static void SendData(byte[] data)
         {
-            DebugLog.Info("[Connection] Sending Data!");
+            DebugLog.LogConn("[Connection] Sending Data!");
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteInteger((data.GetUpperBound(0) - data.GetLowerBound(0)) + 1);
             buffer.WriteBytes(data);

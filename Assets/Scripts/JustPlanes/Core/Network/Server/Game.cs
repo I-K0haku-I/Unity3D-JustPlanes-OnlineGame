@@ -90,7 +90,10 @@ namespace JustPlanes.Core.Network.Server
                 if (toSleep <= 0)
                     toSleepDept += (toSleep * -1f);
                 else
+                {
+                    DebugLog.Warning("Sleeping for " + toSleep.ToString());
                     Thread.Sleep((int)(toSleep * 1000));
+                }
 
                 stopwatchUpdate.Restart();
                 Update(lastFrameElapsed);

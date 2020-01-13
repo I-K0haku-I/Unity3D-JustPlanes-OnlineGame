@@ -22,7 +22,7 @@ namespace JustPlanes.Unity
             if (setLogLevel)
             {
                 DebugLog.Warning($"<color=#FF69B4>[Debugger] change log level is enabled! {loggingLevel}</color>");
-                DebugLog.SetLevel(loggingLevel);
+                // DebugLog.SetLevel(loggingLevel);
             }
         }
 

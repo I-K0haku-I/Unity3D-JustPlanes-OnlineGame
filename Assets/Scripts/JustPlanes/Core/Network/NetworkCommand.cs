@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace JustPlanes.Core.Network
 {
@@ -53,7 +54,7 @@ namespace JustPlanes.Core.Network
         {
             if (NetworkMagic.IsServer)
             {
-                Action.Invoke(data);
+                // Action.Invoke(data);
                 var buffer = BuildBuffer(data);
                 SendBufferToAll(buffer);
             }
@@ -89,7 +90,7 @@ namespace JustPlanes.Core.Network
             buffer.WriteInteger((int)PackageType);
             buffer.WriteInteger(PackageId);
             buffer.WriteInteger(EntityId);
-            DebugLog.Info($"[NetworkMagic] Writing a packet of type {PackageType.ToString()}:");
+            DebugLog.LogPackets($"[NetworkMagic] Writing a packet of type {PackageType.ToString()}:");
             foreach (var field in typeof(T).GetFields())
             {
                 if (field.Name == "connId")
@@ -99,20 +100,25 @@ namespace JustPlanes.Core.Network
                 switch (value)
                 {
                     case string s:
-                        DebugLog.Info($"writing a string for {field.Name}: {s.ToString()}");
+                        DebugLog.LogPackets($"writing a string for {field.Name}: {s.ToString()}");
                         buffer.WriteString(s);
                         break;
                     case bool b:
-                        DebugLog.Info($"writing a bool for {field.Name}: {b.ToString()}");
+                        DebugLog.LogPackets($"writing a bool for {field.Name}: {b.ToString()}");
                         buffer.WriteBool(b);
                         break;
                     case int i:
-                        DebugLog.Info($"writing an int: {i.ToString()}");
+                        DebugLog.LogPackets($"writing an int: {i.ToString()}");
                         buffer.WriteInteger(i);
+                        break;
+                    case PointF p:
+                        DebugLog.LogPackets($"writing a PointF: {p.ToString()}");
+                        buffer.WriteFloat(p.X);
+                        buffer.WriteFloat(p.Y);
                         break;
                     case List<string> list:
                         {
-                            DebugLog.Info($"writing a list of string: {string.Join(", ", list)}");
+                            DebugLog.LogPackets($"writing a list of string: {string.Join(", ", list)}");
                             buffer.WriteInteger(list.Count);
                             foreach (var item in list)
                             {
@@ -123,7 +129,7 @@ namespace JustPlanes.Core.Network
                         }
                 }
             }
-            DebugLog.Info("Writing---");
+            DebugLog.LogPackets("Writing---");
             return buffer;
         }
 
@@ -145,7 +151,7 @@ namespace JustPlanes.Core.Network
         public void HandleBuffer(string connectionId, ByteBuffer buffer)
         {
             var data = (T)Activator.CreateInstance(typeof(T));
-            DebugLog.Info($"[NetworkMagic] Reading a packet {PackageType.ToString()} with data type {typeof(T).Name}:");
+            DebugLog.LogPackets($"[NetworkMagic] Reading a packet {PackageType.ToString()} with data type {typeof(T).Name}:");
             foreach (var field in typeof(T).GetFields())
             {
                 if (field.Name == nameof(NetworkData.ConnId))
@@ -154,13 +160,13 @@ namespace JustPlanes.Core.Network
                 if (field.FieldType == typeof(string))
                 {
                     var value = buffer.ReadString();
-                    DebugLog.Info($"Decrypted string: {value}");
+                    DebugLog.LogPackets($"Decrypted string: {value}");
                     field.SetValue(data, value);
                 }
                 else if (field.FieldType == typeof(bool))
                 {
                     var value = buffer.ReadBool();
-                    DebugLog.Info($"Decrypted bool: {value}");
+                    DebugLog.LogPackets($"Decrypted bool: {value}");
                     field.SetValue(data, value);
                 }
                 else if (field.FieldType == typeof(List<string>))
@@ -171,11 +177,19 @@ namespace JustPlanes.Core.Network
                     {
                         someList.Add(buffer.ReadString());
                     }
-                    DebugLog.Info($"Decrypted list of string: {string.Join(", ", someList)}");
+                    DebugLog.LogPackets($"Decrypted list of string: {string.Join(", ", someList)}");
                     field.SetValue(data, someList);
                 }
+                else if (field.FieldType == typeof(PointF))
+                {
+                    var value = new PointF();
+                    value.X = buffer.ReadFloat();
+                    value.Y = buffer.ReadFloat();
+                    DebugLog.LogPackets($"Decrypted PointF: {value.ToString()}");
+                    field.SetValue(data, value);
+                }
             }
-            DebugLog.Info("Reading---");
+            DebugLog.LogPackets("Reading---");
             data.ConnId = connectionId;
             HandleData(data);
         }

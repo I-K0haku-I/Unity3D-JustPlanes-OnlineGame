@@ -39,7 +39,7 @@ namespace JustPlanes.Unity
                     // Note: this is not debug.
                     //       there are some local units exist (PlaneView) on project currently.
                     //       until it'll be fixed or will be no longer needed, this will stay here to try-not-to-send-invalid-packets.
-                    DebugLog.Warning(this, $"Bullet has found local units (shouldn't happen!)!!");
+                    // DebugLog.Warning(this, $"Bullet has found local units (shouldn't happen!)!!");
                     return;
                 }
 

@@ -22,7 +22,7 @@ namespace JustPlanes.Unity
         {
             if (Instance != null)
             {
-                DebugLog.Severe(this, $"{_prefix} MissionHandlerManager instance already exists!!");
+                // DebugLog.Severe(this, $"{_prefix} MissionHandlerManager instance already exists!!");
                 Destroy(this);
             }
 

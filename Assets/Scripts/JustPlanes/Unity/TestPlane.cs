@@ -16,6 +16,7 @@ namespace JustPlanes.Unity
 
         public void SetPositionAndRotation(float x, float y, float rotation)
         {
+            DebugLog.Warning(x.ToString());
             gameObject.transform.SetPositionAndRotation(new Vector3(x, y, 0), new Quaternion(0, 0, rotation, 0));
         }
 

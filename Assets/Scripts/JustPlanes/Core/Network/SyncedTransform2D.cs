@@ -17,7 +17,7 @@ namespace JustPlanes.Core.Network
 
         private Action<Transform2DNetworkData> transmitState;
         private int stateAmount = 20;
-        private int tickRate = 20;
+        private int tickRate = 1;
         private float tickTriggerAmount;
         private float tickTimer = 0;
 
@@ -32,11 +32,13 @@ namespace JustPlanes.Core.Network
         public SyncedTransform2D(int entityId, ITransformHolder gameObject)
         {
             this.EntityId = entityId;
-            tickTriggerAmount = (int)1000 / tickRate;
+            tickTriggerAmount = 1f / tickRate;
             this.gameObject = gameObject;
 
             stateBuffer = new Transform2DNetworkData[stateAmount];
-            transmitState = NetworkMagic.RegisterAtServer<Transform2DNetworkData>(0, TransmitState_AtAllClients, entityId);
+            stateTimeOffsets.Add(0f);
+            stateBuffer[0] = new Transform2DNetworkData() { Timestamp = 0f, Position = new PointF(0, 0), Rotation = 0f};
+            transmitState = NetworkMagic.RegisterAtAllClients<Transform2DNetworkData>(0, TransmitState_AtAllClients, entityId);
         }
 
         public void Update(float deltaTime)
@@ -44,20 +46,18 @@ namespace JustPlanes.Core.Network
             if (NetworkMagic.IsServer)
             {
                 tickTimer += deltaTime;
-                if (tickTimer >= tickTriggerAmount)
-                {
-                    tickTimer -= tickTriggerAmount;
-                    if (position != stateLastSent.Position)
-                        stateToSend.Position = position;
-                    if (rotation != stateLastSent.Rotation)
-                        stateToSend.Rotation = rotation;
-                    if (position != stateLastSent.Position || rotation != stateLastSent.Rotation)
-                    {
-                        stateToSend.Timestamp = GetWorldTime();
-                        stateLastSent.TransferValuesFrom(stateToSend);
-                        transmitState(stateToSend);
-                    }
-                }
+                if (!(tickTimer >= tickTriggerAmount)) return;
+                
+                tickTimer -= tickTriggerAmount;
+                if (position != stateLastSent.Position)
+                    stateToSend.Position = position;
+                if (Math.Abs(rotation - stateLastSent.Rotation) > 0.01)
+                    stateToSend.Rotation = rotation;
+                if (position == stateLastSent.Position && Math.Abs(rotation - stateLastSent.Rotation) < 0.01) return;
+                
+                stateToSend.Timestamp = GetWorldTime();
+                stateLastSent.TransferValuesFrom(stateToSend);
+                transmitState(stateToSend);
             }
             else
             {
@@ -108,7 +108,7 @@ namespace JustPlanes.Core.Network
                 stateBuffer[stateBuffer.Length - 1] = data;
             }
 
-            DebugLog.Warning($"[SyncedTransform2D-{EntityId}: ");
+            DebugLog.Warning($"[SyncedTransform2D-{EntityId}: {data.Position.ToString()}");
         }
     }
 

@@ -62,11 +62,11 @@ namespace JustPlanes.Core.Network
 
             if (handlersDict.TryGetValue(key, out var command))
             {
-                DebugLog.Warning($"[NetworkMagic] Handling command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}).");
+                DebugLog.LogPackets($"[NetworkMagic] Handling command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}).");
                 command.HandleBuffer(connectionId, buffer);
             }
             else
-                DebugLog.Warning($"[NetworkMagic] Trying to handle command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}), but it's not registered.");
+                DebugLog.LogPackets($"[NetworkMagic] Trying to handle command \"{((PackageTypes)packageType).ToString()}\" with key ({packetId}, {entityId}), but it's not registered.");
         }
 
         public static Action<T> RegisterAtServer<T>(int packageId, Action<T> action, int entityId) where T : NetworkData
