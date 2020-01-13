@@ -18,11 +18,14 @@ namespace JustPlanes.Unity
         private GameObject mainMenuUIManager;
         [SerializeField]
         private GameObject playerListUIManager;
+        [SerializeField]
+        private GameObject testPlane;
 
         private void Awake()
         {
             mainMenuUIManager.SetActive(false);
             playerListUIManager.SetActive(false);
+            testPlane.SetActive(false);
             if (instance == null)
             {
                 instance = this;
@@ -46,6 +49,7 @@ namespace JustPlanes.Unity
         {
             PlayerManager = new PlayerManager();
             playerListUIManager.SetActive(true);
+            testPlane.SetActive(true);
         }
 
         void Update()

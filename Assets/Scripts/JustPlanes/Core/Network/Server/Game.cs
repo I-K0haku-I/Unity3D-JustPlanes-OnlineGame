@@ -32,7 +32,7 @@ namespace JustPlanes.Core.Network.Server
     {
         public ConcurrentQueue<int> queue = new ConcurrentQueue<int>();
         public bool IsRunning;
-        private long tickRate = 10;  // ticks per second
+        private int tickRate = 10;  // ticks per second
         internal ConcurrentQueue<string> msgQueue = new ConcurrentQueue<string>();
         internal ConcurrentQueue<string> clientConnectedQueue = new ConcurrentQueue<string>();
         internal ConcurrentQueue<string> clientDisconnectedQueue = new ConcurrentQueue<string>();
@@ -61,34 +61,45 @@ namespace JustPlanes.Core.Network.Server
         private List<int> missionUpdates = new List<int>();
         public ConcurrentQueue<Action> handleDataQueue = new ConcurrentQueue<Action>();
 
+        public static Stopwatch GameTimer;
+
         public void StartLoop()
         {
-            int millisecondsToTick = (int)(1000 / tickRate);
-            int lastTickElapsed = 0;
-            int toSleep = 0;
-            int toSleepDept = 0;
-            Stopwatch stopwatch = new Stopwatch();
+            float secondsToTick = 1f / tickRate;
+            float lastUpdateElapsed = 0f;
+            float lastFrameElapsed = 0f;
+            float toSleep = 0f;
+            float toSleepDept = 0f;
+            Stopwatch stopwatchUpdate = new Stopwatch();
+            Stopwatch stopwatchLastFrame = new Stopwatch();
+            GameTimer = new Stopwatch();
             NetworkMagic.IsServer = true;
             auth = new Authenticator();
             playerManager = new PlayerManager();
+
+            TestPlane testPlane = new TestPlane();
             // playerManager.AddPlayer("Test1");
             // playerManager.AddPlayer("Test2");
             // unitSpawner.Start();
             IsRunning = true;
             while (IsRunning)
             {
-                lastTickElapsed = (int)stopwatch.ElapsedMilliseconds;
-                toSleep = millisecondsToTick + toSleepDept - lastTickElapsed;
+                lastFrameElapsed = (float)stopwatchLastFrame.ElapsedMilliseconds / 1000f;
+                stopwatchLastFrame.Restart();
+                toSleep = secondsToTick + toSleepDept - lastUpdateElapsed;
                 if (toSleep <= 0)
-                    toSleepDept += (toSleep * -1);
+                    toSleepDept += (toSleep * -1f);
                 else
-                    Thread.Sleep(toSleep);
-                stopwatch.Restart();
-                Update(lastTickElapsed);
+                    Thread.Sleep((int)(toSleep * 1000));
+
+                stopwatchUpdate.Restart();
+                Update(lastFrameElapsed);
+                testPlane.Update(lastFrameElapsed);
+                lastUpdateElapsed = (float)stopwatchUpdate.ElapsedMilliseconds / 1000f;
             }
         }
 
-        private void Update(long elapsedMilliseconds)
+        private void Update(float elapsedMilliseconds)
         {
             if (msgQueue.TryDequeue(out string result))
                 Console.WriteLine(result);
