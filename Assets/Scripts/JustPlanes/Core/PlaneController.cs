@@ -67,7 +67,7 @@ namespace JustPlanes.Core
             ClearBuffer();
         }
 
-        public void Input(float deltaTime, float hori, float vert, bool shoot)
+        public void AddInput(float deltaTime, float hori, float vert, bool shoot)
         {
             vertInputBuffer += Math.Min(Math.Max(vert * deltaTime, 1), -1);
             horiInputBuffer += Math.Min(Math.Max(hori * deltaTime, 1), -1);
@@ -98,7 +98,7 @@ namespace JustPlanes.Core
 
         void FixedTick(float deltaTime);
 
-        void Input(float deltaTime, float horizontalInput, float verticalInput, bool isShooting);
+        void AddInput(float deltaTime, float horizontalInput, float verticalInput, bool isShooting);
 
         Plane GetPlane();
 

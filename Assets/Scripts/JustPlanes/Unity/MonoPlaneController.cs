@@ -1,23 +1,13 @@
-﻿using System;
-using JustPlanes.Core;
+﻿using JustPlanes.Core;
+using System;
 using UnityEngine;
 
 namespace JustPlanes.Unity
 {
-    public class MonoPlaneController : MonoBehaviour
+    public class MonoPlaneController : MonoBehaviour, IPlaneController
     {
-        bool isInitialized = false;
-        IPlaneController controllerImpl = null;
-
-        private void Awake()
-        {
-            
-        }
-
-        private void Start()
-        {
-            
-        }
+        private bool isInitialized = false;
+        private IPlaneController controllerImpl = null;
 
         public void Initialize(IPlaneController controllerImpl)
         {
@@ -31,13 +21,39 @@ namespace JustPlanes.Unity
 
         private void Update()
         {
-            this.controllerImpl.Input(Time.deltaTime, Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetButtonDown("Fire1"));
+            if (isInitialized)
+            {
+                AddInput(Time.deltaTime, Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), Input.GetButtonDown("Fire1"));
+            }
         }
 
         private void FixedUpdate()
         {
-            this.controllerImpl.FixedTick(Time.deltaTime);
-            Transform2D expectingTransform = this.controllerImpl.GetPlane().transform2D;
+            FixedTick(Time.deltaTime);
+        }
+
+        public void FixedTick(float deltaTime)
+        {
+            controllerImpl.FixedTick(deltaTime);
+            Transform2D expectingTransform = controllerImpl.GetPlane().transform2D;
+            Vec2 pos = expectingTransform.position;
+            float rot = expectingTransform.rotation;
+            this.transform.SetPositionAndRotation(new Vector3(pos.x, pos.y), Quaternion.AngleAxis(rot, Vector3.back));
+        }
+
+        public void AddInput(float deltaTime, float horizontalInput, float verticalInput, bool isShooting)
+        {
+            controllerImpl.AddInput(deltaTime, horizontalInput, verticalInput, isShooting);
+        }
+
+        public Core.Plane GetPlane()
+        {
+            return controllerImpl.GetPlane();
+        }
+
+        public Player GetPlayer()
+        {
+            return controllerImpl.GetPlayer();
         }
     }
 }
