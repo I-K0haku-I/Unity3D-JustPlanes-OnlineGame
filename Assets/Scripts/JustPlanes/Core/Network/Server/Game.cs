@@ -70,6 +70,8 @@ namespace JustPlanes.Core.Network.Server
             float lastFrameElapsed = 0f;
             float toSleep = 0f;
             float toSleepDept = 0f;
+            List<float> listOfUpdateTimes = new List<float>();
+            listOfUpdateTimes.Add(0f);
             Stopwatch stopwatchUpdate = new Stopwatch();
             Stopwatch stopwatchLastFrame = new Stopwatch();
             GameTimer = new Stopwatch();
@@ -86,19 +88,24 @@ namespace JustPlanes.Core.Network.Server
             {
                 lastFrameElapsed = (float)stopwatchLastFrame.ElapsedMilliseconds / 1000f;
                 stopwatchLastFrame.Restart();
-                toSleep = secondsToTick + toSleepDept - lastUpdateElapsed;
-                if (toSleep <= 0)
-                    toSleepDept += (toSleep * -1f);
-                else
-                {
-                    DebugLog.Warning("Sleeping for " + toSleep.ToString());
-                    Thread.Sleep((int)(toSleep * 1000));
-                }
+
+                // toSleepDept += lastUpdateElapsed;
+                // if (toSleepDept > secondsToTick)
+                //     toSleepDept -= secondsToTick;
+                // else
+                //     Thread.Sleep((int)(secondsToTick * 1000));
+
+                if (listOfUpdateTimes.Count > 300)
+                    listOfUpdateTimes.RemoveRange(0, 150);
+
+                DebugLog.Warning($"{listOfUpdateTimes.Average()}");
+                Thread.Sleep((int)((secondsToTick - listOfUpdateTimes.Average()) * 1000));
 
                 stopwatchUpdate.Restart();
                 Update(lastFrameElapsed);
                 testPlane.Update(lastFrameElapsed);
                 lastUpdateElapsed = (float)stopwatchUpdate.ElapsedMilliseconds / 1000f;
+                listOfUpdateTimes.Add(lastUpdateElapsed);
             }
         }
 
