@@ -24,7 +24,7 @@ namespace JustPlanes
 
         internal static void Severe(string v)
         {
-            throw new NotImplementedException();
+            Debug.LogError(v);
         }
 
         internal static void Severe(MissionPanelPresenter missionPanelPresenter, string v)
@@ -44,7 +44,7 @@ namespace JustPlanes
 
         public static void LogPackets(string msg)
         {
-            Debug.Log(msg);
+            // Debug.Log(msg);
         }
 
         internal static void Severe(PlayerListPanelOld playerListPanelOld, string v)

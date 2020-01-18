@@ -7,8 +7,8 @@ namespace JustPlanes.Core.Network
 {
     public class SyncedTransform2D
     {
-        public PointF position = new PointF();
-        public float rotation = 0;
+        public PointF Position = new PointF();
+        public float Rotation = 0;
         private int EntityId;
 
         // private
@@ -21,7 +21,7 @@ namespace JustPlanes.Core.Network
         private float tickTriggerAmount;
         private float tickTimer = 0;
 
-        private float interpolationBackTime = 0.1f;
+        public float InterpolationBackTime = 0.1f;
 
         private ITransformHolder gameObject;
 
@@ -37,48 +37,63 @@ namespace JustPlanes.Core.Network
 
             stateBuffer = new Transform2DNetworkData[stateAmount];
             stateTimeOffsets.Add(0f);
-            stateBuffer[0] = new Transform2DNetworkData() { Timestamp = 0f, Position = new PointF(0, 0), Rotation = 0f};
+            stateBuffer[0] = new Transform2DNetworkData() { Timestamp = 0.0000000001f, Position = new PointF(0, 0), Rotation = 0f };
+            stateBuffer[1] = new Transform2DNetworkData() { Timestamp = 0f, Position = new PointF(0, 0), Rotation = 0f };
             transmitState = NetworkMagic.RegisterAtAllClients<Transform2DNetworkData>(0, TransmitState_AtAllClients, entityId);
         }
 
         public void Update(float deltaTime)
         {
             if (NetworkMagic.IsServer)
-            {
-                tickTimer += deltaTime;
-                if (!(tickTimer >= tickTriggerAmount)) return;
-                
-                tickTimer -= tickTriggerAmount;
-                if (position != stateLastSent.Position)
-                    stateToSend.Position = position;
-                if (Math.Abs(rotation - stateLastSent.Rotation) > 0.01)
-                    stateToSend.Rotation = rotation;
-                if (position == stateLastSent.Position && Math.Abs(rotation - stateLastSent.Rotation) < 0.01) return;
-                
-                stateToSend.Timestamp = GetWorldTime();
-                stateLastSent.TransferValuesFrom(stateToSend);
-                transmitState(stateToSend);
-            }
+                UpdateServer(deltaTime);
             else
-            {
-                float serverTime = GetWorldTime() + (float)stateTimeOffsets.Average();
-                float interpolationTime = serverTime - interpolationBackTime;
-                int stateIndex = 0;
-                for (; stateIndex < stateBuffer.Length; stateIndex++)
-                {
-                    if (stateBuffer[stateIndex].Timestamp <= interpolationTime)
-                        break;
-                }
-                if (stateIndex == stateBuffer.Length)
-                    stateIndex--;
+                UpdateClient(deltaTime);
+        }
 
-                Transform2DNetworkData startState = stateBuffer[Math.Max(stateIndex - 1, 0)];
-                Transform2DNetworkData endState = stateBuffer[stateIndex];
-                float amount = (interpolationTime - startState.Timestamp) / (endState.Timestamp / startState.Timestamp);
-                currentState.Position = DoLerp(startState.Position, endState.Position, amount);
-                currentState.Rotation = DoLerp(startState.Rotation, endState.Rotation, amount);
-                gameObject.SetPositionAndRotation(currentState.Position.X, currentState.Position.Y, currentState.Rotation);
+        private void UpdateServer(float deltaTime)
+        {
+            tickTimer += deltaTime;
+            if (!(tickTimer >= tickTriggerAmount)) return;
+
+            tickTimer -= tickTriggerAmount;
+            if (Position != stateLastSent.Position)
+                stateToSend.Position = Position;
+            if (Math.Abs(Rotation - stateLastSent.Rotation) > 0.01)
+                stateToSend.Rotation = Rotation;
+            if (Position == stateLastSent.Position && Math.Abs(Rotation - stateLastSent.Rotation) < 0.01) return;
+
+            stateToSend.Timestamp = GetWorldTime();
+            // DebugLog.Warning($"SENDING {stateToSend.Timestamp}");
+            stateLastSent.TransferValuesFrom(stateToSend);
+            transmitState(stateToSend);
+        }
+
+        private void UpdateClient(float deltaTime)
+        {
+            float serverTime = GetWorldTime() + (float)stateTimeOffsets.Average();
+            float interpolationTime = serverTime - InterpolationBackTime;
+            int stateIndex = 0;
+            for (; stateIndex < stateBuffer.Length; stateIndex++)
+            {
+                if (stateBuffer[stateIndex].Timestamp <= interpolationTime)
+                    break;
             }
+            if (stateIndex == stateBuffer.Length)
+                stateIndex--;
+
+            Transform2DNetworkData endState = stateBuffer[Math.Max(stateIndex - 1, 0)];
+            Transform2DNetworkData startState = stateBuffer[stateIndex];
+            // DebugLog.Warning($"[Transform2D] amount: {endState.Position.ToString()}");
+            float amount = 1f;
+            if (endState.Timestamp != startState.Timestamp)
+                amount = (interpolationTime - startState.Timestamp) / (endState.Timestamp - startState.Timestamp);
+            // DebugLog.Warning("[SyncedTransform2D] amount " + amount.ToString());
+            currentState.Position = DoLerp(startState.Position, endState.Position, amount);
+            currentState.Rotation = DoLerp(startState.Rotation, endState.Rotation, amount);
+            DebugLog.Warning("[SyncedTransform2D] new pos " + currentState.Position.ToString());
+            // gameObject.SetPositionAndRotation(currentState.Position.X, currentState.Position.Y, currentState.Rotation);
+            Position = currentState.Position;
+            Rotation = currentState.Rotation;
         }
 
         private PointF DoLerp(PointF first, PointF second, float amount)
@@ -98,24 +113,29 @@ namespace JustPlanes.Core.Network
 
         private void TransmitState_AtAllClients(Transform2DNetworkData data)
         {
-            stateTimeOffsets.Add(data.Timestamp);
+            if (stateBuffer.Length > 1 && data.Timestamp <= stateBuffer[0].Timestamp)
+                return;
+            
+            if (stateTimeOffsets[0] == 0f)
+                stateTimeOffsets.RemoveAt(0);
+            stateTimeOffsets.Add(data.Timestamp - GetWorldTime());
             if (stateTimeOffsets.Count > stateAmount)
                 stateTimeOffsets.RemoveAt(0);
 
-            if (stateBuffer[0].Timestamp < data.Timestamp)
-            {
-                Array.Copy(stateBuffer, 1, stateBuffer, 0, stateBuffer.Length - 1);
-                stateBuffer[stateBuffer.Length - 1] = data;
-            }
+            for (int i = stateBuffer.Length - 1; i >= 1; i--)
+                stateBuffer[i] = stateBuffer[i - 1];
+            // Array.Copy(stateBuffer, 0, stateBuffer, 1, stateBuffer.Length - 1);
+            stateBuffer[0] = data;
 
-            DebugLog.Warning($"[SyncedTransform2D-{EntityId}: {data.Position.ToString()}");
+            // DebugLog.Warning($"[SyncedTransform2D-{EntityId}: {data.Position.ToString()}");
+            // DebugLog.Warning($"[SyncedTransform2D-{EntityId}: {string.Join(", ", stateBuffer.Select((state, i) => state.Position.ToString()))}");
         }
     }
 
     public interface ITransformHolder
     {
         float GetTime();
-        void SetPositionAndRotation(float x, float y, float rotation);
+        // void SetPositionAndRotation(float x, float y, float rotation);
     }
 
     public class Transform2DNetworkData : NetworkData

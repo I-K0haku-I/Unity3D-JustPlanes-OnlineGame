@@ -35,21 +35,35 @@ namespace JustPlanes.Unity
 
         private void Start()
         {
+            StartCoroutine("TryConnecting");
             StartMainMenu();
+        }
+
+        IEnumerator TryConnecting()
+        {
+            while (true)
+            {
+                if (Core.Network.NetworkMagic.IsConnected)
+                    break;
+                // TODO: add game data reset when disconnecting
+                NetworkManager.instance.StartConnection();
+                yield return new WaitForSeconds(1f);
+            }
         }
 
         public void StartMainMenu()
         {
-            NetworkManager.instance.StartConnection();
             Authenticator = new Authenticator();
             mainMenuUIManager.SetActive(true);
         }
 
         public void StartGame()
         {
+            mainMenuUIManager.SetActive(false);
             PlayerManager = new PlayerManager();
             playerListUIManager.SetActive(true);
             testPlane.SetActive(true);
+            Camera.main.transform.parent = testPlane.transform;
         }
 
         void Update()

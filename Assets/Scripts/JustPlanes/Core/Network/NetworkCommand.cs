@@ -93,7 +93,7 @@ namespace JustPlanes.Core.Network
             DebugLog.LogPackets($"[NetworkMagic] Writing a packet of type {PackageType.ToString()}:");
             foreach (var field in typeof(T).GetFields())
             {
-                if (field.Name == "connId")
+                if (field.Name == nameof(NetworkData.ConnId))
                     continue;
 
                 var value = field.GetValue(data);
@@ -102,6 +102,10 @@ namespace JustPlanes.Core.Network
                     case string s:
                         DebugLog.LogPackets($"writing a string for {field.Name}: {s.ToString()}");
                         buffer.WriteString(s);
+                        break;
+                    case float f:
+                        DebugLog.LogPackets($"writing a float for {field.Name}: {f.ToString()}");
+                        buffer.WriteFloat(f);
                         break;
                     case bool b:
                         DebugLog.LogPackets($"writing a bool for {field.Name}: {b.ToString()}");
@@ -127,6 +131,9 @@ namespace JustPlanes.Core.Network
 
                             break;
                         }
+                    default:
+                        DebugLog.Severe($"[NetworkMagic] You are trying to encrypt an unknown data type for {typeof(T).FullName}!");
+                        break;
                 }
             }
             DebugLog.LogPackets("Writing---");
@@ -163,6 +170,12 @@ namespace JustPlanes.Core.Network
                     DebugLog.LogPackets($"Decrypted string: {value}");
                     field.SetValue(data, value);
                 }
+                else if (field.FieldType == typeof(float))
+                {
+                    var value = buffer.ReadFloat();
+                    DebugLog.LogPackets($"Decrypted float: {value.ToString()}");
+                    field.SetValue(data, value);
+                }
                 else if (field.FieldType == typeof(bool))
                 {
                     var value = buffer.ReadBool();
@@ -188,6 +201,8 @@ namespace JustPlanes.Core.Network
                     DebugLog.LogPackets($"Decrypted PointF: {value.ToString()}");
                     field.SetValue(data, value);
                 }
+                else
+                    DebugLog.Severe($"[NetworkMagic] You are trying to decrypt an unknown data type for {typeof(T).FullName}!");
             }
             DebugLog.LogPackets("Reading---");
             data.ConnId = connectionId;

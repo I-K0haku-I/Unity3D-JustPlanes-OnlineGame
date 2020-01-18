@@ -75,6 +75,7 @@ namespace JustPlanes.Core.Network.Server
             Stopwatch stopwatchUpdate = new Stopwatch();
             Stopwatch stopwatchLastFrame = new Stopwatch();
             GameTimer = new Stopwatch();
+            GameTimer.Start();
             NetworkMagic.IsServer = true;
             auth = new Authenticator();
             playerManager = new PlayerManager();
@@ -98,8 +99,8 @@ namespace JustPlanes.Core.Network.Server
                 if (listOfUpdateTimes.Count > 300)
                     listOfUpdateTimes.RemoveRange(0, 150);
 
-                DebugLog.Warning($"{listOfUpdateTimes.Average()}");
-                Thread.Sleep((int)((secondsToTick - listOfUpdateTimes.Average()) * 1000));
+                // DebugLog.Warning($"{listOfUpdateTimes.Average()}");
+                Thread.Sleep((int)(Math.Max(secondsToTick - listOfUpdateTimes.Average(), 0f) * 1000));
 
                 stopwatchUpdate.Restart();
                 Update(lastFrameElapsed);
@@ -113,11 +114,11 @@ namespace JustPlanes.Core.Network.Server
         {
             if (msgQueue.TryDequeue(out string result))
                 Console.WriteLine(result);
+            
+            // Console.WriteLine(GameTimer.Elapsed);
 
             while (handleDataQueue.TryDequeue(out var action))
-            {
                 action();
-            }
 
             while (clientDisconnectedQueue.TryDequeue(out var connID))
             {
