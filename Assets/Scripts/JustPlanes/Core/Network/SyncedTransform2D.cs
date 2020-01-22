@@ -13,11 +13,11 @@ namespace JustPlanes.Core.Network
 
         // private
         private List<float> stateTimeOffsets = new List<float>();
-        private Transform2DNetworkData[] stateBuffer;
+        public Transform2DNetworkData[] stateBuffer;
 
         private Action<Transform2DNetworkData> transmitState;
         private int stateAmount = 20;
-        private int tickRate = 1;
+        private int tickRate = 10;
         private float tickTriggerAmount;
         private float tickTimer = 0;
 

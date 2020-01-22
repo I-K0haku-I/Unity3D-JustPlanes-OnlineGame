@@ -1554,7 +1554,7 @@ GameObject:
   - component: {fileID: 1110406142}
   - component: {fileID: 1110406144}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: TestPlane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1572,7 +1572,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d5a8eb5bf150534daad3b0d391318f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  positionLerpRate: 0.3
+  isDrawDebugLine: 1
 --- !u!4 &1110406143
 Transform:
   m_ObjectHideFlags: 0
@@ -1625,7 +1625,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: adfef162d1943424d94bfe3f64d43ecc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0d42232f58ab9904b96aba7a967e18bb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
