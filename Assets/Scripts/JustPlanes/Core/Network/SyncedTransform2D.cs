@@ -7,6 +7,7 @@ namespace JustPlanes.Core.Network
 {
     public class SyncedTransform2D
     {
+        public event Action<Transform2DNetworkData> OnPositionReceived;
         public PointF Position = new PointF();
         public float Rotation = 0;
         private int EntityId;
@@ -16,7 +17,7 @@ namespace JustPlanes.Core.Network
         public Transform2DNetworkData[] stateBuffer;
 
         private Action<Transform2DNetworkData> transmitState;
-        private int stateAmount = 20;
+        public int StateAmount = 20;
         private int tickRate = 10;
         private float tickTriggerAmount;
         private float tickTimer = 0;
@@ -35,7 +36,7 @@ namespace JustPlanes.Core.Network
             tickTriggerAmount = 1f / tickRate;
             this.gameObject = gameObject;
 
-            stateBuffer = new Transform2DNetworkData[stateAmount];
+            stateBuffer = new Transform2DNetworkData[StateAmount];
             stateTimeOffsets.Add(0f);
             stateBuffer[0] = new Transform2DNetworkData() { Timestamp = 0.0000000001f, Position = new PointF(0, 0), Rotation = 0f };
             stateBuffer[1] = new Transform2DNetworkData() { Timestamp = 0f, Position = new PointF(0, 0), Rotation = 0f };
@@ -81,29 +82,21 @@ namespace JustPlanes.Core.Network
             if (stateIndex == stateBuffer.Length)
                 stateIndex--;
 
-            Transform2DNetworkData endState = stateBuffer[Math.Max(stateIndex - 1, 0)];
-            Transform2DNetworkData startState = stateBuffer[stateIndex];
+            var startState = stateBuffer[Math.Max(stateIndex - 3, 0)];
+            var midState = stateBuffer[Math.Max(stateIndex - 2, 0)];
+            var midState2 = stateBuffer[Math.Max(stateIndex - 1, 0)];
+            var endState = stateBuffer[stateIndex];
             // DebugLog.Warning($"[Transform2D] amount: {endState.Position.ToString()}");
             float amount = 1f;
             if (endState.Timestamp != startState.Timestamp)
                 amount = (interpolationTime - startState.Timestamp) / (endState.Timestamp - startState.Timestamp);
             // DebugLog.Warning("[SyncedTransform2D] amount " + amount.ToString());
-            currentState.Position = DoLerp(startState.Position, endState.Position, amount);
-            currentState.Rotation = DoLerp(startState.Rotation, endState.Rotation, amount);
+            currentState.Position = JPUtils.DoLerpCube(startState.Position, midState.Position, midState2.Position, endState.Position, amount);
+            currentState.Rotation = JPUtils.DoLerp(startState.Rotation, endState.Rotation, amount);
             DebugLog.Warning("[SyncedTransform2D] new pos " + currentState.Position.ToString());
             // gameObject.SetPositionAndRotation(currentState.Position.X, currentState.Position.Y, currentState.Rotation);
             Position = currentState.Position;
             Rotation = currentState.Rotation;
-        }
-
-        private PointF DoLerp(PointF first, PointF second, float amount)
-        {
-            return new PointF(DoLerp(first.X, second.X, amount), DoLerp(first.Y, second.Y, amount));
-        }
-
-        private float DoLerp(float first, float second, float amount)
-        {
-            return first * (1 - amount) + second * amount;
         }
 
         private float GetWorldTime()
@@ -119,13 +112,14 @@ namespace JustPlanes.Core.Network
             if (stateTimeOffsets[0] == 0f)
                 stateTimeOffsets.RemoveAt(0);
             stateTimeOffsets.Add(data.Timestamp - GetWorldTime());
-            if (stateTimeOffsets.Count > stateAmount)
+            if (stateTimeOffsets.Count > StateAmount)
                 stateTimeOffsets.RemoveAt(0);
 
             for (int i = stateBuffer.Length - 1; i >= 1; i--)
                 stateBuffer[i] = stateBuffer[i - 1];
             // Array.Copy(stateBuffer, 0, stateBuffer, 1, stateBuffer.Length - 1);
             stateBuffer[0] = data;
+            OnPositionReceived?.Invoke(data);
 
             // DebugLog.Warning($"[SyncedTransform2D-{EntityId}: {data.Position.ToString()}");
             // DebugLog.Warning($"[SyncedTransform2D-{EntityId}: {string.Join(", ", stateBuffer.Select((state, i) => state.Position.ToString()))}");
