@@ -65,7 +65,7 @@ namespace JustPlanes.Unity
             {
                 p1 = DoLerp(points, i / distance);
                 v1 = new Vector3(p1.X, p1.Y, 0);
-                DrawQuad(v1, 0.03f, UnityEngine.Color.yellow);
+                DrawQuad(v1, 0.03f, UnityEngine.Color.magenta);
                 Debug.DrawLine(v0, v1, UnityEngine.Color.red);
                 p0 = p1;
                 v0 = v1;
@@ -73,7 +73,7 @@ namespace JustPlanes.Unity
             Debug.DrawLine(v0, positionVecs[positionVecs.Count - 1], UnityEngine.Color.red);
 
             foreach (var vec in positionVecs)
-                DrawQuad(vec, 0.08f, UnityEngine.Color.green);
+                DrawQuad(vec, 0.08f, UnityEngine.Color.yellow);
         }
 
         private PointF DoLerp(PointF[] points, float t)

@@ -8,6 +8,8 @@ namespace JustPlanes.Unity
     {
         private SyncedTransform2D syncedTransform;
         private Vector3 newPos = Vector3.zero;
+        private Quaternion newQuat = Quaternion.identity;
+        private Core.Physics phys;
 
         // public void SetPositionAndRotation(float x, float y, float rotation)
         // {
@@ -17,28 +19,41 @@ namespace JustPlanes.Unity
 
         void Start()
         {
-            syncedTransform = GetComponent<SyncedTransformHolder>().SyncedTransform;
-            newPos.z = transform.position.z;
+            phys = new Core.Physics();
+            // syncedTransform = GetComponent<SyncedTransformHolder>().SyncedTransform;
+            // newPos.z = transform.position.z;
         }
 
+        [SerializeField]
+        [Range(0.5f, 10f)]
+        private float baseSpeed = 1f;
+        [SerializeField]
+        [Range(25f, 100f)]
+        private float rotateSpeed = 1f;
+        private float speed;
 
         // Update is called once per frame
         void Update()
         {
-            syncedTransform.Update(Time.deltaTime);
-            // transform.position = new Vector3(transform.position.x + 10f * Time.deltaTime, transform.position.y, transform.position.z);
-            newPos.x = syncedTransform.Position.X;
-            newPos.y = syncedTransform.Position.Y;
-            // newPos = Vector3.Lerp(transform.position, newPos, Mathf.SmoothStep(0f, 1f, positionLerpRate));
-            transform.SetPositionAndRotation(newPos, new Quaternion(0, 0, syncedTransform.Rotation, 0));
+            // syncedTransform.Update(Time.deltaTime);
+            // newPos.x = syncedTransform.Position.X;
+            // newPos.y = syncedTransform.Position.Y;
+            // transform.SetPositionAndRotation(newPos, new Quaternion(0, 0, syncedTransform.Rotation, 0));
+            float v = Input.GetAxis("Vertical");
+            float h = Input.GetAxis("Horizontal");
+            
+            phys.AngularVelocity = rotateSpeed * h;
+            speed += v * Time.deltaTime * baseSpeed;
+            phys.Velocity = speed;
+            newPos.x = phys.body.GetPosition().X;
+            newPos.y = phys.body.GetPosition().Y;
+            newQuat = Quaternion.AngleAxis(phys.body.GetAngle(), Vector3.back);
+            transform.SetPositionAndRotation(newPos, newQuat);
+        }
 
-            // float t;
-            // Vector2 position;
-            // for (int i = 0; i < syncedTransform.stateBuffer.Length; i++)
-            // {
-            //     t = i / (syncedTransform.stateBuffer.Length - 1f);
-            //     position = (2f * t * t * t - 3f * t * t + 1f) * p0;
-            // }
+        private void FixedUpdate()
+        {
+            phys.Update(Time.fixedDeltaTime);
         }
     }
 }
