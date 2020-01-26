@@ -28,7 +28,7 @@ namespace JustPlanes.Core.Network.Server
         }
     }
 
-    public class Game
+    public class Game : IGame
     {
         public ConcurrentQueue<int> queue = new ConcurrentQueue<int>();
         public bool IsRunning;
@@ -43,6 +43,8 @@ namespace JustPlanes.Core.Network.Server
         // private UnitSpawner unitSpawner = new UnitSpawner();
         public PlayerManager playerManager;
         public Authenticator auth;
+        public PhysicsManager Physics = new PhysicsManager();
+        private TestPlane testPlane;
         // internal ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
         // internal List<Unit> unitDeathToSend = new List<Unit>();
 
@@ -79,8 +81,8 @@ namespace JustPlanes.Core.Network.Server
             NetworkMagic.IsServer = true;
             auth = new Authenticator();
             playerManager = new PlayerManager();
+            testPlane = new TestPlane(this, 3f, 10f, 666);
 
-            TestPlane testPlane = new TestPlane();
             // playerManager.AddPlayer("Test1");
             // playerManager.AddPlayer("Test2");
             // unitSpawner.Start();
@@ -104,13 +106,12 @@ namespace JustPlanes.Core.Network.Server
 
                 stopwatchUpdate.Restart();
                 Update(lastFrameElapsed);
-                testPlane.Update(lastFrameElapsed);
                 lastUpdateElapsed = (float)stopwatchUpdate.ElapsedMilliseconds / 1000f;
                 listOfUpdateTimes.Add(lastUpdateElapsed);
             }
         }
 
-        private void Update(float elapsedMilliseconds)
+        private void Update(float timeDelta)
         {
             if (msgQueue.TryDequeue(out string result))
                 Console.WriteLine(result);
@@ -129,6 +130,9 @@ namespace JustPlanes.Core.Network.Server
             {
                 clients.Add(connID, "");
             }
+
+            Physics.Update(timeDelta);
+            testPlane.Update(timeDelta);
 
             // while (damageQueue.TryDequeue(out var damageItem))
             // {
@@ -199,6 +203,16 @@ namespace JustPlanes.Core.Network.Server
         {
             Console.WriteLine("CANCELED GAME LOOP!! EXITING...");
             IsRunning = false;
+        }
+
+        public float GetTime()
+        {
+            return GameTimer.ElapsedMilliseconds / 1000f;   
+        }
+
+        public PhysicsManager GetPhysicsManager()
+        {
+            return Physics;
         }
     }
 

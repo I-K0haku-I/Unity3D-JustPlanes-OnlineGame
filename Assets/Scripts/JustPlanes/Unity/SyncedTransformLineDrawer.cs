@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using JustPlanes.Core.Network;
-using D = System.Drawing;
 using System;
-using System.Drawing;
+using Box2DX.Common;
 
 namespace JustPlanes.Unity
 {
-    [RequireComponent(typeof(SyncedTransformHolder))]
+    [RequireComponent(typeof(TestPlane2))]
     public class SyncedTransformLineDrawer : MonoBehaviour
     {
 
@@ -26,7 +25,7 @@ namespace JustPlanes.Unity
 
         void Start()
         {
-            syncedTransform = GetComponent<SyncedTransformHolder>().SyncedTransform;
+            syncedTransform = GetComponent<TestPlane2>().plane.transform2D;
             syncedTransform.OnPositionReceived += HandlePositionReceived;
         }
 
@@ -38,7 +37,7 @@ namespace JustPlanes.Unity
 
 
         private List<Vector3> positionVecs = new List<Vector3>();
-        private List<D.PointF> positionPoints = new List<D.PointF>();
+        private List<Vec2> positionPoints = new List<Vec2>();
         private void HandlePositionReceived(Transform2DNetworkData data)
         {
             positionVecs.Add(new Vector3(data.Position.X, data.Position.Y, 0));
@@ -59,7 +58,7 @@ namespace JustPlanes.Unity
             var v0 = positionVecs[positionVecs.Count - 4];
             var p1 = p0;
             var v1 = v0;
-            var points = new PointF[4];
+            var points = new Vec2[4];
             positionPoints.CopyTo(positionPoints.Count - 4, points, 0, 4);
             for (float i = 0; i <= distance; i += distance/ lineAmount)
             {
@@ -76,7 +75,7 @@ namespace JustPlanes.Unity
                 DrawQuad(vec, 0.08f, UnityEngine.Color.yellow);
         }
 
-        private PointF DoLerp(PointF[] points, float t)
+        private Vec2 DoLerp(Vec2[] points, float t)
         {
             return Core.JPUtils.DoLerpCube(points[0], points[1], points[2], points[3], t);
         }

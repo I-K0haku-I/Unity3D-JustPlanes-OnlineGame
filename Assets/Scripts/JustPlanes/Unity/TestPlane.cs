@@ -3,13 +3,12 @@ using JustPlanes.Core.Network;
 
 namespace JustPlanes.Unity
 {
-    [RequireComponent(typeof(SyncedTransformHolder))]
     public class TestPlane : MonoBehaviour
     {
         private SyncedTransform2D syncedTransform;
         private Vector3 newPos = Vector3.zero;
         private Quaternion newQuat = Quaternion.identity;
-        private Core.Physics phys;
+        private Core.PhysicsBody phys;
 
         // public void SetPositionAndRotation(float x, float y, float rotation)
         // {
@@ -17,9 +16,13 @@ namespace JustPlanes.Unity
         //     transform.SetPositionAndRotation(newPos, new Quaternion(0, 0, rotation, 0));
         // }
 
+        void Awake()
+        {
+            phys = GameManager.instance.Physics.CreateBody(5, 5, 5, 5);
+        }
+
         void Start()
         {
-            phys = new Core.Physics();
             // syncedTransform = GetComponent<SyncedTransformHolder>().SyncedTransform;
             // newPos.z = transform.position.z;
         }
@@ -41,19 +44,14 @@ namespace JustPlanes.Unity
             // transform.SetPositionAndRotation(newPos, new Quaternion(0, 0, syncedTransform.Rotation, 0));
             float v = Input.GetAxis("Vertical");
             float h = Input.GetAxis("Horizontal");
-            
-            phys.AngularVelocity = rotateSpeed * h;
+
+            phys.SetAngularVelocity(rotateSpeed * h);
             speed += v * Time.deltaTime * baseSpeed;
-            phys.Velocity = speed;
+            phys.SetVelocity(speed);
             newPos.x = phys.body.GetPosition().X;
             newPos.y = phys.body.GetPosition().Y;
             newQuat = Quaternion.AngleAxis(phys.body.GetAngle(), Vector3.back);
             transform.SetPositionAndRotation(newPos, newQuat);
-        }
-
-        private void FixedUpdate()
-        {
-            phys.Update(Time.fixedDeltaTime);
         }
     }
 }

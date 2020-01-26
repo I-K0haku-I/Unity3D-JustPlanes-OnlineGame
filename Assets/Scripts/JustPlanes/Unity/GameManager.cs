@@ -7,12 +7,13 @@ using JustPlanes.Core;
 
 namespace JustPlanes.Unity
 {
-    public class GameManager : MonoBehaviour, UI.ISceneManager
+    public class GameManager : MonoBehaviour, UI.ISceneManager, IGame
     {
         public static GameManager instance;
 
         public Authenticator Authenticator;
         public PlayerManager PlayerManager;
+        public PhysicsManager Physics = new PhysicsManager();
 
         [SerializeField]
         private GameObject mainMenuUIManager;
@@ -71,9 +72,24 @@ namespace JustPlanes.Unity
 
         }
 
+        private void FixedUpdate()
+        {
+            Physics.Update(Time.fixedDeltaTime);
+        }
+
         public void DisplayGame()
         {
             StartGame();
+        }
+
+        public PhysicsManager GetPhysicsManager()
+        {
+            return Physics;
+        }
+
+        public float GetTime()
+        {
+            throw new NotImplementedException();
         }
     }
 

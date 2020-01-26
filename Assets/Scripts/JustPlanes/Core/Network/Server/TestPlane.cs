@@ -1,42 +1,45 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using Box2DX.Common;
+using JustPlanes.Core.Network;
 
-
-namespace JustPlanes.Core.Network
+namespace JustPlanes.Core
 {
-    public class TestPlane : ITransformHolder
-    {
-        private SyncedTransform2D transform2D;
-        private PointF position;
-        private Random random;
-        private Stopwatch timer = new Stopwatch();
-        private float yToMove;
+    // TODO: redo this to be "Unit" class
 
-        public TestPlane()
+    public class TestPlane
+    {
+        private PhysicsBody body;
+        public SyncedTransform2D transform2D;
+        private IGame game;
+        private float speed;
+
+        public TestPlane(IGame game, float posX, float posY, int syncedTransformId)
         {
-            transform2D = new SyncedTransform2D(666, this); 
-            timer.Start();
-            random = new Random();
-            yToMove = random.Next(-10, 10);
+            this.body = game.GetPhysicsManager().CreateBody(posX, posY, 5, 5);
+            transform2D = new SyncedTransform2D(syncedTransformId, game, body);
+            this.game = game;
         }
 
         public void Update(float deltaTime)
         {
-            if (timer.ElapsedMilliseconds > 0.5)
-            {
-                yToMove = random.Next(-10, 10);
-                timer.Restart();
-            }
-            transform2D.Position.X = transform2D.Position.X + 10f * deltaTime;
-            transform2D.Position.Y = transform2D.Position.Y + yToMove * deltaTime;
             transform2D.Update(deltaTime);
             // DebugLog.Warning($"[TestPlane] position: {transform2D.position.ToString()}");
         }
 
-        public float GetTime()
+        public void ReceiveInput(float h, float v)
         {
-            return Server.Game.GameTimer.ElapsedMilliseconds / 1000f;
+            // TODO: WIP
+            body.SetAngularVelocity(100f * h);
+            speed += v * 10f;
+            body.SetVelocity(speed);
         }
-    } 
+    }
+
+    public interface IGame
+    {
+        PhysicsManager GetPhysicsManager();
+        float GetTime();
+    }
 }

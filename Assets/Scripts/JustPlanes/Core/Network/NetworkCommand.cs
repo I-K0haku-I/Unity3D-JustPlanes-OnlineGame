@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using Box2DX.Common;
 
 namespace JustPlanes.Core.Network
 {
@@ -120,6 +121,11 @@ namespace JustPlanes.Core.Network
                         buffer.WriteFloat(p.X);
                         buffer.WriteFloat(p.Y);
                         break;
+                    case Vec2 p:
+                        DebugLog.LogPackets($"writing a Vec2: X: {p.X}, Y: {p.Y}");
+                        buffer.WriteFloat(p.X);
+                        buffer.WriteFloat(p.Y);
+                        break;
                     case List<string> list:
                         {
                             DebugLog.LogPackets($"writing a list of string: {string.Join(", ", list)}");
@@ -199,6 +205,14 @@ namespace JustPlanes.Core.Network
                     value.X = buffer.ReadFloat();
                     value.Y = buffer.ReadFloat();
                     DebugLog.LogPackets($"Decrypted PointF: {value.ToString()}");
+                    field.SetValue(data, value);
+                }
+                else if (field.FieldType == typeof(Vec2))
+                {
+                    var value = new Vec2();
+                    value.X = buffer.ReadFloat();
+                    value.Y = buffer.ReadFloat();
+                    DebugLog.LogPackets($"Decrypted Vec2: X: {value.X}, Y: {value.Y}");
                     field.SetValue(data, value);
                 }
                 else
