@@ -6,7 +6,7 @@ namespace JustPlanes.Unity
     public class TestPlane2 : MonoBehaviour
     {
         [SerializeField]
-        private int Id;
+        private int syncId;
 
         public Core.TestPlane plane;
         private Vector3 newPos = Vector3.zero;
@@ -14,7 +14,7 @@ namespace JustPlanes.Unity
 
         private void Awake()
         {
-            plane = new Core.TestPlane(GameManager.instance, 0, 0, Id);
+            plane = new Core.TestPlane(GameManager.instance, 0, 0, syncId);
         }
 
         private void Update()
