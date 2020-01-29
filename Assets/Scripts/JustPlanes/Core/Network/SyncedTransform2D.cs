@@ -11,6 +11,7 @@ namespace JustPlanes.Core.Network
         public event Action<Transform2DNetworkData> OnPositionReceived;
         public Vec2 Position = new Vec2();
         public float Rotation = 0;
+        private Vec2 Velocity = new Vec2();
         private int EntityId;
 
         // private
@@ -32,7 +33,7 @@ namespace JustPlanes.Core.Network
         private Transform2DNetworkData stateToSend = new Transform2DNetworkData();
         private Transform2DNetworkData currentState = new Transform2DNetworkData();
 
-        public SyncedTransform2D(int entityId, IGame game, PhysicsBody body)
+        public SyncedTransform2D(int entityId, IGame game, PhysicsBody body = null)
         {
             this.EntityId = entityId;
             tickTriggerAmount = 1f / tickRate;
@@ -56,23 +57,29 @@ namespace JustPlanes.Core.Network
 
         private void UpdateServer(float deltaTime)
         {
-            Position = body.body.GetPosition();
-            Rotation = body.body.GetAngle();
+            if (body != null)
+            {
+                Position = body.body.GetPosition();
+                Rotation = body.body.GetAngle();
+                Velocity = body.body.GetLinearVelocity();
+            }
 
             tickTimer += deltaTime;
             if (!(tickTimer >= tickTriggerAmount)) return;
 
             tickTimer -= tickTriggerAmount;
-            if (Position != stateLastSent.Position)
-                stateToSend.Position = Position;
-            if (System.Math.Abs(Rotation - stateLastSent.Rotation) > 0.01)
-                stateToSend.Rotation = Rotation;
+            // if (Position != stateLastSent.Position)
+            stateToSend.Position = Position;
+            // if (System.Math.Abs(Rotation - stateLastSent.Rotation) > 0.01)
+            stateToSend.Rotation = Rotation;
+            stateToSend.Velocity = Velocity;
             if (Position == stateLastSent.Position && System.Math.Abs(Rotation - stateLastSent.Rotation) < 0.01) return;
 
             stateToSend.Timestamp = GetWorldTime();
             // DebugLog.Warning($"SENDING {stateToSend.Timestamp}");
             stateLastSent.TransferValuesFrom(stateToSend);
             transmitState(stateToSend);
+            DebugLog.Warning($"[SyncedTransform2D] state {stateToSend.Timestamp} sent: X: {stateToSend.Position.X}, Y: {stateToSend.Position.Y}");
         }
 
         private void UpdateClient(float deltaTime)
@@ -96,14 +103,31 @@ namespace JustPlanes.Core.Network
             float amount = 1f;
             if (endState.Timestamp != startState.Timestamp)
                 amount = (interpolationTime - startState.Timestamp) / (endState.Timestamp - startState.Timestamp);
+            currentState.Timestamp = interpolationTime;
             // DebugLog.Warning("[SyncedTransform2D] amount " + amount.ToString());
             currentState.Position = JPUtils.DoLerpCube(startState.Position, midState.Position, midState2.Position, endState.Position, amount);
+            currentState.Velocity = JPUtils.DoLerpCube(startState.Velocity, midState.Velocity, midState2.Velocity, endState.Velocity, amount);
             currentState.Rotation = JPUtils.DoLerp(startState.Rotation, endState.Rotation, amount);
-            DebugLog.Warning("[SyncedTransform2D] new pos " + currentState.Position.ToString());
+            DebugLog.Warning($"[SyncedTransform2D] new pos X: {currentState.Position.X}, Y: {currentState.Position.Y}");
             // gameObject.SetPositionAndRotation(currentState.Position.X, currentState.Position.Y, currentState.Rotation);
 
             // do something else here to consider physic state too instead of just setting it
-            body.body.SetXForm(currentState.Position, currentState.Rotation);
+            // body.body.SetXForm(currentState.Position, currentState.Rotation);
+
+            if (body != null)
+            {
+                // body.body.SetXForm(currentState.Position, currentState.Rotation);
+                body.SetWithLerp(currentState.Position, currentState.Rotation, currentState.Velocity, deltaTime);
+                Position = body.body.GetPosition();
+                Rotation = body.body.GetAngle();
+                Velocity = body.body.GetLinearVelocity();
+            }
+            else
+            {
+                Position = currentState.Position;
+                Rotation = currentState.Rotation;
+                Velocity = currentState.Velocity;
+            }
         }
 
         private float GetWorldTime()
@@ -148,12 +172,14 @@ namespace JustPlanes.Core.Network
         public float Timestamp;
         public Vec2 Position;
         public float Rotation;
+        public Vec2 Velocity;
 
         public void TransferValuesFrom(Transform2DNetworkData stateToSend)
         {
             this.Timestamp = stateToSend.Timestamp;
             this.Position = stateToSend.Position;
             this.Rotation = stateToSend.Rotation;
+            this.Velocity = stateToSend.Velocity;
         }
     }
 }

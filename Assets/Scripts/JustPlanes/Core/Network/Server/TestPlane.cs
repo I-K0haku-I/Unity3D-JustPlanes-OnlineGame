@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using Box2DX.Common;
@@ -13,35 +14,53 @@ namespace JustPlanes.Core
         private PhysicsBody body;
         public SyncedTransform2D transform2D;
         private IGame game;
-        private Action<InputNetworkData> receiveInput;
+        private Action<InputNetworkData> handleInput;
         private float speed;
+        private Queue<InputNetworkData> inputQueue = new Queue<InputNetworkData>();
+        private int tickRate = 10;
+        private float tickTriggerAmount;
+        private float tickTimer = 0;
 
         public TestPlane(IGame game, float posX, float posY, int syncedTransformId)
         {
+            tickTriggerAmount = 1f / tickRate;
             this.body = game.GetPhysicsManager().CreateBody(posX, posY, 5, 5);
+            speed = 10;
+            this.body.SetVelocity(speed);
             transform2D = new SyncedTransform2D(syncedTransformId, game, body);
             this.game = game;
 
-            receiveInput = NetworkMagic.RegisterAtServer<InputNetworkData>(0, ReceiveInput_AtServer, 123);
+            handleInput = NetworkMagic.RegisterAtServer<InputNetworkData>(0, HandleInput_AtServer, 123);
         }
 
-        private void ReceiveInput_AtServer(InputNetworkData data)
+        private void HandleInput_AtServer(InputNetworkData data)
         {
-            body.SetAngularVelocity(100f * data.h);
-            speed += data.v * 10f;
-            body.SetVelocity(speed);
+            DebugLog.Warning($"[TestPlane] Received input horiz: {data.h}, vert: {data.v}");
+            inputQueue.Enqueue(data);
         }
 
         public void Update(float deltaTime)
         {
+            tickTimer += deltaTime;
+
             transform2D.Update(deltaTime);
-            // DebugLog.Warning($"[TestPlane] position: {transform2D.position.ToString()}");
+            while (inputQueue.Count > 0)
+            {
+                var data = inputQueue.Dequeue();
+                body.SetAngularVelocity(100f * data.h);
+                speed += data.v * 10f * deltaTime;
+                body.SetVelocity(speed);
+            }
+            DebugLog.Warning($"[TestPlane] position: X: {transform2D.Position.X}, Y: {transform2D.Position.Y}");
         }
 
-        public void ReceiveInput(float h, float v)
+        public void HandleInput(float h, float v)
         {
+            if (!(tickTimer >= tickTriggerAmount)) return;
+            tickTimer -= tickTriggerAmount;
             var data = new InputNetworkData() { h = h, v = v };
-            receiveInput?.Invoke(data);
+            HandleInput_AtServer(data);
+            handleInput?.Invoke(data);
         }
     }
 

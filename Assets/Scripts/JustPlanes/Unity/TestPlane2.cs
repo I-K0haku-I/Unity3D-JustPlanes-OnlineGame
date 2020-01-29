@@ -21,6 +21,8 @@ namespace JustPlanes.Unity
         {
             float v = Input.GetAxis("Vertical");
             float h = Input.GetAxis("Horizontal");
+            plane.Update(Time.deltaTime);
+            plane.HandleInput(h, v);
 
 
             newPos.x = plane.transform2D.Position.X;

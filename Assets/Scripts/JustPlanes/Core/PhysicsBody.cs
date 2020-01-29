@@ -1,6 +1,7 @@
 using Box2DX.Dynamics;
 using Box2DX.Collision;
 using Box2DX.Common;
+using System;
 
 namespace JustPlanes.Core
 {
@@ -9,6 +10,11 @@ namespace JustPlanes.Core
         public Body body;
         private Vec2 velocity;
         private float angularVelocity;
+
+        private float lerpTimer = 0f;
+        private bool shouldLerp = false;
+        private float lerpTimeStep = 0.5f;
+        private float lerpAmount = 0f;
 
         public PhysicsBody(World world, float posX, float posY, float boxWidth, float boxHeight)
         {
@@ -42,6 +48,32 @@ namespace JustPlanes.Core
             velocity = vel * amount;
             body.WakeUp();
             body.SetLinearVelocity(velocity);
+        }
+
+        public void SetWithLerp(Vec2 position, float rotation, Vec2 vel, float deltaTime)
+        {
+            // lerpTimer += deltaTime;
+            // if (lerpTimer > 0.3f)
+            // {
+            //     lerpTimer -= 0.3f;
+
+            // }
+            // float t = lerpTimer * 0.8f;
+
+            if (System.Math.Abs((position - body.GetPosition()).Length()) > 2f)
+            {
+                shouldLerp = true;
+                lerpAmount = 0f;
+            }
+
+            if (shouldLerp)
+            {
+                lerpAmount += lerpTimeStep * deltaTime;
+                body.SetXForm(JPUtils.DoLerp(body.GetPosition(), position, lerpAmount), JPUtils.DoLerp(body.GetAngle(), rotation, lerpAmount));
+                body.SetLinearVelocity(JPUtils.DoLerp(body.GetLinearVelocity(), vel, lerpAmount));
+                if (System.Math.Abs((position - body.GetPosition()).Length()) < 0.1f)
+                    shouldLerp = false;
+            }
         }
     }
 }

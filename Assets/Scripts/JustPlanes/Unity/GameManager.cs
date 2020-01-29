@@ -89,7 +89,7 @@ namespace JustPlanes.Unity
 
         public float GetTime()
         {
-            throw new NotImplementedException();
+            return Time.realtimeSinceStartup;
         }
     }
 
