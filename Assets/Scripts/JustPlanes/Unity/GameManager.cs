@@ -21,6 +21,8 @@ namespace JustPlanes.Unity
         private GameObject playerListUIManager;
         [SerializeField]
         private GameObject testPlane;
+        [SerializeField]
+        private FollowerCamera camFollower;
 
         private void Awake()
         {
@@ -64,7 +66,7 @@ namespace JustPlanes.Unity
             PlayerManager = new PlayerManager();
             playerListUIManager.SetActive(true);
             testPlane.SetActive(true);
-            Camera.main.transform.parent = testPlane.transform;
+            // Camera.main.transform.parent = testPlane.transform;
         }
 
         void Update()

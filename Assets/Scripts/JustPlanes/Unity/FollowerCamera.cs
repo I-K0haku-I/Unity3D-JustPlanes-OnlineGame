@@ -5,34 +5,51 @@ namespace JustPlanes.Unity
     public class FollowerCamera : MonoBehaviour
     {
 
-        public Camera cam;
-        public GameObject target;
+        // [SerializeField]
+        // private Camera cam;
+        // [SerializeField]
+        // private GameObject target;
+
         public Vector3 offset;
         public float velocityOffset = 0.6F;
-        public float smoothTime = 0.3F;
-        private Vector3 camVelocity = Vector3.zero;
-        private Rigidbody targetRigidbody;
+        public float smoothSpeed = 0.3F;
+        private Vector2 camVelocity = Vector3.zero;
+        [SerializeField]
+        private TestPlane testPlane;
 
         // Start is called before the first frame update
-        private void Start()
+        public void Initialize()
         {
-            targetRigidbody = target.GetComponent<Rigidbody>();
+            // transform2D = target.GetComponent<TestPlane2>().plane.transform2D;
         }
 
         // Update is called once per frame
-        private void Update()
+        private void LateUpdate()
         {
-            // Define a target position above and behind the target transform
-            Vector3 targetPosition = target.transform.TransformPoint(offset) + (targetRigidbody.velocity * velocityOffset);
-            Vector3 currentPosition = transform.position;
+            // if (!testPlane.gameObject.activeInHierarchy)
+            //     return;
+            // // Define a target position above and behind the target transform
+            // Box2DX.Common.Vec2 vel = (testPlane.plane.transform2D.Velocity);
+            // Vector2 velVector2 = new Vector2(vel.X, vel.Y) * velocityOffset;
+            // Vector2 targetPosition = (Vector2)testPlane.gameObject.transform.TransformPoint(offset) + velVector2;
+            // Vector2 currentPosition = base.transform.position;
 
-            Vector3 towardVec = Vector3.MoveTowards(currentPosition, targetPosition, 500);
-            Vector3 camTarget = Vector3.SmoothDamp(currentPosition, towardVec, ref camVelocity, smoothTime);
+            // Vector2 towardVec = Vector2.MoveTowards(currentPosition, targetPosition, 500);
+            // Vector3 camTarget = Vector2.SmoothDamp(currentPosition, towardVec, ref camVelocity, smoothTime);
+            // camTarget.z = -20f;
 
-            transform.position = camTarget;
+            // base.transform.position = camTarget;
 
             //Debug.Log("Target: " + target.transform.forward + "Offset Pos: " + targetPosition + ", TargetVelocity: " + targetRigidbody.velocity);
 
+            Vector3 newPos = testPlane.transform.position + testPlane.transform.TransformDirection(offset);
+            Vector3 smoothedPos = Vector3.Lerp(transform.position, newPos, smoothSpeed);
+                // testPlane.transform.position + testPlane.transform.TransformDirection(offset);
+            smoothedPos.z = -20f;
+            transform.position = smoothedPos;
+            // Vector3 vel = Vector3.zero;
+            // newPos = Vector3.SmoothDamp(transform.position, newPos, ref vel, smoothSpeed);
+            // transform.position = newPos;
         }
     }
 }

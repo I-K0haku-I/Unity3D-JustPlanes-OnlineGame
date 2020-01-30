@@ -8,8 +8,6 @@ namespace JustPlanes.Core
     public class PhysicsBody
     {
         public Body body;
-        private Vec2 velocity;
-        private float angularVelocity;
 
         private float lerpTimer = 0f;
         private bool shouldLerp = false;
@@ -33,21 +31,34 @@ namespace JustPlanes.Core
 
         public void SetAngularVelocity(float amount)
         {
-            angularVelocity = amount;
             body.WakeUp();
-            body.SetAngularVelocity(angularVelocity);
+            body.SetAngularVelocity(amount);
         }
 
         public void SetVelocity(float amount)
         {
+            body.WakeUp();
+            body.SetLinearVelocity(GetDirection() * amount);
+        }
+
+        public Vec2 GetDirection()
+        {
+            return GetDirection(body.GetAngle());
+        }
+
+        public Vec2 GetDirection(float angle)
+        {
             Vec2 vel;
-            double radian = -body.GetAngle() * System.Math.PI / 180f;
+            double radian = GetRadian(angle);
             vel.X = -(1f * (float)System.Math.Sin(radian));
             vel.Y = 1f * (float)System.Math.Cos(radian);
             vel.Normalize();
-            velocity = vel * amount;
-            body.WakeUp();
-            body.SetLinearVelocity(velocity);
+            return vel;
+        }
+
+        public float GetRadian(float angle)
+        {
+            return (float)(-angle * System.Math.PI / 180f);
         }
 
         public void SetWithLerp(Vec2 position, float rotation, Vec2 vel, float deltaTime)
@@ -74,6 +85,11 @@ namespace JustPlanes.Core
                 if (System.Math.Abs((position - body.GetPosition()).Length()) < 0.01f)
                     shouldLerp = false;
             }
+        }
+
+        public float Dot(Vec2 a, Vec2 b)
+        {
+            return a.X * b.X + a.Y * b.Y;
         }
     }
 }

@@ -220,5 +220,10 @@ namespace JustPlanes.Unity
                 instance = null;
             }
         }
+
+        private void OnApplicationQuit()
+        {
+            DestroyImmediate(this);
+        }
     }
 }

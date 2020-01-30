@@ -9,9 +9,10 @@ namespace JustPlanes.Core.Network
     public class SyncedTransform2D
     {
         public event Action<Transform2DNetworkData> OnPositionReceived;
+        public event Action<Transform2DNetworkData> OnStateCalculated;
         public Vec2 Position = new Vec2();
         public float Rotation = 0;
-        private Vec2 Velocity = new Vec2();
+        public Vec2 Velocity = new Vec2();
         private int EntityId;
 
         // private
@@ -100,19 +101,27 @@ namespace JustPlanes.Core.Network
             var midState2 = stateBuffer[System.Math.Max(stateIndex - 1, 0)];
             var endState = stateBuffer[stateIndex];
             // DebugLog.Warning($"[Transform2D] amount: {endState.Position.ToString()}");
+
             float amount = 1f;
             if (endState.Timestamp != startState.Timestamp)
                 amount = (interpolationTime - startState.Timestamp) / (endState.Timestamp - startState.Timestamp);
             currentState.Timestamp = interpolationTime;
             // DebugLog.Warning("[SyncedTransform2D] amount " + amount.ToString());
+
+            // currentState.Position = JPUtils.DoLerpHermite(startState.Position, startState.Velocity, midState.Position, midState.Velocity, amount);
             currentState.Position = JPUtils.DoLerpCube(startState.Position, midState.Position, midState2.Position, endState.Position, amount);
             currentState.Velocity = JPUtils.DoLerpCube(startState.Velocity, midState.Velocity, midState2.Velocity, endState.Velocity, amount);
             currentState.Rotation = JPUtils.DoLerp(startState.Rotation, endState.Rotation, amount);
+            OnStateCalculated?.Invoke(currentState);
             DebugLog.Warning($"[SyncedTransform2D] new pos X: {currentState.Position.X}, Y: {currentState.Position.Y}");
             // gameObject.SetPositionAndRotation(currentState.Position.X, currentState.Position.Y, currentState.Rotation);
 
             // do something else here to consider physic state too instead of just setting it
             // body.body.SetXForm(currentState.Position, currentState.Rotation);
+
+            // Position = currentState.Position;
+            // Rotation = currentState.Rotation;
+            // Velocity = currentState.Velocity;
 
             if (body != null)
             {

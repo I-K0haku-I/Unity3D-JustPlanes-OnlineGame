@@ -11,7 +11,7 @@ namespace JustPlanes.Core
 
     public class TestPlane
     {
-        private PhysicsBody body;
+        public PhysicsBody body;
         public SyncedTransform2D transform2D;
         private IGame game;
         private Action<InputNetworkData> handleInput;
@@ -43,7 +43,6 @@ namespace JustPlanes.Core
         {
             tickTimer += deltaTime;
 
-            transform2D.Update(deltaTime);
             while (inputQueue.Count > 0)
             {
                 var data = inputQueue.Dequeue();
@@ -51,6 +50,21 @@ namespace JustPlanes.Core
                 speed += data.v * 10f * 0.1f;
                 body.SetVelocity(speed);
             }
+            transform2D.Update(deltaTime);
+
+            // Looks complicated, but all this is doing is making sure the speed gets updated
+            Vec2 dir = body.GetDirection(transform2D.Rotation);
+            Vec2 vel = transform2D.Velocity;
+            // this checks if the velocity is backwards or forwards
+            if (System.Math.Abs((body.Dot(dir, vel) / (dir.Length() * vel.Length())) + 1f) < 0.1f)
+            {
+                speed = vel.Length() * -1;
+            }
+            else
+            {
+                speed = vel.Length();
+            }
+
             DebugLog.Warning($"[TestPlane] position: X: {transform2D.Position.X}, Y: {transform2D.Position.Y}");
         }
 

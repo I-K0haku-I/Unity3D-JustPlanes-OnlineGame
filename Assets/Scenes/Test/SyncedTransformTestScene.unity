@@ -778,6 +778,7 @@ MonoBehaviour:
   mainMenuUIManager: {fileID: 346033225}
   playerListUIManager: {fileID: 1936430044}
   testPlane: {fileID: 1110406141}
+  camFollower: {fileID: 0}
 --- !u!1 &582727781
 GameObject:
   m_ObjectHideFlags: 0
@@ -1470,6 +1471,7 @@ GameObject:
   - component: {fileID: 1078887972}
   - component: {fileID: 1078887971}
   - component: {fileID: 1078887970}
+  - component: {fileID: 1078887973}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1542,6 +1544,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1078887973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078887969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 921909f14b445434790f9a9e8ff21fdd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  offset: {x: 0, y: 0, z: 0}
+  velocityOffset: 0.6
+  smoothSpeed: 1
+  testPlane: {fileID: 1110406146}
 --- !u!1 &1110406141
 GameObject:
   m_ObjectHideFlags: 0
@@ -1552,6 +1570,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1110406143}
   - component: {fileID: 1110406144}
+  - component: {fileID: 1110406146}
   - component: {fileID: 1110406145}
   - component: {fileID: 1110406142}
   m_Layer: 0
@@ -1570,10 +1589,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1110406141}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b87aa74684dc02545a32474089ca263c, type: 3}
+  m_Script: {fileID: 11500000, guid: 4001ec0dccdef95459f60d9ee1f162a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncId: 666
+  isGhostEnable: 1
+  ghostSprite: {fileID: 21300000, guid: 0fde9972b5948ec429399cff1296622c, type: 3}
+  ghostColor: {r: 1, g: 0.23277296, b: 0, a: 0.827451}
 --- !u!4 &1110406143
 Transform:
   m_ObjectHideFlags: 0
@@ -1649,8 +1670,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eb06f9d4974c91448ba30f705650d62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineAmount: 16
-  isDrawDebugLine: 0
+  isDrawSimulatedDebugLine: 0
+  lineLength: 0.1
+  lineDuration: 1
+  idDrawReceivedState: 0
+  isDrawCalculatedInterpHistory: 0
+  statesToSaveInHistory: 100
+--- !u!114 &1110406146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110406141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d5a8eb5bf150534daad3b0d391318f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncId: 666
 --- !u!1001 &1148225403
 PrefabInstance:
   m_ObjectHideFlags: 0

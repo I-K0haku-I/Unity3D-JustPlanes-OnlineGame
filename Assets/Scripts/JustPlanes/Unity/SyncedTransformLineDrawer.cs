@@ -6,18 +6,28 @@ using Box2DX.Common;
 
 namespace JustPlanes.Unity
 {
-    [RequireComponent(typeof(TestPlane2))]
+    [RequireComponent(typeof(TestPlane))]
     public class SyncedTransformLineDrawer : MonoBehaviour
     {
 
         private SyncedTransform2D syncedTransform;
 
-        [SerializeField]
-        [Range(1, 30)]
-        private int lineAmount = 2;
 
         [SerializeField]
-        private bool isDrawDebugLine = true;
+        private bool isDrawSimulatedDebugLine = true;
+        [SerializeField]
+        [Range(0.1f, 2f)]
+        private float lineLength = 2;
+        [SerializeField]
+        private float lineDuration = 1f;
+
+        [SerializeField]
+        private bool idDrawReceivedState = false;
+
+        [SerializeField]
+        private bool isDrawCalculatedInterpHistory;
+        [SerializeField]
+        private int statesToSaveInHistory = 10;
 
         void Awake()
         {
@@ -25,59 +35,148 @@ namespace JustPlanes.Unity
 
         void Start()
         {
-            syncedTransform = GetComponent<TestPlane2>().plane.transform2D;
+            syncedTransform = GetComponent<TestPlane>().plane.transform2D;
             syncedTransform.OnPositionReceived += HandlePositionReceived;
+            syncedTransform.OnStateCalculated += HandleStateCalculated;
+        }
+
+        private List<Transform2DNetworkData> stateHistory = new List<Transform2DNetworkData>();
+        private void HandleStateCalculated(Transform2DNetworkData data)
+        {
+            var copyData = new Transform2DNetworkData();
+            copyData.TransferValuesFrom(data);
+            stateHistory.Add(copyData);
+            if (stateHistory.Count > statesToSaveInHistory)
+                stateHistory.RemoveAt(0);
         }
 
         void Update()
         {
-            if (isDrawDebugLine)
-                DrawBezier();
+            if (idDrawReceivedState)
+                DrawReceivedState();
+            if (isDrawSimulatedDebugLine)
+                DrawSimulatedBezier();
+            if (isDrawCalculatedInterpHistory)
+                DrawCalculatedInterpHistory();
         }
 
-
-        private List<Vector3> positionVecs = new List<Vector3>();
-        private List<Vec2> positionPoints = new List<Vec2>();
-        private void HandlePositionReceived(Transform2DNetworkData data)
+        private void DrawCalculatedInterpHistory()
         {
-            positionVecs.Add(new Vector3(data.Position.X, data.Position.Y, 0));
-            if (positionVecs.Count > syncedTransform.StateAmount)
-                positionVecs.RemoveAt(0);
-            positionPoints.Add(data.Position);
-            if (positionPoints.Count > syncedTransform.StateAmount)
-                positionPoints.RemoveAt(0);
-        }
-
-        private void DrawBezier()
-        {
-            if (positionPoints.Count < 4)
+            if (stateHistory.Count < 2)
                 return;
-
-            var distance = (positionVecs[0] - positionVecs[positionVecs.Count - 1]).magnitude;
-            var p0 = positionPoints[positionPoints.Count - 4];
-            var v0 = positionVecs[positionVecs.Count - 4];
+            var p0 = stateHistory[0];
+            var v0 = new Vector3(p0.Position.X, p0.Position.Y);
             var p1 = p0;
             var v1 = v0;
-            var points = new Vec2[4];
-            positionPoints.CopyTo(positionPoints.Count - 4, points, 0, 4);
-            for (float i = 0; i <= distance; i += distance/ lineAmount)
+            foreach (var state in stateHistory)
             {
-                p1 = DoLerp(points, i / distance);
-                v1 = new Vector3(p1.X, p1.Y, 0);
-                DrawQuad(v1, 0.03f, UnityEngine.Color.magenta);
+                v1 = new Vector3(state.Position.X, state.Position.Y);
                 Debug.DrawLine(v0, v1, UnityEngine.Color.red);
-                p0 = p1;
                 v0 = v1;
             }
-            Debug.DrawLine(v0, positionVecs[positionVecs.Count - 1], UnityEngine.Color.red);
+        }
 
-            foreach (var vec in positionVecs)
-                DrawQuad(vec, 0.08f, UnityEngine.Color.yellow);
+        private List<Vector3> positionVector3s = new List<Vector3>();
+        private List<Vec2> positionVec2s = new List<Vec2>();
+        private List<Vector3> velocityVector3s = new List<Vector3>();
+        private List<Vec2> velocityVec2s = new List<Vec2>();
+        private int isDrawnCounter = 0;
+
+        private void HandlePositionReceived(Transform2DNetworkData data)
+        {
+            positionVector3s.Add(new Vector3(data.Position.X, data.Position.Y, 0));
+            if (positionVector3s.Count > syncedTransform.StateAmount)
+                positionVector3s.RemoveAt(0);
+
+            positionVec2s.Add(data.Position);
+            if (positionVec2s.Count > syncedTransform.StateAmount)
+                positionVec2s.RemoveAt(0);
+
+            velocityVec2s.Add(new Vec2(data.Velocity.X, data.Velocity.Y));
+            if (velocityVec2s.Count > syncedTransform.StateAmount)
+                velocityVec2s.RemoveAt(0);
+
+            velocityVector3s.Add(new Vector3(data.Velocity.X, data.Velocity.Y));
+            if (velocityVector3s.Count > syncedTransform.StateAmount)
+            {
+                velocityVector3s.RemoveAt(0);
+                if (isDrawnCounter > 0)
+                    isDrawnCounter -= 1;
+            }
+        }
+
+        private void DrawSimulatedBezier()
+        {
+            if (positionVec2s.Count < 4 || isDrawnCounter >= positionVector3s.Count)
+                return;
+
+            // var distance = (positionVecs[0] - positionVecs[positionVecs.Count - 1]).magnitude;
+            // var p0 = positionPoints[positionPoints.Count - 4];
+            // var v0 = positionVecs[positionVecs.Count - 4];
+            // var p1 = p0;
+            // var v1 = v0;
+            // var points = new Vec2[4];
+            // positionPoints.CopyTo(positionPoints.Count - 4, points, 0, 4);
+            // for (float i = 0; i <= distance; i += distance / lineAmount)
+            // {
+            //     p1 = DoLerp(points, i / distance);
+            //     v1 = new Vector3(p1.X, p1.Y, 0);
+            //     DrawQuad(v1, 0.03f, UnityEngine.Color.magenta);
+            //     Debug.DrawLine(v0, v1, UnityEngine.Color.red);
+            //     p0 = p1;
+            //     v0 = v1;
+            // }
+            // Debug.DrawLine(v0, positionVecs[positionVecs.Count - 1], UnityEngine.Color.red);
+
+            var distance = 0f;
+            var c = isDrawnCounter;
+            for (; c < positionVector3s.Count - 1; c++)
+            {
+                distance = (positionVector3s[c] - positionVector3s[c + 1]).magnitude;
+                if (distance < lineLength)
+                    Debug.DrawLine(positionVector3s[c], positionVector3s[c + 1], UnityEngine.Color.red, lineDuration);
+                else
+                {
+                    Vector3 v0 = positionVector3s[c];
+                    Vector3 v1 = Vector3.zero;
+                    Vec2 lerpResult = Vec2.Zero;
+                    for (float i = 0; i <= distance; i += lineLength)
+                    {
+                        lerpResult = Core.JPUtils.DoLerpHermite(positionVec2s[c], velocityVec2s[c], positionVec2s[c + 1], velocityVec2s[c + 1], i / distance);
+                        v1.x = lerpResult.X;
+                        v1.y = lerpResult.Y;
+                        Debug.DrawLine(v0, v1, UnityEngine.Color.red, lineDuration);
+                        v0 = v1;
+                    }
+                    Debug.DrawLine(v1, positionVector3s[c + 1], UnityEngine.Color.red, lineDuration);
+                }
+            }
+            isDrawnCounter = c;
         }
 
         private Vec2 DoLerp(Vec2[] points, float t)
         {
             return Core.JPUtils.DoLerpCube(points[0], points[1], points[2], points[3], t);
+        }
+
+        private void DrawReceivedState()
+        {
+            // Vector3 pos = Vector3.zero;
+            // Vector3 vel = Vector3.zero;
+            // foreach (var state in stateHistory)
+            // {
+            //     pos.x = state.Position.X;
+            //     pos.y = state.Position.Y;
+            //     vel.x = state.Velocity.X;
+            //     vel.y = state.Velocity.Y;
+            //     DrawQuad(pos, 0.08f, UnityEngine.Color.yellow);
+            //     Debug.DrawLine(pos, vel, UnityEngine.Color.green);
+            // }
+            for (int i = 0; i < positionVector3s.Count; i++)
+            {
+                DrawQuad(positionVector3s[i], 0.08f, UnityEngine.Color.yellow);
+                Debug.DrawLine(positionVector3s[i], positionVector3s[i] + velocityVector3s[i] / 2, UnityEngine.Color.green);
+            }
         }
 
         // private void DrawBezier()
