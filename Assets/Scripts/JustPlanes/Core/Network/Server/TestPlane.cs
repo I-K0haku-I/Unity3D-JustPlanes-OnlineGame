@@ -48,7 +48,7 @@ namespace JustPlanes.Core
             {
                 var data = inputQueue.Dequeue();
                 body.SetAngularVelocity(100f * data.h);
-                speed += data.v * 10f * deltaTime;
+                speed += data.v * 10f * 0.1f;
                 body.SetVelocity(speed);
             }
             DebugLog.Warning($"[TestPlane] position: X: {transform2D.Position.X}, Y: {transform2D.Position.Y}");

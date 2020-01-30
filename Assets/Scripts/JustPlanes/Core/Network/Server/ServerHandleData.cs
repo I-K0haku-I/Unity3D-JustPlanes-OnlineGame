@@ -23,7 +23,13 @@ namespace JustPlanes.Core.Network.Server
             byte[] incomingBuffer = (byte[])data.Clone();
             int packetLength = 0;
 
-            Client client = ClientManager.clients[connectionID];
+            bool isFound = ClientManager.clients.TryGetValue(connectionID, out Client client);
+            if (!isFound)
+            {
+                DebugLog.Severe($"[Connection] Tried to handle data for disconnected client {connectionID}");
+                return;
+            }
+
             if (client.buffer == null)
                 client.buffer = new ByteBuffer();
 

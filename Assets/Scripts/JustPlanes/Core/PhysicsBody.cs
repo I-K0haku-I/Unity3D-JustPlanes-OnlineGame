@@ -60,7 +60,7 @@ namespace JustPlanes.Core
             // }
             // float t = lerpTimer * 0.8f;
 
-            if (System.Math.Abs((position - body.GetPosition()).Length()) > 2f)
+            if (System.Math.Abs((position - body.GetPosition()).Length()) > 0.2f)
             {
                 shouldLerp = true;
                 lerpAmount = 0f;
@@ -71,7 +71,7 @@ namespace JustPlanes.Core
                 lerpAmount += lerpTimeStep * deltaTime;
                 body.SetXForm(JPUtils.DoLerp(body.GetPosition(), position, lerpAmount), JPUtils.DoLerp(body.GetAngle(), rotation, lerpAmount));
                 body.SetLinearVelocity(JPUtils.DoLerp(body.GetLinearVelocity(), vel, lerpAmount));
-                if (System.Math.Abs((position - body.GetPosition()).Length()) < 0.1f)
+                if (System.Math.Abs((position - body.GetPosition()).Length()) < 0.01f)
                     shouldLerp = false;
             }
         }
