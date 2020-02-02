@@ -27,6 +27,8 @@ namespace JustPlanes.Core.Network
 
         public float InterpolationBackTime = 0.1f;
 
+        public Vec2 PredictedPos = Vec2.Zero;
+
         private IGame game;
         private PhysicsBody body;
 
@@ -125,8 +127,10 @@ namespace JustPlanes.Core.Network
 
             if (body != null)
             {
-                // body.body.SetXForm(currentState.Position, currentState.Rotation);
-                body.SetWithLerp(currentState.Position, currentState.Rotation, currentState.Velocity, deltaTime);
+                PredictedPos = currentState.Position + currentState.Velocity * InterpolationBackTime;
+                // could predict rotation here too
+                DebugLog.Warning($"[SyncedTransform2D] new predicted pos X: {PredictedPos.X}, Y: {PredictedPos.Y}");
+                body.SetWithLerp(PredictedPos, currentState.Rotation, currentState.Velocity, deltaTime);
                 Position = body.body.GetPosition();
                 Rotation = body.body.GetAngle();
                 Velocity = body.body.GetLinearVelocity();
@@ -159,6 +163,13 @@ namespace JustPlanes.Core.Network
                 stateBuffer[i] = stateBuffer[i - 1];
             // Array.Copy(stateBuffer, 0, stateBuffer, 1, stateBuffer.Length - 1);
             stateBuffer[0] = data;
+
+            // TODO: implement correction of position
+            // first store last second of states every 0.1s
+            // use timestamp to get a past state, either use lerping or just take the closest state.
+            // test if it is correct, if not, then reset all and world.step() with time offset
+
+
             OnPositionReceived?.Invoke(data);
 
             // DebugLog.Warning($"[SyncedTransform2D-{EntityId}: {data.Position.ToString()}");

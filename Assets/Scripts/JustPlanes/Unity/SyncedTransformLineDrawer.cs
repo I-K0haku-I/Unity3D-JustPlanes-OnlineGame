@@ -12,6 +12,8 @@ namespace JustPlanes.Unity
 
         private SyncedTransform2D syncedTransform;
 
+        [SerializeField]
+        private bool isDrawPredictedPosition;
 
         [SerializeField]
         private bool isDrawSimulatedDebugLine = true;
@@ -58,6 +60,16 @@ namespace JustPlanes.Unity
                 DrawSimulatedBezier();
             if (isDrawCalculatedInterpHistory)
                 DrawCalculatedInterpHistory();
+            if (isDrawPredictedPosition)
+                DrawPredictedPosition();
+        }
+
+        private void DrawPredictedPosition()
+        {
+            var predictedVec = new Vector3();
+            predictedVec.x = syncedTransform.PredictedPos.X;
+            predictedVec.y = syncedTransform.PredictedPos.Y;
+            DrawQuad(predictedVec, 0.1f, UnityEngine.Color.red);
         }
 
         private void DrawCalculatedInterpHistory()

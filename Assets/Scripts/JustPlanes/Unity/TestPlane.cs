@@ -8,6 +8,14 @@ namespace JustPlanes.Unity
         [SerializeField]
         private int syncId;
 
+        [SerializeField]
+        [Range(0.01f, 0.9f)]
+        private float lerpTime = 2f;
+
+        [SerializeField]
+        [Range(0.01f, 1f)]
+        private float lerpDistanceTrigger = 0.2f;
+
         public Core.TestPlane plane;
         private Vector3 newPos = Vector3.zero;
         private Quaternion newQuat = Quaternion.identity;
@@ -23,6 +31,9 @@ namespace JustPlanes.Unity
             float h = Input.GetAxis("Horizontal");
             plane.Update(Time.deltaTime);
             plane.HandleInput(h, v);
+
+            plane.body.MaxLerpTime = lerpTime;
+            plane.body.LerpDistanceTrigger = lerpDistanceTrigger;
 
 
             newPos.x = plane.transform2D.Position.X;

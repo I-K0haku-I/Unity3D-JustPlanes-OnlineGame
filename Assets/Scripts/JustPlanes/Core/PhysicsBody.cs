@@ -9,10 +9,10 @@ namespace JustPlanes.Core
     {
         public Body body;
 
-        private float lerpTimer = 0f;
         private bool shouldLerp = false;
-        private float lerpTimeStep = 0.5f;
-        private float lerpAmount = 0f;
+        private float lerpTimer;
+        public float MaxLerpTime = 1f;
+        public float LerpDistanceTrigger = 0.2f;
 
         public PhysicsBody(World world, float posX, float posY, float boxWidth, float boxHeight)
         {
@@ -71,17 +71,27 @@ namespace JustPlanes.Core
             // }
             // float t = lerpTimer * 0.8f;
 
-            if (System.Math.Abs((position - body.GetPosition()).Length()) > 0.2f)
+            DebugLog.Warning($"[PhysicsBody] to lerp distance: {(position - body.GetPosition()).Length()}");
+
+            if (!shouldLerp && System.Math.Abs((position - body.GetPosition()).Length()) > LerpDistanceTrigger)
             {
                 shouldLerp = true;
-                lerpAmount = 0f;
+                lerpTimer = 0f;
             }
 
             if (shouldLerp)
             {
-                lerpAmount += lerpTimeStep * deltaTime;
-                body.SetXForm(JPUtils.DoLerp(body.GetPosition(), position, lerpAmount), JPUtils.DoLerp(body.GetAngle(), rotation, lerpAmount));
-                body.SetLinearVelocity(JPUtils.DoLerp(body.GetLinearVelocity(), vel, lerpAmount));
+                // lerpTimer += deltaTime;
+                // var t = lerpTimer / MaxLerpTime;
+                // t = t * t;
+                // t = t * t * (3f - 2f * t);
+                // t = t * t * t * (t * (6f * t - 15f) + 10f);
+                // t = 1f - (float)System.Math.Cos(t * System.Math.PI * 0.5f);
+                // DebugLog.Warning($"[PhysicsBody] lerp amount: {t}");
+                // DebugLog.Warning("HELLO " + t + ", lerptimer " + lerpTimer + ", lerptime: " + MaxLerpTime);
+                var t = MaxLerpTime;
+                body.SetXForm(JPUtils.DoLerp(body.GetPosition(), position, t), JPUtils.DoLerp(body.GetAngle(), rotation, t));
+                body.SetLinearVelocity(JPUtils.DoLerp(body.GetLinearVelocity(), vel, t));
                 if (System.Math.Abs((position - body.GetPosition()).Length()) < 0.01f)
                     shouldLerp = false;
             }
