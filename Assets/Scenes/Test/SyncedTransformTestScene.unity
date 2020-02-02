@@ -1670,6 +1670,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2eb06f9d4974c91448ba30f705650d62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isDrawPredictedPosition: 0
   isDrawSimulatedDebugLine: 0
   lineLength: 0.1
   lineDuration: 1
@@ -1689,6 +1690,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncId: 666
+  lerpTime: 0.135
+  lerpDistanceTrigger: 0.01
 --- !u!1001 &1148225403
 PrefabInstance:
   m_ObjectHideFlags: 0
