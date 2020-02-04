@@ -2,6 +2,7 @@ using Box2DX.Dynamics;
 using Box2DX.Collision;
 using Box2DX.Common;
 using System;
+using JustPlanes.Core.Network;
 
 namespace JustPlanes.Core
 {
@@ -100,6 +101,11 @@ namespace JustPlanes.Core
         public float Dot(Vec2 a, Vec2 b)
         {
             return a.X * b.X + a.Y * b.Y;
+        }
+
+        public void DoCrazyShit(Transform2DNetworkData state)
+        {
+            throw new NotImplementedException();
         }
     }
 }

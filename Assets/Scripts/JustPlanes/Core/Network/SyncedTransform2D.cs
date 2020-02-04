@@ -35,6 +35,10 @@ namespace JustPlanes.Core.Network
         private Transform2DNetworkData stateLastSent = new Transform2DNetworkData();
         private Transform2DNetworkData stateToSend = new Transform2DNetworkData();
         private Transform2DNetworkData currentState = new Transform2DNetworkData();
+        private List<Transform2DNetworkData> lastSecondStates = new List<Transform2DNetworkData>();
+        private float lastSecondStateTimer = 0f;
+        private float lastSecondStateSaveRate = 0.1f;
+        private float lastSecondStateSaveTime = 1f;
 
         public SyncedTransform2D(int entityId, IGame game, PhysicsBody body = null)
         {
@@ -141,6 +145,15 @@ namespace JustPlanes.Core.Network
                 Rotation = currentState.Rotation;
                 Velocity = currentState.Velocity;
             }
+
+            lastSecondStateTimer += deltaTime;
+            if (lastSecondStateTimer > lastSecondStateSaveRate)
+            {
+                lastSecondStateTimer -= lastSecondStateSaveRate;
+                lastSecondStates.Add(currentState.GetCopy());
+                if (lastSecondStates.Count > (int)(lastSecondStateSaveTime/lastSecondStateSaveRate))
+                    lastSecondStates.RemoveAt(0);
+            }
         }
 
         private float GetWorldTime()
@@ -168,7 +181,21 @@ namespace JustPlanes.Core.Network
             // first store last second of states every 0.1s
             // use timestamp to get a past state, either use lerping or just take the closest state.
             // test if it is correct, if not, then reset all and world.step() with time offset
-
+            foreach (var state in lastSecondStates)
+            {
+                if (data.Timestamp > state.Timestamp)
+                    continue;
+                
+                if (System.Math.Abs((data.Position - state.Position).Length()) < 0.1f)
+                    break;
+                
+                // TODO: implement rewind
+                body.DoCrazyShit(state);
+                Position = body.body.GetPosition();
+                Rotation = body.body.GetAngle();
+                Velocity = body.body.GetLinearVelocity();
+                break;
+            }
 
             OnPositionReceived?.Invoke(data);
 
@@ -200,6 +227,13 @@ namespace JustPlanes.Core.Network
             this.Position = stateToSend.Position;
             this.Rotation = stateToSend.Rotation;
             this.Velocity = stateToSend.Velocity;
+        }
+
+        public Transform2DNetworkData GetCopy()
+        {
+            var state = new Transform2DNetworkData();
+            state.TransferValuesFrom(this);
+            return state;
         }
     }
 }
