@@ -45,6 +45,7 @@ namespace JustPlanes.Core.Network.Server
         public Authenticator auth;
         public PhysicsManager Physics = new PhysicsManager();
         private TestPlane testPlane;
+        private Snake snake;
         // internal ConcurrentQueue<Tuple<string, int>> damageQueue = new ConcurrentQueue<Tuple<string, int>>();
         // internal List<Unit> unitDeathToSend = new List<Unit>();
 
@@ -82,6 +83,7 @@ namespace JustPlanes.Core.Network.Server
             auth = new Authenticator();
             playerManager = new PlayerManager();
             testPlane = new TestPlane(this, 3f, 10f, 666);
+            snake = new Snake(this, 0f, 0f, 4523);
 
             // playerManager.AddPlayer("Test1");
             // playerManager.AddPlayer("Test2");
@@ -133,6 +135,7 @@ namespace JustPlanes.Core.Network.Server
 
             Physics.Update(timeDelta);
             testPlane.Update(timeDelta);
+            snake.Update(timeDelta);
 
             // while (damageQueue.TryDequeue(out var damageItem))
             // {

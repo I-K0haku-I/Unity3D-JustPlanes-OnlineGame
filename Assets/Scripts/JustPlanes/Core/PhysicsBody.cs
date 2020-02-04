@@ -24,6 +24,8 @@ namespace JustPlanes.Core
             shapeDef.SetAsBox(boxWidth, boxHeight);
             shapeDef.Density = 1f;
             shapeDef.Friction = 0.3f;
+            // disable collision, still unclear on everything this does
+            shapeDef.Filter.GroupIndex = -1;
             body.CreateShape(shapeDef);
             body.SetMassFromShapes();
             // body.SetLinearVelocity(new Vec2(0f, 1f));

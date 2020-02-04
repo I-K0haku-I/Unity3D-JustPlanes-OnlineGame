@@ -82,6 +82,7 @@ namespace JustPlanes.Unity
             if (updateReceived >= updateRate)
             {
                 updateReceived = 0;
+                // TO DERPY: you can just call the method here directly instead of setting bools
                 shouldUpdateBody = true;
             }
         }
