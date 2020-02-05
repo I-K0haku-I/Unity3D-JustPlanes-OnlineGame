@@ -1590,6 +1590,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncId: 4523
+  updateRate: 30
+  zCoordinate: 10
+  snakeLength: 50
+  smoothTime: 0.1
+  maxSpeed: 500
+  snakeObjectHolder: {fileID: 1552037218}
+  snakeHead: {fileID: 1735014925069876092, guid: 4e55e351e47e928468771fbbb15ee689,
+    type: 3}
+  snakeBody: {fileID: 8943919960962222004, guid: 65c98917160b1fc41974546739826e43,
+    type: 3}
 --- !u!4 &1106263574
 Transform:
   m_ObjectHideFlags: 0
@@ -1617,7 +1627,6 @@ GameObject:
   - component: {fileID: 1110406146}
   - component: {fileID: 1110406145}
   - component: {fileID: 1110406142}
-  - component: {fileID: 1110406147}
   m_Layer: 0
   m_Name: TestPlane
   m_TagString: Untagged
@@ -1737,28 +1746,6 @@ MonoBehaviour:
   syncId: 666
   lerpTime: 0.135
   lerpDistanceTrigger: 0.01
---- !u!114 &1110406147
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1110406141}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57d202626e4cffa499de84b9a78f11a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  updateRate: 0
-  zCoordinate: 10
-  snakeLength: 50
-  smoothTime: 0.1
-  maxSpeed: 500
-  parentTransform: {fileID: 1552037218}
-  snakeHead: {fileID: 1735014925069876092, guid: 4e55e351e47e928468771fbbb15ee689,
-    type: 3}
-  snakeBody: {fileID: 8943919960962222004, guid: 65c98917160b1fc41974546739826e43,
-    type: 3}
 --- !u!1001 &1148225403
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2115,7 +2102,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552037217}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 52.60127, y: -12.895289, z: 71.272095}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

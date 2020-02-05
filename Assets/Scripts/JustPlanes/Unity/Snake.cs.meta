@@ -3,7 +3,12 @@ guid: a56a8f625c4697147a1e9a2ebe973b24
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - snakeObjectHolder: {instanceID: 0}
+  - snakeHead: {fileID: 1735014925069876092, guid: 4e55e351e47e928468771fbbb15ee689,
+      type: 3}
+  - snakeBody: {fileID: 8943919960962222004, guid: 65c98917160b1fc41974546739826e43,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
