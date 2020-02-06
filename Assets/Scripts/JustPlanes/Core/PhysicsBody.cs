@@ -2,6 +2,7 @@ using Box2DX.Dynamics;
 using Box2DX.Collision;
 using Box2DX.Common;
 using System;
+using System.Collections.Generic;
 using JustPlanes.Core.Network;
 
 namespace JustPlanes.Core
@@ -10,16 +11,19 @@ namespace JustPlanes.Core
     {
         public Body body;
 
+        public List<InputBodyState> inputBuffer = new List<InputBodyState>();
+
         private bool shouldLerp = false;
         private float lerpTimer;
         public float MaxLerpTime = 1f;
         public float LerpDistanceTrigger = 0.2f;
+        private float inputBufferBackTime = 1f;
 
-        public PhysicsBody(World world, float posX, float posY, float boxWidth, float boxHeight)
+        public PhysicsBody(PhysicsManager physics, float posX, float posY, float boxWidth, float boxHeight)
         {
             BodyDef bodyDef = new BodyDef();
             bodyDef.Position.Set(posX, posY);
-            body = world.CreateBody(bodyDef);
+            body = physics.CreateBody(bodyDef);
 
             PolygonDef shapeDef = new PolygonDef();
             shapeDef.SetAsBox(boxWidth, boxHeight);
@@ -98,14 +102,45 @@ namespace JustPlanes.Core
             }
         }
 
+        public void StoreInputState(float newVelToAdd, float newAngVelToSet, float timestamp)
+        {
+            inputBuffer.Add(new InputBodyState()
+            {
+                NewVelocityToAdd = newVelToAdd,
+                NewAngularVelocityToSet = newAngVelToSet,
+                OldVelocity = body.GetLinearVelocity(),
+                OldAngularVelocity = body.GetAngularVelocity(),
+                Timestamp = timestamp
+            });
+            if (inputBuffer[0].Timestamp < timestamp - inputBufferBackTime)
+                inputBuffer.RemoveAt(0);
+        }
+
         public float Dot(Vec2 a, Vec2 b)
         {
             return a.X * b.X + a.Y * b.Y;
         }
 
-        public void DoCrazyShit(Transform2DNetworkData state)
+        public void ReCalculate(Transform2DNetworkData state, float goBackTime)
         {
+            body.SetXForm(state.Position, state.Rotation);
+            for (int i = inputBuffer.Count - 1; i >= 0; i--)
+            {
+                
+            }
+            // body.SetLinearVelocity(state.Velocity);
+            // body.SetAngularVelocity(state.)
+            // body.GetWorld()
             throw new NotImplementedException();
         }
+    }
+
+    public class InputBodyState
+    {
+        public float NewVelocityToAdd;
+        public float NewAngularVelocityToSet;
+        public float Timestamp;
+        internal float OldAngularVelocity;
+        internal Vec2 OldVelocity;
     }
 }

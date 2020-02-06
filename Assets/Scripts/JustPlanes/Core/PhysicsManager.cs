@@ -34,6 +34,11 @@ namespace JustPlanes.Core
 
         }
 
+        public Body CreateBody(BodyDef bodyDef)
+        {
+            return world.CreateBody(bodyDef);
+        }
+
         public void Update(float deltaTime)
         {
             // foreach (var body in bodies)
@@ -43,7 +48,7 @@ namespace JustPlanes.Core
 
         public PhysicsBody CreateBody(float posX, float posY, float boxWidth, float boxHeight)
         {
-            var body = new PhysicsBody(world, posX, posY, boxWidth, boxHeight);
+            var body = new PhysicsBody(this, posX, posY, boxWidth, boxHeight);
             bodies.Add(body);
             return body;
         }

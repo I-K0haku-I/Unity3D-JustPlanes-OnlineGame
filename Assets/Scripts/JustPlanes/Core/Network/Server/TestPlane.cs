@@ -43,27 +43,35 @@ namespace JustPlanes.Core
         {
             tickTimer += deltaTime;
 
-            while (inputQueue.Count > 0)
-            {
-                var data = inputQueue.Dequeue();
-                body.SetAngularVelocity(100f * data.h);
-                speed += data.v * 10f * 0.1f;
-                body.SetVelocity(speed);
-            }
-            transform2D.Update(deltaTime);
-
             // Looks complicated, but all this is doing is making sure the speed gets updated
             Vec2 dir = body.GetDirection(transform2D.Rotation);
             Vec2 vel = transform2D.Velocity;
             // this checks if the velocity is backwards or forwards
             if (System.Math.Abs((body.Dot(dir, vel) / (dir.Length() * vel.Length())) + 1f) < 0.1f)
-            {
                 speed = vel.Length() * -1;
-            }
             else
-            {
                 speed = vel.Length();
+
+            if (inputQueue.Count > 0)
+            {
+                var newVel = 0f;
+                var newAngVel = 0f;
+                while (inputQueue.Count > 0)
+                {
+                    var data = inputQueue.Dequeue();
+                    newVel += data.v * 10f * tickTriggerAmount;
+                    newAngVel = 100f * data.h;
+                    // body.SetAngularVelocity(100f * data.h);
+                    // speed += data.v * 10f * 0.1f;
+                    // body.SetVelocity(speed)
+                }
+                if (NetworkMagic.IsClient)
+                    body.StoreInputState(newVel, newAngVel, game.GetTime());
+                speed += newVel;
+                body.SetVelocity(speed);
+                body.SetAngularVelocity(newAngVel);
             }
+            transform2D.Update(deltaTime);
 
             DebugLog.Warning($"[TestPlane] position: X: {transform2D.Position.X}, Y: {transform2D.Position.Y}");
         }

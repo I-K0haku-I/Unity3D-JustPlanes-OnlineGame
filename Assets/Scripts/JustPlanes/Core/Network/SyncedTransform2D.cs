@@ -35,10 +35,10 @@ namespace JustPlanes.Core.Network
         private Transform2DNetworkData stateLastSent = new Transform2DNetworkData();
         private Transform2DNetworkData stateToSend = new Transform2DNetworkData();
         private Transform2DNetworkData currentState = new Transform2DNetworkData();
-        private List<Transform2DNetworkData> lastSecondStates = new List<Transform2DNetworkData>();
-        private float lastSecondStateTimer = 0f;
-        private float lastSecondStateSaveRate = 0.1f;
-        private float lastSecondStateSaveTime = 1f;
+        private List<Transform2DNetworkData> predictedStates = new List<Transform2DNetworkData>();
+        private float predictedStateTimer = 0f;
+        private float predictedStateSaveRate = 0.1f;
+        private float predictedStateBufferTime = 1f;
 
         public SyncedTransform2D(int entityId, IGame game, PhysicsBody body = null)
         {
@@ -146,13 +146,15 @@ namespace JustPlanes.Core.Network
                 Velocity = currentState.Velocity;
             }
 
-            lastSecondStateTimer += deltaTime;
-            if (lastSecondStateTimer > lastSecondStateSaveRate)
+            predictedStateTimer += deltaTime;
+            if (predictedStateTimer > predictedStateSaveRate)
             {
-                lastSecondStateTimer -= lastSecondStateSaveRate;
-                lastSecondStates.Add(currentState.GetCopy());
-                if (lastSecondStates.Count > (int)(lastSecondStateSaveTime/lastSecondStateSaveRate))
-                    lastSecondStates.RemoveAt(0);
+                predictedStateTimer -= predictedStateSaveRate;
+                var state = currentState.GetCopy();
+                state.Timestamp = game.GetTime();
+                predictedStates.Add(state);
+                if (predictedStates.Count > (int)(predictedStateBufferTime / predictedStateSaveRate))
+                    predictedStates.RemoveAt(0);
             }
         }
 
@@ -181,16 +183,30 @@ namespace JustPlanes.Core.Network
             // first store last second of states every 0.1s
             // use timestamp to get a past state, either use lerping or just take the closest state.
             // test if it is correct, if not, then reset all and world.step() with time offset
-            foreach (var state in lastSecondStates)
+            for (int i = predictedStates.Count - 1; i >= 0; i--)
             {
+                var state = predictedStates[i];
+                // }
+                // foreach (var state in predictedStates)
+                // {
                 if (data.Timestamp > state.Timestamp)
                     continue;
-                
-                if (System.Math.Abs((data.Position - state.Position).Length()) < 0.1f)
+                if (i == predictedStates.Count)
+                    continue;
+                var nextState = predictedStates[i + 1];
+                var t = data.Timestamp - state.Timestamp / state.Timestamp - nextState.Timestamp;
+                var lerpedState = new Transform2DNetworkData()
+                {
+                    Timestamp = JPUtils.DoLerp(state.Timestamp, nextState.Timestamp, t),
+                    Position = JPUtils.DoLerpHermite(state.Position, state.Velocity, nextState.Position, nextState.Velocity, t),
+                    Rotation = JPUtils.DoLerp(state.Rotation, nextState.Rotation, t),
+                    Velocity = JPUtils.DoLerp(state.Velocity, nextState.Velocity, t),
+                };
+
+                if (System.Math.Abs((data.Position - lerpedState.Position).Length()) < 0.1f)
                     break;
-                
-                // TODO: implement rewind
-                body.DoCrazyShit(state);
+
+                body.ReCalculate(data, predictedStates[predictedStates.Count - 1].Timestamp - lerpedState.Timestamp);
                 Position = body.body.GetPosition();
                 Rotation = body.body.GetAngle();
                 Velocity = body.body.GetLinearVelocity();
