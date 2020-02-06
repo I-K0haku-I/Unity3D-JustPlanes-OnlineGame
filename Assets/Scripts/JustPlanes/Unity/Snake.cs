@@ -8,7 +8,7 @@ namespace JustPlanes.Unity
     public class Snake : MonoBehaviour
     {
 
-        public Core.Snake snake;
+        public Core.Snake snake = null;
 
 
         [SerializeField]
@@ -24,8 +24,6 @@ namespace JustPlanes.Unity
         private float smoothTime = 0.1F;
         [SerializeField, Tooltip("Max speed of snake head.\n\nused for Vector3.SmoothDamp.")]
         private float maxSpeed = 500F;
-        [SerializeField, Tooltip("Parent transform for snake head/bodies.\n\nall head/bodies goes into below this transform.")]
-        private Transform snakeObjectHolder = null;
         [SerializeField]
         private Object snakeHead = null;
         [SerializeField]
@@ -36,9 +34,6 @@ namespace JustPlanes.Unity
         private GameObject snakeHeadInstance = null;
 
         private Vector3 velocity = Vector3.zero;
-        private Vector3 nextPos = Vector3.zero;
-        private bool shouldUpdateBody = false;
-
 
         #region Unity Methods
 
@@ -46,13 +41,13 @@ namespace JustPlanes.Unity
         private void Awake()
         {
             snakeHeadInstance = (GameObject)Instantiate(snakeHead);
-            snakeHeadInstance.transform.SetParent(snakeObjectHolder);
+            snakeHeadInstance.transform.SetParent(transform);
             snakeHeadInstance.name = "SnakeHead";
 
             for (int i = 0; i < snakeLength; i++)
             {
                 GameObject bodyInstance = (GameObject)Instantiate(snakeBody);
-                bodyInstance.transform.SetParent(snakeObjectHolder);
+                bodyInstance.transform.SetParent(transform);
                 bodyInstance.name = $"SnakeBody-{i + 1}";
                 snakeBodyInstances.Enqueue(bodyInstance);
             }
@@ -68,14 +63,6 @@ namespace JustPlanes.Unity
         private void Update()
         {
             snake.Update(Time.deltaTime);
-            Vector3 smoothed = Vector3.SmoothDamp(snakeHeadInstance.transform.position, nextPos, ref velocity, smoothTime, maxSpeed);
-            Quaternion rotation = Quaternion.AngleAxis(Mathf.Atan2(velocity.x, velocity.y) * Mathf.Rad2Deg, Vector3.back);
-
-            snakeHeadInstance.transform.SetPositionAndRotation(smoothed, rotation);
-            if (shouldUpdateBody)
-            {
-                UpdateBody(snakeHeadInstance.transform);
-            }
         }
 
 
@@ -86,19 +73,21 @@ namespace JustPlanes.Unity
         private void HandleStateCalculated(Transform2DNetworkData obj)
         {
             updateReceived++;
-            nextPos = new Vector3(obj.Position.X, obj.Position.Y, zCoordinate);
 
-            if (updateReceived >= updateRate)
+            Vector3 nextPos = new Vector3(obj.Position.X, obj.Position.Y, zCoordinate);
+            Vector3 smoothed = Vector3.SmoothDamp(snakeHeadInstance.transform.position, nextPos, ref velocity, smoothTime, maxSpeed);
+            Quaternion rotation = Quaternion.AngleAxis(Mathf.Atan2(velocity.x, velocity.y) * Mathf.Rad2Deg, Vector3.back);
+
+            snakeHeadInstance.transform.SetPositionAndRotation(smoothed, rotation);
+            if (updateReceived > updateRate)
             {
                 updateReceived = 0;
-                // TO DERPY: you can just call the method here directly instead of setting bools
-                shouldUpdateBody = true;
+                UpdateBody(snakeHeadInstance.transform);
             }
         }
 
         private void UpdateBody(Transform nextTransform)
         {
-            shouldUpdateBody = false;
             GameObject body = snakeBodyInstances.Dequeue();
             body.transform.SetPositionAndRotation(nextTransform.position, nextTransform.rotation);
             snakeBodyInstances.Enqueue(body);
