@@ -13,7 +13,7 @@ namespace JustPlanes.Unity
         [SerializeField]
         private int syncId = 4523;
         [SerializeField]
-        private float zCoordinate = 10f;
+        private float zCoordinate = -10f;
         [SerializeField]
         private Object snakeHead = null;
 
@@ -34,26 +34,19 @@ namespace JustPlanes.Unity
         private void Start()
         {
             snake = new Core.Snake(GameManager.instance, 0, 0, syncId);
-            snake.transform2D.OnStateCalculated += HandleStateCalculated;
         }
-
+        private Vector3 nextPos = Vector3.zero;
+        private Quaternion rotation = Quaternion.identity;
         private void Update()
         {
             snake.Update(Time.deltaTime);
+
+            nextPos = new Vector3(snake.transform2D.Position.X, snake.transform2D.Position.Y, zCoordinate);
+            rotation = Quaternion.AngleAxis(snake.transform2D.Rotation, Vector3.back);
+            snakeHeadInstance.transform.SetPositionAndRotation(nextPos, rotation);
         }
 
 
         #endregion Unity Methods
-
-
-
-        private void HandleStateCalculated(Transform2DNetworkData obj)
-        {
-            Vector3 nextPos = new Vector3(obj.Position.X, obj.Position.Y, zCoordinate);
-            Quaternion rotation = Quaternion.AngleAxis(obj.Rotation, Vector3.back);
-
-            snakeHeadInstance.transform.SetPositionAndRotation(nextPos, rotation);
-        }
-
     }
 }
