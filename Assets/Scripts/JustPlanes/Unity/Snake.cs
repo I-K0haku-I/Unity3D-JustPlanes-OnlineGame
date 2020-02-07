@@ -14,26 +14,24 @@ namespace JustPlanes.Unity
         [SerializeField]
         private int syncId = 4523;
 
-        [SerializeField, Tooltip("Update rate of snake body.\n\nbody will not update until SyncedTransform2D updates this amount of time.")]
-        private int updateRate = 0;
+        [SerializeField, Tooltip("Use new updating method, bit laggier than old one.")]
+        private bool useNewUpdating = true;
+        [SerializeField, Tooltip("Minimal distance between each bodies")]
+        private float bodyDistance = 1F;
         [SerializeField, Tooltip("Z Coordinate of snake head/bodies.")]
         private float zCoordinate = 10F;
         [SerializeField, Tooltip("Amount of snake body instances.\n\ncannot be changed at runtime.")]
         private int snakeLength = 50;
-        [SerializeField, Tooltip("Smooth time of snake head.\n\nused for Vector3.SmoothDamp.")]
-        private float smoothTime = 0.1F;
-        [SerializeField, Tooltip("Max speed of snake head.\n\nused for Vector3.SmoothDamp.")]
-        private float maxSpeed = 500F;
         [SerializeField]
         private Object snakeHead = null;
         [SerializeField]
         private Object snakeBody = null;
 
-        private int updateReceived = 0;
-        private Queue<GameObject> snakeBodyInstances = new Queue<GameObject>();
+        private GameObject[] snakeBodyInstances = null;
+        private GameObject snakeBodyFirstInstance = null;
         private GameObject snakeHeadInstance = null;
 
-        private Vector3 velocity = Vector3.zero;
+        private int lastUpdated = 0;
 
         #region Unity Methods
 
@@ -44,14 +42,16 @@ namespace JustPlanes.Unity
             snakeHeadInstance.transform.SetParent(transform);
             snakeHeadInstance.name = "SnakeHead";
 
+            List<GameObject> bodies = new List<GameObject>();
             for (int i = 0; i < snakeLength; i++)
             {
                 GameObject bodyInstance = (GameObject)Instantiate(snakeBody);
                 bodyInstance.transform.SetParent(transform);
                 bodyInstance.name = $"SnakeBody-{i + 1}";
-                snakeBodyInstances.Enqueue(bodyInstance);
+                bodies.Add(bodyInstance);
             }
-
+            snakeBodyInstances = bodies.ToArray();
+            snakeBodyFirstInstance = snakeBodyInstances[0];
         }
 
         private void Start()
@@ -72,25 +72,58 @@ namespace JustPlanes.Unity
 
         private void HandleStateCalculated(Transform2DNetworkData obj)
         {
-            updateReceived++;
-
             Vector3 nextPos = new Vector3(obj.Position.X, obj.Position.Y, zCoordinate);
-            Vector3 smoothed = Vector3.SmoothDamp(snakeHeadInstance.transform.position, nextPos, ref velocity, smoothTime, maxSpeed);
-            Quaternion rotation = Quaternion.AngleAxis(Mathf.Atan2(velocity.x, velocity.y) * Mathf.Rad2Deg, Vector3.back);
+            Quaternion rotation = Quaternion.AngleAxis(obj.Rotation, Vector3.back);
 
-            snakeHeadInstance.transform.SetPositionAndRotation(smoothed, rotation);
-            if (updateReceived > updateRate)
+            snakeHeadInstance.transform.SetPositionAndRotation(nextPos, rotation);
+
+
+            Vector3 headPos = snakeHeadInstance.transform.position;
+            Vector3 firstBodyPos = snakeBodyFirstInstance.transform.position;
+            float distanceBetween = Vector3.Distance(headPos, firstBodyPos);
+
+            if (distanceBetween > bodyDistance)
             {
-                updateReceived = 0;
                 UpdateBody(snakeHeadInstance.transform);
             }
         }
 
         private void UpdateBody(Transform nextTransform)
         {
-            GameObject body = snakeBodyInstances.Dequeue();
-            body.transform.SetPositionAndRotation(nextTransform.position, nextTransform.rotation);
-            snakeBodyInstances.Enqueue(body);
+            if (useNewUpdating)
+            {
+                MoveBody(nextTransform);
+            }
+            else
+            {
+                TeleportBody(nextTransform);
+            }
+        }
+
+        private void MoveBody(Transform nextTransform)
+        {
+            // Reversed loop
+            for (int i = snakeBodyInstances.Length - 1; i >= 0; i--)
+            {
+                if (i == 0)
+                {
+                    snakeBodyInstances[0].transform.SetPositionAndRotation(nextTransform.position, nextTransform.rotation);
+                }
+                else
+                {
+                    Transform targetTransform = snakeBodyInstances[i - 1].transform;
+                    snakeBodyInstances[i].transform.SetPositionAndRotation(targetTransform.position, targetTransform.rotation);
+                }
+            }
+            snakeBodyFirstInstance = snakeBodyInstances[0];
+        }
+
+        private void TeleportBody(Transform nextTransform)
+        {
+            int nextToUpdate = lastUpdated + 1 < snakeBodyInstances.Length ? lastUpdated + 1 : 0;
+            snakeBodyInstances[nextToUpdate].transform.SetPositionAndRotation(nextTransform.position, nextTransform.rotation);
+            lastUpdated = nextToUpdate;
+            snakeBodyFirstInstance = snakeBodyInstances[lastUpdated];
         }
 
 
