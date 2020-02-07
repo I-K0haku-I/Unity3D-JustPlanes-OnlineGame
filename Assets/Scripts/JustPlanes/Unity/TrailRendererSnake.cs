@@ -10,7 +10,6 @@ namespace JustPlanes.Unity
 
         public Core.Snake snake = null;
 
-
         [SerializeField]
         private int syncId = 4523;
         [SerializeField]

@@ -14,7 +14,7 @@ namespace JustPlanes.Core
             this.game = game;
             body = game.GetPhysicsManager().CreateBody(posX, posY, 5, 5);
             body.SetVelocity(Speed);
-            body.SetAngularVelocity(15F);
+            body.SetAngularVelocity(120f);
             transform2D = new Network.SyncedTransform2D(syncedTransformId, game, body);
         }
 
