@@ -9,6 +9,7 @@ namespace JustPlanes.Core
 {
     public class PhysicsBody
     {
+        private PhysicsManager physics;
         public Body body;
 
         public List<InputBodyState> inputBuffer = new List<InputBodyState>();
@@ -23,6 +24,7 @@ namespace JustPlanes.Core
         {
             BodyDef bodyDef = new BodyDef();
             bodyDef.Position.Set(posX, posY);
+            this.physics = physics;
             body = physics.CreateBody(bodyDef);
 
             PolygonDef shapeDef = new PolygonDef();
@@ -106,8 +108,8 @@ namespace JustPlanes.Core
         {
             inputBuffer.Add(new InputBodyState()
             {
-                NewVelocityToAdd = newVelToAdd,
-                NewAngularVelocityToSet = newAngVelToSet,
+                NewVelocity = newVelToAdd,
+                NewAngularVelocity = newAngVelToSet,
                 OldVelocity = body.GetLinearVelocity(),
                 OldAngularVelocity = body.GetAngularVelocity(),
                 Timestamp = timestamp
@@ -121,24 +123,51 @@ namespace JustPlanes.Core
             return a.X * b.X + a.Y * b.Y;
         }
 
-        public void ReCalculate(Transform2DNetworkData state, float goBackTime)
+        public void ReCalculate(Transform2DNetworkData state, float currTime, float startTime)
         {
             body.SetXForm(state.Position, state.Rotation);
-            for (int i = inputBuffer.Count - 1; i >= 0; i--)
+
+            var i = inputBuffer.Count;
+            while (i >= 0)
             {
-                
+                if (startTime > inputBuffer[i].Timestamp)
+                {
+                    i++;
+                    break;
+                }
+                i--;
             }
+
+            //  no input
+            if (i > inputBuffer.Count)
+                return;
+
+
+            InputBodyState input;
+            InputBodyState nextInput;
+            while (i + 1 <= inputBuffer.Count)
+            {
+                input = inputBuffer[i];
+                nextInput = inputBuffer[i + 1];
+                SetVelocity(input.NewVelocity);
+                SetAngularVelocity(input.NewAngularVelocity);
+                physics.Update(nextInput.Timestamp - input.Timestamp);
+            }
+            input = inputBuffer[i];
+            nextInput = inputBuffer[i + 1];
+            SetVelocity(input.NewVelocity);
+            SetAngularVelocity(input.NewAngularVelocity);
+
             // body.SetLinearVelocity(state.Velocity);
             // body.SetAngularVelocity(state.)
             // body.GetWorld()
-            throw new NotImplementedException();
         }
     }
 
     public class InputBodyState
     {
-        public float NewVelocityToAdd;
-        public float NewAngularVelocityToSet;
+        public float NewVelocity;
+        public float NewAngularVelocity;
         public float Timestamp;
         internal float OldAngularVelocity;
         internal Vec2 OldVelocity;

@@ -206,7 +206,8 @@ namespace JustPlanes.Core.Network
                 if (System.Math.Abs((data.Position - lerpedState.Position).Length()) < 0.1f)
                     break;
 
-                body.ReCalculate(data, predictedStates[predictedStates.Count - 1].Timestamp - lerpedState.Timestamp);
+                // body.ReCalculate(data, predictedStates[predictedStates.Count - 1].Timestamp - lerpedState.Timestamp);
+                body.ReCalculate(data, GetWorldTime(), stateTimeOffsets.Average());
                 Position = body.body.GetPosition();
                 Rotation = body.body.GetAngle();
                 Velocity = body.body.GetLinearVelocity();

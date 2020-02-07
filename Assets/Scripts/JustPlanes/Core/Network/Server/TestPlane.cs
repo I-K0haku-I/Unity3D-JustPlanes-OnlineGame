@@ -66,7 +66,7 @@ namespace JustPlanes.Core
                     // body.SetVelocity(speed)
                 }
                 if (NetworkMagic.IsClient)
-                    body.StoreInputState(newVel, newAngVel, game.GetTime());
+                    body.StoreInputState(speed + newVel, newAngVel, game.GetTime());
                 speed += newVel;
                 body.SetVelocity(speed);
                 body.SetAngularVelocity(newAngVel);
