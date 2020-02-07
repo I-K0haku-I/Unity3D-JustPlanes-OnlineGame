@@ -7,19 +7,20 @@ namespace JustPlanes.Core
         public Network.SyncedTransform2D transform2D;
         private IGame game;
 
-        public float Speed = 1f;
+        public float Speed = 15F;
 
         public Snake(IGame game, float posX, float posY, int syncedTransformId)
         {
             this.game = game;
-            this.body = game.GetPhysicsManager().CreateBody(posX, posY, 5, 5);
-            this.body.SetVelocity(Speed);
-            this.body.SetAngularVelocity(120f);
+            body = game.GetPhysicsManager().CreateBody(posX, posY, 5, 5);
+            body.SetVelocity(Speed);
+            body.SetAngularVelocity(15F);
             transform2D = new Network.SyncedTransform2D(syncedTransformId, game, body);
         }
 
         public void Update(float deltaTime)
         {
+            body.SetVelocity(Speed);
             transform2D.Update(deltaTime);
         }
     }
