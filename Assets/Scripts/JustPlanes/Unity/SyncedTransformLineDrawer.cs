@@ -66,10 +66,17 @@ namespace JustPlanes.Unity
 
         private void DrawPredictedPosition()
         {
-            var predictedVec = new Vector3();
-            predictedVec.x = syncedTransform.PredictedPos.X;
-            predictedVec.y = syncedTransform.PredictedPos.Y;
-            DrawQuad(predictedVec, 0.1f, UnityEngine.Color.red);
+            // var predictedVec = new Vector3();
+            // predictedVec.x = syncedTransform.PredictedPos.X;
+            // predictedVec.y = syncedTransform.PredictedPos.Y;
+            // DrawQuad(predictedVec, 0.1f, UnityEngine.Color.red);
+            var v = Vector3.zero;
+            foreach (var state in syncedTransform.predictedStates)
+            {
+                v.x = state.Position.X;
+                v.y = state.Position.Y;
+                DrawQuad(v, 0.05f, UnityEngine.Color.blue);
+            }
         }
 
         private void DrawCalculatedInterpHistory()

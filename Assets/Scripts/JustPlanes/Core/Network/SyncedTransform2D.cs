@@ -35,10 +35,11 @@ namespace JustPlanes.Core.Network
         private Transform2DNetworkData stateLastSent = new Transform2DNetworkData();
         private Transform2DNetworkData stateToSend = new Transform2DNetworkData();
         private Transform2DNetworkData currentState = new Transform2DNetworkData();
-        private List<Transform2DNetworkData> predictedStates = new List<Transform2DNetworkData>();
+        public List<Transform2DNetworkData> predictedStates = new List<Transform2DNetworkData>();
         private float predictedStateTimer = 0f;
         private float predictedStateSaveRate = 0.1f;
         private float predictedStateBufferTime = 1f;
+        private float correctionDistance = 0.01f;
 
         public SyncedTransform2D(int entityId, IGame game, PhysicsBody body = null)
         {
@@ -134,7 +135,7 @@ namespace JustPlanes.Core.Network
                 PredictedPos = currentState.Position + currentState.Velocity * InterpolationBackTime;
                 // could predict rotation here too
                 DebugLog.Warning($"[SyncedTransform2D] new predicted pos X: {PredictedPos.X}, Y: {PredictedPos.Y}");
-                body.SetWithLerp(PredictedPos, currentState.Rotation, currentState.Velocity, deltaTime);
+                // body.SetWithLerp(PredictedPos, currentState.Rotation, currentState.Velocity, deltaTime);
                 Position = body.body.GetPosition();
                 Rotation = body.body.GetAngle();
                 Velocity = body.body.GetLinearVelocity();
@@ -150,8 +151,13 @@ namespace JustPlanes.Core.Network
             if (predictedStateTimer > predictedStateSaveRate)
             {
                 predictedStateTimer -= predictedStateSaveRate;
-                var state = currentState.GetCopy();
-                state.Timestamp = game.GetTime();
+                var state = new Transform2DNetworkData()
+                {
+                    Timestamp = game.GetTime(),
+                    Position = Position,
+                    Rotation = Rotation,
+                    Velocity = Velocity,
+                };
                 predictedStates.Add(state);
                 if (predictedStates.Count > (int)(predictedStateBufferTime / predictedStateSaveRate))
                     predictedStates.RemoveAt(0);
@@ -179,39 +185,85 @@ namespace JustPlanes.Core.Network
             // Array.Copy(stateBuffer, 0, stateBuffer, 1, stateBuffer.Length - 1);
             stateBuffer[0] = data;
 
-            // TODO: implement correction of position
-            // first store last second of states every 0.1s
-            // use timestamp to get a past state, either use lerping or just take the closest state.
-            // test if it is correct, if not, then reset all and world.step() with time offset
-            for (int i = predictedStates.Count - 1; i >= 0; i--)
+            // correction of position
+            if (body != null && predictedStates.Count >= 2)
             {
-                var state = predictedStates[i];
-                // }
-                // foreach (var state in predictedStates)
+                    DebugLog.Warning($"[SyncedTransform2D] recalc");
+                    body.ReCalculate(data, game.GetTime(), (float)stateTimeOffsets.Average());
+                    Position = body.body.GetPosition();
+                    Rotation = body.body.GetAngle();
+                    Velocity = body.body.GetLinearVelocity();
+                // DebugLog.Warning($"[SyncedTransform2D] recalc getting i...");
+                // DebugLog.Warning($"[SyncedTransform2D] recalc world time: {GetWorldTime()}");
+                // DebugLog.Warning($"[SyncedTransform2D] recalc server time: {GetWorldTime() + (float)stateTimeOffsets.Average()}");
+                // DebugLog.Warning($"[SyncedTransform2D] recalc target time: {data.Timestamp}");
+                // int i = 1;
+                // while (i < predictedStates.Count)
                 // {
-                if (data.Timestamp > state.Timestamp)
-                    continue;
-                if (i == predictedStates.Count)
-                    continue;
-                var nextState = predictedStates[i + 1];
-                var t = data.Timestamp - state.Timestamp / state.Timestamp - nextState.Timestamp;
-                var lerpedState = new Transform2DNetworkData()
-                {
-                    Timestamp = JPUtils.DoLerp(state.Timestamp, nextState.Timestamp, t),
-                    Position = JPUtils.DoLerpHermite(state.Position, state.Velocity, nextState.Position, nextState.Velocity, t),
-                    Rotation = JPUtils.DoLerp(state.Rotation, nextState.Rotation, t),
-                    Velocity = JPUtils.DoLerp(state.Velocity, nextState.Velocity, t),
-                };
+                //     DebugLog.Warning($"[SyncedTransform2D] recalc checking against {predictedStates[i].Timestamp}");
+                //     if (predictedStates[i].Timestamp > data.Timestamp)
+                //     {
+                //         i--;
+                //         break;
+                //     }
+                //     i++;
+                // }
+                // DebugLog.Warning($"[SyncedTransform2D] recalc got i: {i} out of {predictedStates.Count - 1}");
 
-                if (System.Math.Abs((data.Position - lerpedState.Position).Length()) < 0.1f)
-                    break;
+                // // either time offset not calibrated or data is in future
+                // if (i >= predictedStates.Count)
+                //     return;
 
-                // body.ReCalculate(data, predictedStates[predictedStates.Count - 1].Timestamp - lerpedState.Timestamp);
-                body.ReCalculate(data, GetWorldTime(), stateTimeOffsets.Average());
-                Position = body.body.GetPosition();
-                Rotation = body.body.GetAngle();
-                Velocity = body.body.GetLinearVelocity();
-                break;
+                // var state = predictedStates[i];
+                // var nextState = predictedStates[i + 1];
+                // var t = data.Timestamp - state.Timestamp / nextState.Timestamp - state.Timestamp;
+                // var lerpedState = new Transform2DNetworkData()
+                // {
+                //     Timestamp = JPUtils.DoLerp(state.Timestamp, nextState.Timestamp, t),
+                //     Position = JPUtils.DoLerpHermite(state.Position, state.Velocity, nextState.Position, nextState.Velocity, t),
+                //     Rotation = JPUtils.DoLerp(state.Rotation, nextState.Rotation, t),
+                //     Velocity = JPUtils.DoLerp(state.Velocity, nextState.Velocity, t),
+                // };
+
+                // DebugLog.Warning($"[SyncedTransform2D] recalc try, diff: {System.Math.Abs((data.Position - lerpedState.Position).Length())}");
+                // if (System.Math.Abs((data.Position - lerpedState.Position).Length()) > correctionDistance)
+                // {
+                //     DebugLog.Warning($"[SyncedTransform2D] recalc");
+                //     body.ReCalculate(data, game.GetTime(), (float)stateTimeOffsets.Average());
+                //     Position = body.body.GetPosition();
+                //     Rotation = body.body.GetAngle();
+                //     Velocity = body.body.GetLinearVelocity();
+                // }
+
+                // for (int i = predictedStates.Count - 1; i >= 0; i--)
+                // {
+                //     var state = predictedStates[i];
+                //     // }
+                //     // foreach (var state in predictedStates)
+                //     // {
+                //     if (data.Timestamp > state.Timestamp)
+                //         continue;
+                //     if (i == predictedStates.Count - 1)
+                //         continue;
+                //     var nextState = predictedStates[i + 1];
+                //     var t = data.Timestamp - state.Timestamp / state.Timestamp - nextState.Timestamp;
+                //     var lerpedState = new Transform2DNetworkData()
+                //     {
+                //         Timestamp = JPUtils.DoLerp(state.Timestamp, nextState.Timestamp, t),
+                //         Position = JPUtils.DoLerpHermite(state.Position, state.Velocity, nextState.Position, nextState.Velocity, t),
+                //         Rotation = JPUtils.DoLerp(state.Rotation, nextState.Rotation, t),
+                //         Velocity = JPUtils.DoLerp(state.Velocity, nextState.Velocity, t),
+                //     };
+
+                //     if (System.Math.Abs((data.Position - lerpedState.Position).Length()) < correctionDistance)
+                //         break;
+
+                //     body.ReCalculate(data, GetWorldTime(), stateTimeOffsets.Average());
+                //     Position = body.body.GetPosition();
+                //     Rotation = body.body.GetAngle();
+                //     Velocity = body.body.GetLinearVelocity();
+                //     break;
+                // }
             }
 
             OnPositionReceived?.Invoke(data);

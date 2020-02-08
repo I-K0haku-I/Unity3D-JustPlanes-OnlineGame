@@ -47,7 +47,7 @@ namespace JustPlanes.Core
             Vec2 dir = body.GetDirection(transform2D.Rotation);
             Vec2 vel = transform2D.Velocity;
             // this checks if the velocity is backwards or forwards
-            if (System.Math.Abs((body.Dot(dir, vel) / (dir.Length() * vel.Length())) + 1f) < 0.1f)
+            if (System.Math.Abs((JPUtils.Dot(dir, vel) / (dir.Length() * vel.Length())) + 1f) < 0.1f)
                 speed = vel.Length() * -1;
             else
                 speed = vel.Length();

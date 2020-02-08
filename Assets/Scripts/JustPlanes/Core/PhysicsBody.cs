@@ -56,17 +56,13 @@ namespace JustPlanes.Core
         public Vec2 GetDirection(float angle)
         {
             Vec2 vel;
-            double radian = GetRadian(angle);
+            double radian = JPUtils.GetRadian(angle);
             vel.X = -(1f * (float)System.Math.Sin(radian));
             vel.Y = 1f * (float)System.Math.Cos(radian);
             vel.Normalize();
             return vel;
         }
 
-        public float GetRadian(float angle)
-        {
-            return (float)(-angle * System.Math.PI / 180f);
-        }
 
         public void SetWithLerp(Vec2 position, float rotation, Vec2 vel, float deltaTime)
         {
@@ -118,45 +114,47 @@ namespace JustPlanes.Core
                 inputBuffer.RemoveAt(0);
         }
 
-        public float Dot(Vec2 a, Vec2 b)
-        {
-            return a.X * b.X + a.Y * b.Y;
-        }
 
-        public void ReCalculate(Transform2DNetworkData state, float currTime, float startTime)
+        public void ReCalculate(Transform2DNetworkData state, float gameTime, float serverTimeOffset)
         {
-            body.SetXForm(state.Position, state.Rotation);
+            // body.SetXForm(state.Position, state.Rotation);
 
-            var i = inputBuffer.Count;
+            if (inputBuffer.Count == 0)
+                return;
+
+            var i = inputBuffer.Count - 1;
             while (i >= 0)
             {
-                if (startTime > inputBuffer[i].Timestamp)
+                if (state.Timestamp - serverTimeOffset > inputBuffer[i].Timestamp)
                 {
-                    i++;
                     break;
                 }
                 i--;
             }
-
-            //  no input
-            if (i > inputBuffer.Count)
-                return;
-
+            if (i == -1)
+                i = 0;
 
             InputBodyState input;
             InputBodyState nextInput;
-            while (i + 1 <= inputBuffer.Count)
+            // TODO: remove this and implement ReStep in physics itself so we can have multiple bodies
+            // probably need to do an init registration too :thinking:
+            body.SetXForm(state.Position, state.Rotation);
+            while (i >= 0 && i < inputBuffer.Count - 1)
             {
                 input = inputBuffer[i];
                 nextInput = inputBuffer[i + 1];
                 SetVelocity(input.NewVelocity);
                 SetAngularVelocity(input.NewAngularVelocity);
                 physics.Update(nextInput.Timestamp - input.Timestamp);
+                // physics.RegisterReStep(this, input, nextInput.Timestamp - input.Timestamp);
+                i++;
             }
             input = inputBuffer[i];
-            nextInput = inputBuffer[i + 1];
             SetVelocity(input.NewVelocity);
             SetAngularVelocity(input.NewAngularVelocity);
+            physics.Update(gameTime - input.Timestamp);
+            // physics.RegisterReStep(this, input, gameTime - input.Timestamp);
+
 
             // body.SetLinearVelocity(state.Velocity);
             // body.SetAngularVelocity(state.)

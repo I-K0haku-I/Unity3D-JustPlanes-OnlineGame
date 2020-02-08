@@ -52,5 +52,16 @@ namespace JustPlanes.Core
             bodies.Add(body);
             return body;
         }
+
+        internal void RegisterReStep(PhysicsBody body, InputBodyState input, float duration)
+        {
+            // register in list or similar ordered by input.timestamp
+            // then execute it at the end of loop, figure out how, propably lateupdate
+            // just go through list and do i to i + 1
+            // or do i to duration if earlier
+            // or do i to duration of another if that one runs out
+            // so probably keep an extra list of times to run out  
+            throw new NotImplementedException();
+        }
     }
 }

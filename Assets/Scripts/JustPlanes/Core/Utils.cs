@@ -41,5 +41,15 @@ namespace JustPlanes.Core
         {
             return first * (1 - amount) + second * amount;
         }
+
+        public static float GetRadian(float angle)
+        {
+            return (float)(-angle * System.Math.PI / 180f);
+        }
+
+        public static float Dot(Vec2 a, Vec2 b)
+        {
+            return a.X * b.X + a.Y * b.Y;
+        }
     }
 }
