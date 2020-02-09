@@ -133,6 +133,7 @@ namespace JustPlanes.Core.Network.Server
 
             Physics.Update(timeDelta);
             testPlane.Update(timeDelta);
+            testPlane.FixedUpdate(timeDelta);
 
             // while (damageQueue.TryDequeue(out var damageItem))
             // {

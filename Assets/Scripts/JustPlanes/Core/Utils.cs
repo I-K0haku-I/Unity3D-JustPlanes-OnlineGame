@@ -8,14 +8,21 @@ namespace JustPlanes.Core
     {
         public static Vec2 DoLerpHermite(Vec2 a, Vec2 ma, Vec2 b, Vec2 mb, float t)
         {
-            var ti = (t - 1);
-            var t2 = t * t;
-            var ti2 = ti * ti;
-            var h00 = (1 + 2 * t) * ti2;
-            var h10 = t * ti2;
-            var h01 = t2 * (3 - 2 * t);
-            var h11 = t2 * ti;
-            return h00 * a + h10 * ma + h01 * b + h11 * mb;
+            // var ti = (t - 1);
+            // var t2 = t * t;
+            // var ti2 = ti * ti;
+            // var h00 = (1 + 2 * t) * ti2;
+            // var h10 = t * ti2;
+            // var h01 = t2 * (3 - 2 * t);
+            // var h11 = t2 * ti;
+            // return h00 * a + h10 * ma + h01 * b + h11 * mb;
+            float t2 = t * t;
+            float t3 = t * t * t;
+            float h1 =   2f * t3  - 3f * t2 + 1f;
+            float h2 = -(2f * t3) + 3f * t2;
+            float h3 =        t3  - 2f * t2 + t;
+            float h4 =        t3  -      t2;
+            return h1 * a + h2 * b + h3 * ma + h4 * mb;
         }
 
         public static Vec2 DoLerpCube(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float amount)

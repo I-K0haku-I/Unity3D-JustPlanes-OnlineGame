@@ -17,7 +17,7 @@ namespace JustPlanes.Core
         private Action<InputNetworkData> handleInput;
         private float speed;
         private Queue<InputNetworkData> inputQueue = new Queue<InputNetworkData>();
-        private int tickRate = 10;
+        private int tickRate = 20;
         private float tickTriggerAmount;
         private float tickTimer = 0;
 
@@ -43,6 +43,13 @@ namespace JustPlanes.Core
         {
             tickTimer += deltaTime;
 
+            transform2D.Update(deltaTime);
+
+            DebugLog.Warning($"[TestPlane] position: X: {transform2D.Position.X}, Y: {transform2D.Position.Y}");
+        }
+
+        public void FixedUpdate(float deltaTime)
+        {
             // Looks complicated, but all this is doing is making sure the speed gets updated
             Vec2 dir = body.GetDirection(transform2D.Rotation);
             Vec2 vel = transform2D.Velocity;
@@ -70,10 +77,8 @@ namespace JustPlanes.Core
                 speed += newVel;
                 body.SetVelocity(speed);
                 body.SetAngularVelocity(newAngVel);
+                DebugLog.Warning($"[TestPlane] changed to vel: {speed}, ang vel: {newAngVel}");
             }
-            transform2D.Update(deltaTime);
-
-            DebugLog.Warning($"[TestPlane] position: X: {transform2D.Position.X}, Y: {transform2D.Position.Y}");
         }
 
         public void HandleInput(float h, float v)

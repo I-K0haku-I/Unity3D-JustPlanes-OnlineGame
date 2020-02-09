@@ -1671,10 +1671,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDrawPredictedPosition: 0
-  isDrawSimulatedDebugLine: 0
+  isDrawSimulatedPositions: 1
+  bezierMultiplier: 0.1
   lineLength: 0.1
-  lineDuration: 1
-  idDrawReceivedState: 0
+  lineDuration: 3
+  idDrawReceivedState: 1
   isDrawCalculatedInterpHistory: 0
   statesToSaveInHistory: 100
 --- !u!114 &1110406146

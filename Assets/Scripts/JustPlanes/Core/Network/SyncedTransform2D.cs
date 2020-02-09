@@ -21,7 +21,7 @@ namespace JustPlanes.Core.Network
 
         private Action<Transform2DNetworkData> transmitState;
         public int StateAmount = 20;
-        private int tickRate = 10;
+        private int tickRate = 3;
         private float tickTriggerAmount;
         private float tickTimer = 0;
 
@@ -40,6 +40,7 @@ namespace JustPlanes.Core.Network
         private float predictedStateSaveRate = 0.1f;
         private float predictedStateBufferTime = 1f;
         private float correctionDistance = 0.01f;
+        private bool isFirstData = true;
 
         public SyncedTransform2D(int entityId, IGame game, PhysicsBody body = null)
         {
@@ -132,13 +133,14 @@ namespace JustPlanes.Core.Network
 
             if (body != null)
             {
-                PredictedPos = currentState.Position + currentState.Velocity * InterpolationBackTime;
+                // PredictedPos = currentState.Position + currentState.Velocity * InterpolationBackTime;
                 // could predict rotation here too
-                DebugLog.Warning($"[SyncedTransform2D] new predicted pos X: {PredictedPos.X}, Y: {PredictedPos.Y}");
+                // DebugLog.Warning($"[SyncedTransform2D] new predicted pos X: {PredictedPos.X}, Y: {PredictedPos.Y}");
                 // body.SetWithLerp(PredictedPos, currentState.Rotation, currentState.Velocity, deltaTime);
                 Position = body.body.GetPosition();
                 Rotation = body.body.GetAngle();
                 Velocity = body.body.GetLinearVelocity();
+                DebugLog.Warning($"[SyncedTransform2D] set X: {Position.X}, Y: {Position.Y}");
             }
             else
             {
@@ -176,9 +178,17 @@ namespace JustPlanes.Core.Network
 
             if (stateTimeOffsets[0] == 0f)
                 stateTimeOffsets.RemoveAt(0);
+
             stateTimeOffsets.Add(data.Timestamp - GetWorldTime());
             if (stateTimeOffsets.Count > StateAmount)
                 stateTimeOffsets.RemoveAt(0);
+
+            if (isFirstData)
+            {
+                isFirstData = false;
+                body.body.SetXForm(data.Position, data.Rotation);
+                body.body.SetLinearVelocity(data.Velocity);
+            }
 
             for (int i = stateBuffer.Length - 1; i >= 1; i--)
                 stateBuffer[i] = stateBuffer[i - 1];

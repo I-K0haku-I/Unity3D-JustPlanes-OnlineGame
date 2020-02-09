@@ -16,7 +16,11 @@ namespace JustPlanes.Unity
         private bool isDrawPredictedPosition;
 
         [SerializeField]
-        private bool isDrawSimulatedDebugLine = true;
+        private bool isDrawSimulatedPositions = true;
+        [SerializeField]
+        [Range(0.01f, 2f)]
+        private float bezierMultiplier = 0.4f;
+
         [SerializeField]
         [Range(0.1f, 2f)]
         private float lineLength = 2;
@@ -56,7 +60,7 @@ namespace JustPlanes.Unity
         {
             if (idDrawReceivedState)
                 DrawReceivedState();
-            if (isDrawSimulatedDebugLine)
+            if (isDrawSimulatedPositions)
                 DrawSimulatedBezier();
             if (isDrawCalculatedInterpHistory)
                 DrawCalculatedInterpHistory();
@@ -99,6 +103,7 @@ namespace JustPlanes.Unity
         private List<Vec2> positionVec2s = new List<Vec2>();
         private List<Vector3> velocityVector3s = new List<Vector3>();
         private List<Vec2> velocityVec2s = new List<Vec2>();
+        private List<Vec2> velocityVec2Normalized = new List<Vec2>();
         private int isDrawnCounter = 0;
 
         private void HandlePositionReceived(Transform2DNetworkData data)
@@ -114,6 +119,12 @@ namespace JustPlanes.Unity
             velocityVec2s.Add(new Vec2(data.Velocity.X, data.Velocity.Y));
             if (velocityVec2s.Count > syncedTransform.StateAmount)
                 velocityVec2s.RemoveAt(0);
+            
+            var v = new Vec2(data.Velocity.X, data.Velocity.Y);
+            v.Normalize();
+            velocityVec2Normalized.Add(v);
+            if (velocityVec2Normalized.Count > syncedTransform.StateAmount)
+                velocityVec2Normalized.RemoveAt(0);
 
             velocityVector3s.Add(new Vector3(data.Velocity.X, data.Velocity.Y));
             if (velocityVector3s.Count > syncedTransform.StateAmount)
@@ -161,7 +172,7 @@ namespace JustPlanes.Unity
                     Vec2 lerpResult = Vec2.Zero;
                     for (float i = 0; i <= distance; i += lineLength)
                     {
-                        lerpResult = Core.JPUtils.DoLerpHermite(positionVec2s[c], velocityVec2s[c], positionVec2s[c + 1], velocityVec2s[c + 1], i / distance);
+                        lerpResult = Core.JPUtils.DoLerpHermite(positionVec2s[c], velocityVec2s[c] * bezierMultiplier, positionVec2s[c + 1], velocityVec2s[c + 1] * bezierMultiplier, i / distance);
                         v1.x = lerpResult.X;
                         v1.y = lerpResult.Y;
                         Debug.DrawLine(v0, v1, UnityEngine.Color.red, lineDuration);
@@ -194,7 +205,7 @@ namespace JustPlanes.Unity
             for (int i = 0; i < positionVector3s.Count; i++)
             {
                 DrawQuad(positionVector3s[i], 0.08f, UnityEngine.Color.yellow);
-                Debug.DrawLine(positionVector3s[i], positionVector3s[i] + velocityVector3s[i] / 2, UnityEngine.Color.green);
+                Debug.DrawLine(positionVector3s[i], positionVector3s[i] + velocityVector3s[i] * bezierMultiplier, UnityEngine.Color.green);
             }
         }
 

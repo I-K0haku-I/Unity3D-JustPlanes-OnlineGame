@@ -41,5 +41,10 @@ namespace JustPlanes.Unity
             newQuat = Quaternion.AngleAxis(plane.transform2D.Rotation, Vector3.back);
             transform.SetPositionAndRotation(newPos, newQuat);
         }
+
+        private void FixedUpdate()
+        {
+            plane.FixedUpdate(Time.fixedDeltaTime);
+        }
     }
 }
